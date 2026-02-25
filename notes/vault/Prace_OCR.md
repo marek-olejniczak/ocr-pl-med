@@ -132,3 +132,103 @@ https://arxiv.org/pdf/2505.20513v1
 2. Wprowadzenie mechanizmu **Test-Time Adaptation**: gdy system otrzymuje serię skanów od jednego lekarza, może "nauczyć się" jego stylu poprzez rekonstrukcję obrazu (np. przez autoenkoder lub warstwy dekodujące obraz), co automatycznie poprawi precyzję dekodowania tekstu bez ręcznej korekty haseł.
     
 3. Wykorzystanie meta-learningu na etapie pre-trainingu, aby przygotować uniwersalne prompty zdolne do błyskawicznej adaptacji do nowych, specyficznych krojów pisma.
+
+## AI-Based OCR System for Handwritten Medical Prescription Recognition and Interpretation
+https://www.indjcst.com/archiver/archives/ai_based_ocr_system_for_handwritten_medical_prescription_recognition_and_interpretation.pdf
+
+#przydatne
+### System OCR oparty na AI do rozpoznawania i interpretacji odręcznych recept medycznych
+
+1. **Cel i przedmiot opracowania:** Przedmiotem prac jest system OCR oparty na sztucznej inteligencji, przeznaczony do rozpoznawania i interpretacji odręcznych recept medycznych. Rozwiązanie to ma na celu minimalizację błędów wynikających z niskiej czytelności i braku standaryzacji, co prowadzi m.in. do błędnego dawkowania, niepożądanych reakcji na leki i opóźnień w leczeniu. Projekt wspiera cyfrową transformację opieki zdrowotnej, redukując błędy ludzkie i poprawiając bezpieczeństwo pacjentów.
+
+2. **Metodologia i architektura systemu:** System wykorzystuje wieloetapowy przepływ pracy, integrujący tradycyjne narzędzia OCR z modelami głębokiego uczenia i przetwarzaniem języka naturalnego (NLP).
+
+	- **Wstępne przetwarzanie obrazu (Preprocessing):** Etap ten znacząco poprawia jakość obrazów wejściowych przed właściwą analizą. Kluczowe operacje obejmują:
+    
+	    - Binaryzację w celu wyraźniejszego wyodrębnienia tekstu z tła.
+        
+	    - Usuwanie szumów, takich jak smugi, artefakty i nieistotne oznaczenia.
+        
+	    - Korektę pochylenia (skew correction) dla wyrównania skanów.
+        
+	    - Segmentację wierszy tekstu w celu uproszczenia procesu rozpoznawania znaków.
+        
+	    - Normalizację standaryzującą rozmiar i rozdzielczość obrazów dla spójnej pracy modelu.
+        
+	- **Hybrydowa architektura modelu i ekstrakcja danych:**
+    
+	    - **Tesseract OCR i CNN-LSTM:** Tradycyjne narzędzie Tesseract zostało zintegrowane z modelami CNN-LSTM, co zapewnia niezawodne rozpoznawanie odręcznych znaków i symboli pomimo niespójnych stylów pisma.
+        
+	    - **Moduł NLP i NER:** Wykorzystuje zaawansowane techniki rozpoznawania do ekstrakcji i klasyfikacji kluczowych informacji medycznych, takich jak nazwy leków, dawkowanie, dane pacjenta i instrukcje administracyjne.
+        
+
+ 3. **Implementacja i proces uczenia**
+
+- **Narzędzia i środowisko:** System zaimplementowano w języku Python 3.x, wykorzystując frameworki TensorFlow/Keras do modelowania architektur CNN-LSTM. Do interpretacji NLP użyto bibliotek takich jak SpaCy oraz BERT, a intuicyjny interfejs użytkownika stworzono za pomocą platformy Streamlit. Ustrukturyzowane wyniki są bezpiecznie przechowywane w bazach danych SQLite lub PostgreSQL.
+
+- **Dane treningowe:** Wykorzystano rzeczywiste zbiory danych odręcznych recept, które odzwierciedlają różne style pisma, specyficzne dla lekarzy skróty oraz treści wielojęzyczne. Dane te były adnotowane ręcznie przez ekspertów, aby dokładnie oznaczyć kluczowe encje medyczne.
+
+3. **Wyniki i wskaźniki wydajności** Prototyp systemu został poddany ocenie pod kątem dokładności i szybkości, wskazując na dużą przydatność w warunkach klinicznych i aptecznych:
+
+	- **Dokładność rozpoznawania (Recognition Accuracy):** System osiągnął wysoką dokładność na poziomie 92% dla ustrukturyzowanych recept.
+    
+	- **Precyzja i czułość:** Algorytmy poprawnie wyodrębniały terminy dotyczące leków i dawkowania, osiągając precyzję na poziomie 90%. Czułość (Recall) wyniosła 88%, przy czym odnotowano pewne trudności z rzadko spotykanymi terminami skrótowymi.
+
+	- **Czas przetwarzania (Average Latency):** Średni czas analizy wynosi 1,5 sekundy na obraz, co czyni system w pełni dostosowanym do działania w czasie rzeczywistym.
+    
+	- **Satysfakcja użytkowników:** Aż 91% użytkowników oceniło system jako intuicyjny i bardzo pomocny w codziennej pracy.
+    
+
+4. **Ograniczenia i wnioski** 
+	Zauważono, że system jest obecnie ograniczony wielkością zbioru danych treningowych i wymaga rozszerzenia o bardziej zróżnicowane próbki z wielu instytucji. Istotnym wyzwaniem pozostaje szeroka zmienność skrótów używanych przez lekarzy oraz zależność od jakości obrazu, gdzie np. zamazane skany obniżają dokładność rozpoznawania. Prototyp skupia się głównie na języku angielskim i nie posiada jeszcze aktywnej integracji z systemami szpitalnymi EHR w czasie rzeczywistym. Wskazano na konieczność dalszego rozwoju poprzez wdrożenie obsługi wielojęzycznej, zastosowanie bezpiecznych API do łączności z systemami zarządzania apteką oraz wykorzystanie specjalistycznych modeli transformatorowych, takich jak BioBERT i MedBERT.
+
+## Advancements and Challenges in Handwritten Text Recognition: A Comprehensive Survey
+https://pmc.ncbi.nlm.nih.gov/articles/PMC10817575/pdf/jimaging-10-00018.pdf
+
+#do_sprawdzenia
+Porównanie wielu technik
+
+## Text line segmentation from struck-out handwritten document images
+https://www.sciencedirect.com/science/article/pii/S0957417422014075?via%3Dihub
+
+#przydatne 
+
+## Segmentacja linii tekstu w swobodnych dokumentach odręcznych: przypadek tekstu przekreślonego
+
+1. **Cel i przedmiot opracowania** 
+	Głównym przedmiotem artykułu jest problem segmentacji linii tekstu w tzw. "swobodnych" dokumentach odręcznych (np. notatkach, pracach egzaminacyjnych), w których często występują błędy korygowane przez autorów poprzez przekreślanie, wymazywanie lub nadpisywanie. Celem pracy jest opracowanie metody, która poradzi sobie z segmentacją zarówno czystego tekstu, jak i tekstu przekreślonego (ang. _struck-out text_), co stanowi wyzwanie dla dotychczasowych metod, które często gubią takie fragmenty lub błędnie łączą linie. Jest to kluczowe dla systemów oceniania prac, identyfikacji fałszerstw czy rozpoznawania autora.
+
+2. **Metodologia i architektura systemu** 
+	Zaproponowano trzystopniowe podejście, które jest niezależne od rodzaju pisma (skryptu) i rodzaju przekreślenia.
+
+	- **Krok 1: Detekcja komponentów (Component Detection):** System identyfikuje komponenty na poziomie słów (zarówno czyste, jak i przekreślone) w oparciu o szacowanie szerokości pociągnięcia (Stroke Width - SW). Zastosowano tu wygładzanie pionowe i poziome oraz operacje morfologiczne, aby scalić znaki słowa w jeden obiekt.
+    
+	- **Krok 2: Klasyfikacja tekstu przekreślonego (Struck-out Classification):** Wykorzystano model głębokiego uczenia **DenseNet121** (zmodyfikowany), aby odróżnić komponenty przekreślone od czystych. Model został wytrenowany na stworzonym syntetycznie zbiorze danych, aby zrównoważyć liczbę przykładów przekreślonych i czystych. Klasyfikator radzi sobie z różnymi typami przekreśleń (np. pojedyncza linia, "zygzak", zamazywanie, przekreślenie krzyżykowe).
+    
+	- **Krok 3: Segmentacja linii tekstu (Line Segmentation):** Metoda wykorzystuje relacje przestrzenne. Kluczową innowacją jest to, że wykryte w kroku 2 słowa przekreślone są traktowane inaczej – system ignoruje je przy wyznaczaniu głównego kierunku linii, aby nie zaburzały geometrii. Analizowane cechy to:
+	    - Odległość euklidesowa między punktami skrajnymi sąsiednich komponentów.
+        
+	    - Kąt nachylenia (slope) między środkami ciężkości (Center of Gravity - CG) komponentów.
+        
+	    - Wspólny obszar nakładania się (overlapping region) między sąsiadami.
+
+3. **Wyniki i wskaźniki wydajności** 
+	Zaproponowana metoda została porównana z istniejącymi rozwiązaniami i wykazała wyższą skuteczność:
+	- **Skuteczność segmentacji:** Na dedykowanym zbiorze danych metoda osiągnęła wskaźnik Detection Rate (DR) na poziomie **0,94** oraz Recognition Accuracy (RA) **0,90**. Dla porównania, metody konkurencyjne osiągnęły DR na poziomie 0,74 – 0,85.
+    
+	- **Niezależność od skryptu:** Metoda sprawdziła się również na zbiorach wielojęzycznych (ICDAR2013) i historycznych chińskich (ICDAR2019), co potwierdza jej uniwersalność.
+    
+	- **Klasyfikacja przekreśleń:** Model DenseNet osiągnął F-score na poziomie **0,87** dla klasyfikacji słów przekreślonych, przewyższając metody oparte na cechach ręcznych (0,73) i prostszych sieciach CNN (0,83).
+    
+
+4. **Ograniczenia i wnioski** 
+	Autorzy wskazują na pewne ograniczenia systemu:
+	
+	- **Szum i kontekst:** W przypadku bardzo zaszumionych znaków dochodzi czasem do błędnej klasyfikacji jako przekreślenie.
+    
+	- **Nieregularne odstępy:** Metoda może mieć trudności, gdy odstępy między słowami w jednej linii są bardzo zróżnicowane i nieregularne.
+    
+	- **Złożoność obliczeniowa:** Wykorzystanie analizy spójnych składowych (Connected Component Analysis) wymaga sporych zasobów obliczeniowych.
+    
+
+Wnioski końcowe sugerują, że uwzględnienie przetwarzania języka naturalnego (NLP) i semantyki mogłoby w przyszłości pomóc w lepszym grupowaniu słów w linie, gdy same cechy geometryczne są niewystarczające.

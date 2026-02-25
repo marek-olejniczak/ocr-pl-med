@@ -2,6 +2,7 @@
 
 ### Polish Handwritten Characters Database (PHCD)
 https://www.kaggle.com/datasets/westedcrean/phcd-polish-handwritten-characters-database
+https://yadda.icm.edu.pl/baztech/element/bwmeta1.element.baztech-b97bdeca-28ef-4915-a601-b36a819d9ab3 (to chyba do tego)
 
 Baza PHCD, opracowana przez naukowców z Politechniki Lubelskiej, stanowi obecnie najbardziej obszerny fundament dla systemów rozpoznawania polskiej grafii odręcznej. Zbiór ten zawiera ponad 530 000 obrazów znaków, co pozwala na trenowanie głębokich sieci konwolucyjnych (CNN) z wysoką odpornością na różnorodność stylów pisma. Dane te zostały pozyskane od zróżnicowanej demograficznie grupy ponad 2000 uczestników, w tym studentów i pracowników uczelni, co gwarantuje szerokie spektrum wariancji międzyosobniczej.
 Struktura techniczna PHCD obejmuje 89 klas decyzyjnych, co pozwala na pełne pokrycie polskiego alfabetu wraz z cyframi i znakami specjalnymi. Każda próbka jest znormalizowanym obrazem w skali szarości o rozdzielczości $32\times32$ piksele.
