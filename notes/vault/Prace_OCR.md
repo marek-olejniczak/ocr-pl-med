@@ -187,3 +187,49 @@ https://pmc.ncbi.nlm.nih.gov/articles/PMC10817575/pdf/jimaging-10-00018.pdf
 
 #do_sprawdzenia
 Porównanie wielu technik
+
+
+# Pozostałe pokrewne
+
+## Architektura Detekcji i Rozpoznawania (Model Hybrydowy)
+
+Głównym wyzwaniem jest stworzenie modelu na tyle lekkiego, by mógł działać lokalnie (edge deployment) bez przesyłania danych pacjentów na zewnętrzne serwery.
+
+- **Praca:** **Joan Puigcerver (ICDAR 2017)**
+    - **URL:** [https://www.jpuigcerver.net/pubs/jpuigcerver_icdar2017.pdf](https://www.jpuigcerver.net/pubs/jpuigcerver_icdar2017.pdf)
+    - **Kluczowe wnioski:** Wielowymiarowe sieci MDLSTM są zbyt zasobożerne i trudne do optymalizacji. Zamiast nich rekomenduje się architekturę hybrydową: głęboką sieć **CNN + 1D-LSTM**.
+    - **Szczegóły techniczne:** Model wykorzystuje 5 bloków konwolucyjnych z małymi jądrami ($3\times3$ px), co pozwala zachować detale polskiej diakrytyki (kropki, ogonki). Całość wieńczy funkcja straty **CTC (Connectionist Temporal Classification)**, która eliminuje konieczność ręcznego dzielenia wyrazów na litery
+
+
+## Inżynieria Syntezy Danych (Generowanie Recept)
+
+Z powodu ograniczeń RODO w dostępie do autentycznych recept , system musi opierać się na danych syntetycznych tworzonych z banków znaków takich jak PHCD.
+
+- **Praca: ScrabbleGAN**
+    - **URL:** [https://arxiv.org/pdf/2005.13044](https://arxiv.org/pdf/2005.13044)
+    - **Kluczowe wnioski:** Rozwiązuje problem generowania wyrazów o dowolnej długości (np. długich nazw chemicznych leków) poprzez "zlepianie" filtrów znaków w osi szerokości. Posiada wbudowany **Recognizer**, który pełni rolę "nauczyciela", karząc generator za nieczytelne napisy.
+        
+- **Praca: GANwriting**
+    - **URL:** [https://arxiv.org/pdf/2003.02567](https://arxiv.org/pdf/2003.02567)
+    - **Kluczowe wnioski:** Skupia się na naśladowaniu indywidualnych stylów pisma (n-shot) poprzez rozdzielenie kodera stylu od kodera treści. Słabość – traci jakość przy wyrazach dłuższych niż 10 znaków.
+        
+- **Praca: Handwriting Transformers (HWT)**
+    - **URL:** [https://arxiv.org/pdf/2102.08742](https://arxiv.org/pdf/2102.08742)
+    - **Kluczowe wnioski:** Uznana za rozwiązanie **State-of-the-Art**. Dzięki mechanizmom **Self-Attention** i **Cross-Attention** potrafi skorelować kształty liter na początku i końcu długiego zdania. Jest to kluczowe dla polskiej nomenklatury medycznej i wyrazów spoza słownika (OOV).
+        
+- **Praca: Learning to Read and Write (InkSight)**
+    - **URL:** [https://arxiv.org/pdf/2009.00678](https://arxiv.org/pdf/2009.00678)
+    - **Kluczowe wnioski:** Praca ta dostarcza mechanizmów dyskryminatorów częstotliwościowych, które pomagają usuwać mikroskopijne artefakty graficzne, zapewniając fotorealizm syntetycznych dokumentów.
+
+
+## Adaptacja do Autora (Przełamywanie luki generalizacyjnej)
+
+Modele często tracą celność, gdy napotykają pismo nowego lekarza (spadek o 11-13%). 
+
+- **Praca: Sieci SEN (Style Extractor Network)**
+    - **URL:** [https://www.researchgate.net/publication/356903770_Fast_writer_adaptation_with_style_extractor_network_for_handwritten_text_recognition](https://www.researchgate.net/publication/356903770_Fast_writer_adaptation_with_style_extractor_network_for_handwritten_text_recognition)
+    - **Kluczowe wnioski:** To podejście "lekkie" i rekomendowane dla szpitali. Tworzy matematyczny "odcisk palca" grafomotoryki lekarza (wektor stylu) i wstrzykuje go do zamrożonego modelu głównego. Nie wymaga czasochłonnego douczania całej sieci.
+        
+- **Praca: MetaHTR (MAML)**
+    - **URL:** [https://arxiv.org/pdf/2307.15071](https://arxiv.org/pdf/2307.15071)
+    - **Kluczowe wnioski:** Wykorzystuje meta-uczenie (uczenie się jak się uczyć), by przygotować model do błyskawicznej adaptacji na podstawie zaledwie 16-20 próbek pisma. Choć bardzo skuteczne w redukcji błędu WER, jest kosztowne obliczeniowo (pochodne drugiego rzędu)
