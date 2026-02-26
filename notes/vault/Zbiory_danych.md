@@ -34,11 +34,6 @@ Zbiór ten obejmuje:
 
 Wykorzystanie ADMEDVOICE pozwala na trenowanie modeli językowych (np. n-gramów lub mniejszych modeli BERT) w zakresie prawdopodobieństwa współwystępowania słów w kontekście klinicznym.
 
-### Most Wiedzy: Baza Sytuacji Klinicznych
-https://mostwiedzy.pl/en/open-research-data/clinical-situations-text-database-for-polish-language,11080602391139881-0
-
-Repozytorium Most Wiedzy udostępnia zbiór zatytułowany „Clinical situations text database for Polish language” (2024). Jest to zestaw ustrukturyzowanych tekstów medycznych podzielonych na 10 kategorii, takich jak wywiad medyczny, badanie onkologiczne, kardiologiczne czy recepty z nazwami farmaceutycznymi. Dane te, zapisane w formacie CSV, stanowią idealny materiał do fine-tuningu modeli HTR w zakresie całych linii tekstu, symulując typowy układ i składnię polskich dokumentów medycznych.
-
 #### Hugging Face: amu-cai/medical-exams-PES-PL-2007-2024
 https://huggingface.co/datasets/amu-cai/medical-exams-PES-PL-2007-2024
 „Polish Medical Exams”, zawierających ponad 24 000 pytań z egzaminów LEK, LDEK i PES. Choć są to teksty drukowane, ich wartość polega na dostarczeniu bogatego słownictwa z zakresu polskiej medycyny konserwatywnej, stomatologii, chirurgii i prawa medycznego. 
