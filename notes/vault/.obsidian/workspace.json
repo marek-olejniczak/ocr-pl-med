@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Prace_OCR.md",
+                "file": "Segmentacja_linii.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Prace_OCR"
+              "title": "Segmentacja_linii"
             }
           }
         ]
@@ -61,7 +61,7 @@
                 "sortOrder": "alphabetical"
               },
               "icon": "lucide-search",
-              "title": "Wyszukiwarka"
+              "title": "Search"
             }
           },
           {
@@ -183,10 +183,11 @@
       "bases:Create new base": false
     }
   },
-  "active": "c0a188f111e158bf",
+  "active": "a547c1165eb6f04d",
   "lastOpenFiles": [
-    "Zbiory_danych.md",
     "Prace_OCR.md",
+    "Zbiory_danych.md",
+    "Segmentacja_linii.md",
     "Witaj.md"
   ]
 }
