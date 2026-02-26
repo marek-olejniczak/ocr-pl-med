@@ -55,9 +55,9 @@ This dataset comprises a diverse range of medical prescription images obtained f
 
 ### Doctor Handwriting Recognition Dataset (90 fragmentów recept + labele)
 https://www.kaggle.com/datasets/mrdude20/doctor-handwriting-recognition-dataset
+This Doctor Handwriting Dataset contains 90 high-quality handwritten medical prescription samples collected manually from 30 different doctors in Nawabshah, Pakistan. Each medicine name is written by 3 doctors, offering diverse handwriting styles and variations. This dataset is ideal for researchers and developers working on handwriting recognition, optical character recognition (OCR) for medical prescriptions, and AI models focused on medical handwriting analysis. 
 
 ### Doctor's Handwritten Prescription BD Dataset (Word-level)
 https://www.kaggle.com/datasets/mamun1113/doctors-handwritten-prescription-bd-dataset
 posegmentowane odręczne słowa z recept, ponad 4600 pojedyńczych słow, podzielone na train/val/test
 
-This Doctor Handwriting Dataset contains 90 high-quality handwritten medical prescription samples collected manually from 30 different doctors in Nawabshah, Pakistan. Each medicine name is written by 3 doctors, offering diverse handwriting styles and variations. This dataset is ideal for researchers and developers working on handwriting recognition, optical character recognition (OCR) for medical prescriptions, and AI models focused on medical handwriting analysis. 
