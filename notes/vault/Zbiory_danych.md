@@ -47,6 +47,10 @@ https://huggingface.co/datasets/amu-cai/medical-exams-PES-PL-2007-2024
 #### Ręcznie labelowane wyrazy z polskich zapisów historycznych (20k)
 https://github.com/perechen/htr_lexicography
 
+### Clinical Situations Text Database (Most Wiedzy, 2024)
+https://mostwiedzy.pl/pl/open-research-data/clinical-situations-text-database-for-polish-language,11080602391139881-0 [web:32]
+Dataset zawiera bazę zanonimizowanych tekstów po polsku do budowy korpusu mowy medycznej: wywiad lekarski, opis badań onkologicznych/radiologicznych/patologicznych/kardiologicznych, opis zabiegów chirurgicznych/reanimacji, zalecenia medyczne, recepty (z listami nazw leków).
+
 # Angielskie
 
 ### Handwritten Medical Prescriptions Collection (129 recept)
