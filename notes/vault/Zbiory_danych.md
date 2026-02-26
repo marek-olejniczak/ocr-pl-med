@@ -34,11 +34,6 @@ Zbiór ten obejmuje:
 
 Wykorzystanie ADMEDVOICE pozwala na trenowanie modeli językowych (np. n-gramów lub mniejszych modeli BERT) w zakresie prawdopodobieństwa współwystępowania słów w kontekście klinicznym.
 
-### Most Wiedzy: Baza Sytuacji Klinicznych
-https://mostwiedzy.pl/en/open-research-data/clinical-situations-text-database-for-polish-language,11080602391139881-0
-
-Repozytorium Most Wiedzy udostępnia zbiór zatytułowany „Clinical situations text database for Polish language” (2024). Jest to zestaw ustrukturyzowanych tekstów medycznych podzielonych na 10 kategorii, takich jak wywiad medyczny, badanie onkologiczne, kardiologiczne czy recepty z nazwami farmaceutycznymi. Dane te, zapisane w formacie CSV, stanowią idealny materiał do fine-tuningu modeli HTR w zakresie całych linii tekstu, symulując typowy układ i składnię polskich dokumentów medycznych.
-
 #### Hugging Face: amu-cai/medical-exams-PES-PL-2007-2024
 https://huggingface.co/datasets/amu-cai/medical-exams-PES-PL-2007-2024
 „Polish Medical Exams”, zawierających ponad 24 000 pytań z egzaminów LEK, LDEK i PES. Choć są to teksty drukowane, ich wartość polega na dostarczeniu bogatego słownictwa z zakresu polskiej medycyny konserwatywnej, stomatologii, chirurgii i prawa medycznego. 
@@ -46,6 +41,10 @@ https://huggingface.co/datasets/amu-cai/medical-exams-PES-PL-2007-2024
 
 #### Ręcznie labelowane wyrazy z polskich zapisów historycznych (20k)
 https://github.com/perechen/htr_lexicography
+
+### Clinical Situations Text Database (Most Wiedzy, 2024)
+https://mostwiedzy.pl/pl/open-research-data/clinical-situations-text-database-for-polish-language,11080602391139881-0 [web:32]
+Dataset zawiera bazę zanonimizowanych tekstów po polsku do budowy korpusu mowy medycznej: wywiad lekarski, opis badań onkologicznych/radiologicznych/patologicznych/kardiologicznych, opis zabiegów chirurgicznych/reanimacji, zalecenia medyczne, recepty (z listami nazw leków).
 
 # Angielskie
 
@@ -56,5 +55,9 @@ This dataset comprises a diverse range of medical prescription images obtained f
 
 ### Doctor Handwriting Recognition Dataset (90 fragmentów recept + labele)
 https://www.kaggle.com/datasets/mrdude20/doctor-handwriting-recognition-dataset
-
 This Doctor Handwriting Dataset contains 90 high-quality handwritten medical prescription samples collected manually from 30 different doctors in Nawabshah, Pakistan. Each medicine name is written by 3 doctors, offering diverse handwriting styles and variations. This dataset is ideal for researchers and developers working on handwriting recognition, optical character recognition (OCR) for medical prescriptions, and AI models focused on medical handwriting analysis. 
+
+### Doctor's Handwritten Prescription BD Dataset (Word-level)
+https://www.kaggle.com/datasets/mamun1113/doctors-handwritten-prescription-bd-dataset
+posegmentowane odręczne słowa z recept, ponad 4600 pojedyńczych słow, podzielone na train/val/test
+
