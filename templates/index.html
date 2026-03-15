@@ -359,67 +359,50 @@ canvas { display: block; }
 .toast.error { border-color: var(--danger); }
 .toast.success { border-color: var(--success); }
 
-/* ── Label prompt modal ──────────────────── */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(4px);
-  z-index: 50;
+/* ── Label prompt (floating bar, no overlay) ── */
+.label-bar {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
   display: flex;
   align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-}
-.modal-overlay.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-.modal {
+  gap: 8px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-light);
-  border-radius: 12px;
-  padding: 24px;
-  min-width: 340px;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
-  transform: translateY(10px);
-  transition: transform 0.15s ease;
+  border-radius: 10px;
+  padding: 8px 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
-.modal-overlay.visible .modal {
-  transform: translateY(0);
+.label-bar.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
 }
-.modal h4 {
-  font-size: 15px;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-.modal p {
+.label-bar .label-hint {
   font-size: 12px;
   color: var(--text-muted);
-  margin-bottom: 14px;
+  font-weight: 500;
 }
-.modal input {
-  width: 100%;
-  padding: 10px 12px;
+.label-bar input {
+  padding: 7px 10px;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);
   background: var(--bg-primary);
   color: var(--text-primary);
   font-size: 14px;
+  width: 260px;
   outline: none;
   transition: border var(--transition);
 }
-.modal input:focus { border-color: var(--accent); }
-.modal .modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 16px;
-}
-.modal .modal-actions button {
-  padding: 7px 18px;
+.label-bar input:focus { border-color: var(--accent); }
+.label-bar button {
+  padding: 7px 14px;
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -427,16 +410,16 @@ canvas { display: block; }
   font-weight: 500;
   transition: all var(--transition);
 }
-.modal .btn-cancel {
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
-}
-.modal .btn-cancel:hover { background: var(--bg-hover); }
-.modal .btn-confirm {
+.label-bar .btn-confirm {
   background: var(--accent);
   color: #fff;
 }
-.modal .btn-confirm:hover { background: var(--accent-hover); }
+.label-bar .btn-confirm:hover { background: var(--accent-hover); }
+.label-bar .btn-cancel {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+.label-bar .btn-cancel:hover { background: var(--bg-hover); }
 </style>
 </head>
 <body>
@@ -504,6 +487,12 @@ canvas { display: block; }
       <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       <p>Drop images here</p>
     </div>
+    <div class="label-bar" id="labelBar">
+      <span class="label-hint">Label:</span>
+      <input type="text" id="modalLabelInput" placeholder="e.g. patient_name, date, address..." spellcheck="false" autocomplete="off">
+      <button class="btn-confirm" onclick="confirmLabel()">Add</button>
+      <button class="btn-cancel" onclick="cancelLabel()">Cancel</button>
+    </div>
   </div>
 
   <!-- Sidebar -->
@@ -532,18 +521,6 @@ canvas { display: block; }
   <span>Ready</span>
 </div>
 
-<!-- Label prompt modal -->
-<div class="modal-overlay" id="labelModal">
-  <div class="modal">
-    <h4>Label this region</h4>
-    <p>Enter a label for the selected area</p>
-    <input type="text" id="modalLabelInput" placeholder="e.g. patient_name, date, address..." spellcheck="false" autocomplete="off">
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="cancelLabel()">Cancel</button>
-      <button class="btn-confirm" onclick="confirmLabel()">Add</button>
-    </div>
-  </div>
-</div>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
@@ -889,9 +866,9 @@ canvas.addEventListener("wheel", (e) => {
 
 // ── Label modal ────────────────────────────────────────────────
 function showLabelModal() {
-  const overlay = document.getElementById("labelModal");
+  const bar = document.getElementById("labelBar");
   const inp = document.getElementById("modalLabelInput");
-  overlay.classList.add("visible");
+  bar.classList.add("visible");
   inp.value = "";
   setTimeout(() => inp.focus(), 50);
 }
@@ -908,16 +885,16 @@ function confirmLabel() {
     pendingBox = null;
     render(); updateList(); updateThumbs();
   }
-  document.getElementById("labelModal").classList.remove("visible");
+  document.getElementById("labelBar").classList.remove("visible");
 }
 
 function cancelLabel() {
   pendingBox = null;
-  document.getElementById("labelModal").classList.remove("visible");
+  document.getElementById("labelBar").classList.remove("visible");
   render();
 }
 
-// Modal keyboard: Enter = confirm, Escape = cancel
+// Label bar keyboard: Enter = confirm, Escape = cancel
 document.getElementById("modalLabelInput").addEventListener("keydown", (e) => {
   if (e.key === "Enter") { e.preventDefault(); confirmLabel(); }
   if (e.key === "Escape") { e.preventDefault(); cancelLabel(); }
@@ -927,7 +904,7 @@ document.getElementById("modalLabelInput").addEventListener("keydown", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Control") return;  // handled separately
   // Don't handle shortcuts when modal is open or typing in inputs
-  if (document.getElementById("labelModal").classList.contains("visible")) return;
+  if (document.getElementById("labelBar").classList.contains("visible")) return;
   if (e.target.tagName === "INPUT") return;
 
   if (e.ctrlKey && e.key === "s") { e.preventDefault(); saveAnnotations(); }
