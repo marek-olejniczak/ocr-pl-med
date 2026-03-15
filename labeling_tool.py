@@ -131,11 +131,12 @@ def _save_csv(base, filename, annotations):
 
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["filename", "label", "x_min", "y_min", "x_max", "y_max"])
+        writer.writerow(["filename", "label", "x_min", "y_min", "x_max", "y_max", "crop"])
         for row in existing_rows:
-            writer.writerow([row["filename"], row["label"], row["x_min"], row["y_min"], row["x_max"], row["y_max"]])
-        for ann in annotations:
-            writer.writerow([filename, ann["label"], ann["x_min"], ann["y_min"], ann["x_max"], ann["y_max"]])
+            writer.writerow([row["filename"], row["label"], row["x_min"], row["y_min"], row["x_max"], row["y_max"], row.get("crop", "")])
+        for i, ann in enumerate(annotations, 1):
+            crop_name = f"line{i}.jpg"
+            writer.writerow([filename, ann["label"], ann["x_min"], ann["y_min"], ann["x_max"], ann["y_max"], crop_name])
 
 
 @app.route("/api/load-annotations/<fid>")
