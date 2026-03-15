@@ -16,8 +16,8 @@ from flask import Flask, render_template, jsonify, request, send_file, abort
 from PIL import Image
 
 APP_DIR = Path(__file__).parent.resolve()
-ANNOTATIONS_DIR = APP_DIR / "annotations"
-ANNOTATIONS_DIR.mkdir(exist_ok=True)
+DATASET_DIR = APP_DIR / "dataset"
+DATASET_DIR.mkdir(exist_ok=True)
 
 app = Flask(__name__, template_folder=str(APP_DIR / "templates"))
 app.config["MAX_CONTENT_LENGTH"] = 200 * 1024 * 1024  # 200 MB
@@ -90,35 +90,52 @@ def save():
     annotations = data.get("annotations", [])
     name = entry["name"]
     base = Path(name).stem
+    ext = Path(name).suffix or ".jpg"
 
-    # Save CSV
-    csv_path = ANNOTATIONS_DIR / f"{base}.csv"
-    with open(csv_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["filename", "label", "x_min", "y_min", "x_max", "y_max"])
-        for ann in annotations:
-            writer.writerow([
-                name, ann["label"],
-                ann["x_min"], ann["y_min"], ann["x_max"], ann["y_max"],
-            ])
+    # Create image folder: dataset/<image_name>/
+    image_dir = DATASET_DIR / base
+    image_dir.mkdir(exist_ok=True)
 
-    # Export cropped regions
-    crops_dir = ANNOTATIONS_DIR / f"{base}_crops"
-    crops_dir.mkdir(exist_ok=True)
+    # Save copy of original image
     img = Image.open(io.BytesIO(entry["data"]))
     img.load()
-    label_counts = {}
-    for ann in annotations:
-        safe = "".join(c if c.isalnum() or c in "-_ " else "_" for c in ann["label"])
-        safe = safe.strip().replace(" ", "_") or "unlabeled"
-        count = label_counts.get(safe, 0)
-        label_counts[safe] = count + 1
-        suffix = f"_{count}" if count > 0 else ""
-        crop_path = crops_dir / f"{base}_{safe}{suffix}.png"
+    img.save(image_dir / f"{base}{ext}")
+
+    # Create lines folder and export cropped regions
+    lines_dir = image_dir / "lines"
+    lines_dir.mkdir(exist_ok=True)
+    # Clear old lines
+    for old in lines_dir.iterdir():
+        old.unlink()
+    for i, ann in enumerate(annotations, 1):
+        crop_path = lines_dir / f"line{i}.jpg"
         cropped = img.crop((ann["x_min"], ann["y_min"], ann["x_max"], ann["y_max"]))
         cropped.save(crop_path)
 
-    return jsonify({"ok": True, "csv": str(csv_path), "crops": len(annotations)})
+    # Append/update single annotations.csv at dataset root
+    _save_csv(base, name, annotations)
+
+    return jsonify({"ok": True, "csv": str(DATASET_DIR / "annotations.csv"), "crops": len(annotations)})
+
+
+def _save_csv(base, filename, annotations):
+    """Update the single annotations.csv — replace rows for this image, keep others."""
+    csv_path = DATASET_DIR / "annotations.csv"
+    existing_rows = []
+    if csv_path.exists():
+        with open(csv_path, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row["filename"] != filename:
+                    existing_rows.append(row)
+
+    with open(csv_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["filename", "label", "x_min", "y_min", "x_max", "y_max"])
+        for row in existing_rows:
+            writer.writerow([row["filename"], row["label"], row["x_min"], row["y_min"], row["x_max"], row["y_max"]])
+        for ann in annotations:
+            writer.writerow([filename, ann["label"], ann["x_min"], ann["y_min"], ann["x_max"], ann["y_max"]])
 
 
 @app.route("/api/load-annotations/<fid>")
@@ -126,17 +143,18 @@ def load_annotations(fid):
     entry = image_store.get(fid)
     if not entry:
         return jsonify({"annotations": []})
-    base = Path(entry["name"]).stem
-    csv_path = ANNOTATIONS_DIR / f"{base}.csv"
+    name = entry["name"]
+    csv_path = DATASET_DIR / "annotations.csv"
     annotations = []
     if csv_path.exists():
         with open(csv_path, "r", encoding="utf-8") as f:
             for row in csv.DictReader(f):
-                annotations.append({
-                    "label": row["label"],
-                    "x_min": int(row["x_min"]), "y_min": int(row["y_min"]),
-                    "x_max": int(row["x_max"]), "y_max": int(row["y_max"]),
-                })
+                if row["filename"] == name:
+                    annotations.append({
+                        "label": row["label"],
+                        "x_min": int(row["x_min"]), "y_min": int(row["y_min"]),
+                        "x_max": int(row["x_max"]), "y_max": int(row["y_max"]),
+                    })
     return jsonify({"annotations": annotations})
 
 
