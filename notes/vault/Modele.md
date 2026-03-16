@@ -1,0 +1,11 @@
+Do testów:
+- RysOCR (Hugging Face)
+- Tesseract OCR (pol.traineddata)
+- TrOCR (Transformer-based Optical Character Recognition)
+- Modele MLLM: GOT-OCR 2.0 i Qwen2.5-VL
+- PaddleOCR (Multilingual)
+- EasyOCR
+- PARSeq (docTR)
+- Donut (Document Understanding Transformer)
+- Surya
+- Calamari OCR
