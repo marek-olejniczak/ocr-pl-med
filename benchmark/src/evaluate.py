@@ -23,9 +23,20 @@ def _normalize_text(text: str) -> str:
 
 
 def evaluate_samples(samples: List[HTRSample], model: HTRModelWrapper) -> pd.DataFrame:
+	if not samples:
+		return pd.DataFrame(
+			columns=["file_name", "document_id", "line_id", "ground_truth", "prediction"]
+		)
+
+	image_paths = [str(sample.image_path) for sample in samples]
+	predictions = model.predict_batch(image_paths)
+	if len(predictions) != len(samples):
+		raise RuntimeError(
+			f"Model zwrocil {len(predictions)} predykcji dla {len(samples)} probek."
+		)
+
 	rows = []
-	for sample in samples:
-		pred = model.predict(str(sample.image_path))
+	for sample, pred in zip(samples, predictions):
 		gt_norm = _normalize_text(sample.ground_truth)
 		pred_norm = _normalize_text(pred)
 		rows.append(
@@ -59,6 +70,8 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 			max_new_tokens=args.rysocr_max_new_tokens,
 			device=args.rysocr_device,
 			local_files_only=args.rysocr_local_files_only,
+			batch_size=args.rysocr_batch_size,
+			use_amp=args.rysocr_use_amp,
 		)
 
 	raise ValueError(f"Nieobslugiwany model: {args.model}")
@@ -145,6 +158,17 @@ def parse_args() -> argparse.Namespace:
 		"--rysocr-local-files-only",
 		action="store_true",
 		help="Tryb offline: laduj tylko z lokalnego cache Hugging Face, bez pobierania.",
+	)
+	parser.add_argument(
+		"--rysocr-batch-size",
+		type=int,
+		default=2,
+		help="Rozmiar batcha inferencji dla RysOCR (domyslnie: 2).",
+	)
+	parser.add_argument(
+		"--rysocr-use-amp",
+		action="store_true",
+		help="Wlacz mixed precision (AMP) dla RysOCR na CUDA.",
 	)
 	return parser.parse_args()
 

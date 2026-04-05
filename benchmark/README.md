@@ -34,6 +34,18 @@ python src/evaluate.py --model tesseract_pol --limit 50
 python src/evaluate.py --model rysocr --limit 50
 ```
 
+4. Uruchom RysOCR z wiekszym batchem na GPU:
+
+```bash
+python src/evaluate.py --model rysocr --rysocr-batch-size 4 --limit 50
+```
+
+5. Uruchom RysOCR z batchem i mixed precision (AMP):
+
+```bash
+python src/evaluate.py --model rysocr --rysocr-batch-size 4 --rysocr-use-amp --limit 50
+```
+
 Uwaga: pierwsze uruchomienie `RysOCR` moze pobrac duze wagi modelu (ok. 2GB+).
 
 ## Tryb offline dla RysOCR
@@ -53,7 +65,15 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - `--rysocr-device` - np. `cpu` lub `cuda`
 - `--rysocr-max-new-tokens`
 - `--rysocr-prompt`
+- `--rysocr-batch-size` - domyslnie `2`, zwieksza throughput kosztem VRAM
+- `--rysocr-use-amp` - opcjonalne mixed precision na CUDA (domyslnie wylaczone)
 - `--rysocr-local-files-only`
+
+## Wydajnosc RysOCR
+
+- Domyslnie RysOCR dziala z `--rysocr-batch-size 2`, co zwykle lepiej wykorzystuje GPU niz inferencja pojedyncza.
+- Przy ograniczonej pamieci GPU startuj od batcha 2 i stopniowo zwiekszaj (`4`, `8`) do momentu najlepszego kompromisu szybkosc/VRAM.
+- `--rysocr-use-amp` przyspiesza inferencje na CUDA, ale na CPU jest ignorowane.
 
 ## Wyniki
 
