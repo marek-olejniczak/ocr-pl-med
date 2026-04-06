@@ -61,6 +61,16 @@ def _resolve_trocr_model_id(args: argparse.Namespace) -> str:
 	return "microsoft/trocr-small-handwritten"
 
 
+def _resolve_paddleocr_rec_model_name(args: argparse.Namespace) -> str:
+	if args.paddleocr_rec_model_name:
+		return args.paddleocr_rec_model_name
+
+	if args.paddleocr_variant == "server":
+		return "PP-OCRv4_server_rec"
+
+	return "PP-OCRv4_mobile_rec"
+
+
 def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 	if args.model == "tesseract_pol":
 		return TesseractPolWrapper(
@@ -96,6 +106,17 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 			use_amp=args.trocr_use_amp,
 		)
 
+	if args.model == "paddleocr":
+		from modele.paddleocr_wrapper import PaddleOCRWrapper
+
+		return PaddleOCRWrapper(
+			rec_model_name=_resolve_paddleocr_rec_model_name(args),
+			lang=args.paddleocr_lang,
+			device=args.paddleocr_device,
+			use_angle_cls=args.paddleocr_use_angle_cls,
+			rec_batch_size=args.paddleocr_rec_batch_size,
+		)
+
 	raise ValueError(f"Nieobslugiwany model: {args.model}")
 
 
@@ -104,7 +125,7 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"--model",
 		type=str,
-		choices=["tesseract_pol", "rysocr", "trocr"],
+		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr"],
 		default="tesseract_pol",
 		help="Model OCR do uruchomienia",
 	)
@@ -235,6 +256,46 @@ def parse_args() -> argparse.Namespace:
 		"--trocr-use-amp",
 		action="store_true",
 		help="Wlacz mixed precision (AMP) dla TrOCR na CUDA.",
+	)
+	parser.add_argument(
+		"--paddleocr-variant",
+		type=str,
+		choices=["mobile", "server"],
+		default="mobile",
+		help="Wariant PP-OCRv4 dla rozpoznawania: mobile (lekki) lub server (dokladniejszy).",
+	)
+	parser.add_argument(
+		"--paddleocr-rec-model-name",
+		type=str,
+		default=None,
+		help=(
+			"Nadpisz nazwe modelu rozpoznawania PaddleOCR. "
+			"Gdy pominiete, wybor wynika z --paddleocr-variant."
+		),
+	)
+	parser.add_argument(
+		"--paddleocr-lang",
+		type=str,
+		default="pl",
+		help="Jezyk PaddleOCR (uzywany glownie w fallbacku legacy OCR). Dla PL: pl.",
+	)
+	parser.add_argument(
+		"--paddleocr-device",
+		type=str,
+		choices=["auto", "cpu", "gpu"],
+		default="auto",
+		help="Urzadzenie PaddleOCR: auto, cpu lub gpu.",
+	)
+	parser.add_argument(
+		"--paddleocr-use-angle-cls",
+		action="store_true",
+		help="Wlacz klasyfikator kata (CLS) w PaddleOCR.",
+	)
+	parser.add_argument(
+		"--paddleocr-rec-batch-size",
+		type=int,
+		default=8,
+		help="Batch size dla rozpoznawania PaddleOCR (domyslnie: 8).",
 	)
 	return parser.parse_args()
 

@@ -9,6 +9,7 @@ Lekki benchmark do porownywania modeli OCR/HTR na danych polskich.
   - `tesseract_pol_wrapper.py` - wrapper dla Tesseract POL
   - `rysocr_wrapper.py` - wrapper dla RysOCR (LoRA na PaddleOCR-VL)
   - `trocr_wrapper.py` - wrapper dla TrOCR handwritten (Transformer OCR)
+  - `paddleocr_wrapper.py` - wrapper dla PaddleOCR PP-OCRv4 (mobile/server, recognition-only)
 - `src/`:
   - `data_generator.py` - loader probek i mapowanie `file_name -> image_path`
   - `metrics.py` - metryki (EMA, CER, WER, Levenshtein) + raporty
@@ -71,6 +72,34 @@ python src/evaluate.py --model trocr --trocr-batch-size 8 --trocr-use-amp --limi
 python src/evaluate.py --model trocr --trocr-variant base --trocr-batch-size 4 --limit 50
 ```
 
+10. Uruchom PaddleOCR PP-OCRv4 w wariancie mobile (wydajnosc):
+
+```bash
+python src/evaluate.py --model paddleocr --paddleocr-variant mobile --paddleocr-device cpu --limit 50
+```
+
+11. Uruchom PaddleOCR PP-OCRv4 w wariancie server (wyzsza precyzja):
+
+```bash
+python src/evaluate.py --model paddleocr --paddleocr-variant server --paddleocr-device cpu --limit 50
+```
+
+Uwaga: PaddleOCR wymaga dodatkowo backendu PaddlePaddle.
+
+Aktualna rekomendacja dla tego repo: profil CPU (Python 3.12).
+
+Rekomendowane profile instalacji:
+- Python 3.12 (CPU): `paddlepaddle==3.3.1` + `paddleocr/paddlex 3.4.x`
+- GPU na tym hostcie: dostepne sa tylko wheel `paddlepaddle-gpu 2.6.x`, co oznacza profil legacy (`paddleocr/paddlex 2.x`) i najlepiej starszy Python (np. 3.10)
+
+Przykladowe komendy instalacji:
+- Py3.12 CPU: `python -m pip install "paddlepaddle==3.3.1" "paddleocr>=3.4.0,<3.5.0" "paddlex>=3.4.3,<3.5.0"`
+- Legacy GPU (Py<=3.10): `python -m pip install "paddlepaddle-gpu==2.6.2" "paddleocr==2.10.0" "paddlex==2.1.0"`
+
+Niezgodny mix wersji (np. `paddleocr/paddlex 3.x` z `paddle 2.x`) moze konczyc sie bledem C++ (`SIGSEGV`).
+
+W praktyce benchmark utrzymujemy obecnie i testujemy na CPU, dlatego przy uruchomieniach PaddleOCR zalecane jest jawne `--paddleocr-device cpu`.
+
 Uwaga: pierwsze uruchomienie `RysOCR` moze pobrac duze wagi modelu (ok. 2GB+).
 
 ## Tryb offline dla RysOCR
@@ -96,7 +125,6 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 
 ## Argumenty przydatne dla TrOCR
 
-- `--trocr-model-id` - domyslnie `microsoft/trocr-small-handwritten`
 - `--trocr-variant` - `small` (domyslnie) lub `base`; wybiera domyslny checkpoint handwritten
 - `--trocr-model-id` - opcjonalne nadpisanie checkpointu; gdy pominiete, bierze model z `--trocr-variant`
 - `--trocr-device` - np. `cpu` lub `cuda`
@@ -104,6 +132,21 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - `--trocr-batch-size` - domyslnie `4`, zwieksza throughput kosztem VRAM
 - `--trocr-use-amp` - opcjonalne mixed precision na CUDA (domyslnie wylaczone)
 - `--trocr-local-files-only`
+
+## Argumenty przydatne dla PaddleOCR
+
+- `--paddleocr-variant` - `mobile` (domyslnie) lub `server`
+- `--paddleocr-rec-model-name` - opcjonalne nadpisanie modelu rec; gdy pominiete, bierze model z `--paddleocr-variant`
+- `--paddleocr-lang` - domyslnie `pl`; istotne glownie dla fallbacku legacy OCR
+- `--paddleocr-device` - `auto`, `cpu` lub `gpu`
+- `--paddleocr-use-angle-cls` - wlacza klasyfikator kata (CLS)
+- `--paddleocr-rec-batch-size` - batch size dla rec (domyslnie `8`)
+
+## PaddleOCR i tryb bez detekcji dokumentu
+
+- Wrapper PaddleOCR dziala w trybie recognition-only (`det=False`), bo benchmark operuje na wycietych slowach/liniach.
+- Detektor na poziomie dokumentu/strony jest celowo wylaczony.
+- W nowszych wersjach PaddleOCR backend opiera sie o `TextRecognition` (bez detekcji z definicji).
 
 ## TrOCR i jezyk polski
 
