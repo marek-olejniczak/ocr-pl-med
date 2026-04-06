@@ -51,6 +51,16 @@ def evaluate_samples(samples: List[HTRSample], model: HTRModelWrapper) -> pd.Dat
 	return pd.DataFrame(rows)
 
 
+def _resolve_trocr_model_id(args: argparse.Namespace) -> str:
+	if args.trocr_model_id:
+		return args.trocr_model_id
+
+	if args.trocr_variant == "base":
+		return "microsoft/trocr-base-handwritten"
+
+	return "microsoft/trocr-small-handwritten"
+
+
 def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 	if args.model == "tesseract_pol":
 		return TesseractPolWrapper(
@@ -74,6 +84,18 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 			use_amp=args.rysocr_use_amp,
 		)
 
+	if args.model == "trocr":
+		from modele.trocr_wrapper import TrOCRWrapper
+
+		return TrOCRWrapper(
+			model_id=_resolve_trocr_model_id(args),
+			max_new_tokens=args.trocr_max_new_tokens,
+			device=args.trocr_device,
+			local_files_only=args.trocr_local_files_only,
+			batch_size=args.trocr_batch_size,
+			use_amp=args.trocr_use_amp,
+		)
+
 	raise ValueError(f"Nieobslugiwany model: {args.model}")
 
 
@@ -82,7 +104,7 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"--model",
 		type=str,
-		choices=["tesseract_pol", "rysocr"],
+		choices=["tesseract_pol", "rysocr", "trocr"],
 		default="tesseract_pol",
 		help="Model OCR do uruchomienia",
 	)
@@ -169,6 +191,50 @@ def parse_args() -> argparse.Namespace:
 		"--rysocr-use-amp",
 		action="store_true",
 		help="Wlacz mixed precision (AMP) dla RysOCR na CUDA.",
+	)
+	parser.add_argument(
+		"--trocr-variant",
+		type=str,
+		choices=["small", "base"],
+		default="small",
+		help="Wariant TrOCR handwritten. small: lzejszy VRAM, base: ciezszy i zwykle dokladniejszy.",
+	)
+	parser.add_argument(
+		"--trocr-model-id",
+		type=str,
+		default=None,
+		help=(
+			"Nadpisz domyslne repozytorium TrOCR na Hugging Face. "
+			"Gdy pominiete, wybor wynika z --trocr-variant."
+		),
+	)
+	parser.add_argument(
+		"--trocr-max-new-tokens",
+		type=int,
+		default=128,
+		help="Maksymalna liczba tokenow generowanych przez TrOCR.",
+	)
+	parser.add_argument(
+		"--trocr-device",
+		type=str,
+		default=None,
+		help="Urzadzenie dla TrOCR (np. cpu, cuda). Domyslnie wybierane automatycznie.",
+	)
+	parser.add_argument(
+		"--trocr-local-files-only",
+		action="store_true",
+		help="Tryb offline: laduj TrOCR tylko z lokalnego cache Hugging Face, bez pobierania.",
+	)
+	parser.add_argument(
+		"--trocr-batch-size",
+		type=int,
+		default=4,
+		help="Rozmiar batcha inferencji dla TrOCR (domyslnie: 4).",
+	)
+	parser.add_argument(
+		"--trocr-use-amp",
+		action="store_true",
+		help="Wlacz mixed precision (AMP) dla TrOCR na CUDA.",
 	)
 	return parser.parse_args()
 
