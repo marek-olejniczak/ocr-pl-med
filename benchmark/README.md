@@ -11,6 +11,7 @@ Lekki benchmark do porownywania modeli OCR/HTR na danych polskich.
   - `trocr_wrapper.py` - wrapper dla TrOCR handwritten (Transformer OCR)
   - `paddleocr_wrapper.py` - wrapper dla PaddleOCR PP-OCRv4 (mobile/server, recognition-only)
   - `easyocr_wrapper.py` - wrapper dla EasyOCR (GPU/CPU, batching, lokalny cache wag)
+  - `parseq_wrapper.py` - wrapper dla PARSeq (docTR, recognition-only)
 - `src/`:
   - `data_generator.py` - loader probek i mapowanie `file_name -> image_path`
   - `metrics.py` - metryki (EMA, CER, WER, Levenshtein) + raporty
@@ -97,12 +98,25 @@ python src/evaluate.py --model easyocr --easyocr-device cuda --easyocr-langs pl,
 python src/evaluate.py --model easyocr --easyocr-device cuda --easyocr-batch-size 16 --easyocr-model-storage-dir modele/cache/easyocr --limit 50
 ```
 
-14. Przykladowe uruchomienie z jawnie ustawionymi katalogami cache modeli:
+14. Uruchom PARSeq (docTR) z domyslnym preprocessingiem 32x128:
+
+```bash
+python src/evaluate.py --model parseq --limit 50
+```
+
+15. Uruchom PARSeq (docTR) z alternatywnym preprocessingiem 128x128:
+
+```bash
+python src/evaluate.py --model parseq --parseq-input-size 128x128 --parseq-batch-size 8 --limit 50
+```
+
+16. Przykladowe uruchomienie z jawnie ustawionymi katalogami cache modeli:
 
 ```bash
 python src/evaluate.py --model trocr --trocr-cache-dir modele/cache/trocr --limit 50
 python src/evaluate.py --model rysocr --rysocr-cache-dir modele/cache/rysocr --limit 50
 python src/evaluate.py --model paddleocr --paddleocr-cache-dir modele/cache/paddlex --paddleocr-device cpu --limit 50
+python src/evaluate.py --model parseq --parseq-cache-dir modele/cache/parseq --limit 50
 ```
 
 Uwaga: PaddleOCR wymaga dodatkowo backendu PaddlePaddle.
@@ -173,6 +187,17 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - `--easyocr-batch-size` - batch size inferencji (domyslnie `8`)
 - `--easyocr-model-storage-dir` - katalog na lokalny cache wag EasyOCR
 
+## Argumenty przydatne dla PARSeq (docTR)
+
+- `--parseq-device` - `auto`, `cpu` lub `cuda`
+- `--parseq-batch-size` - batch size inferencji (domyslnie `8`)
+- `--parseq-cache-dir` - katalog na lokalny cache wag PARSeq/docTR (domyslnie `modele/cache/parseq`)
+- `--parseq-input-size` - preset preprocessingu resize: `32x128` (domyslnie) albo `128x128`; gdy checkpoint nie wspiera wybranego rozmiaru, wrapper zrobi fallback do rozmiaru modelu
+- `--parseq-use-amp` - opcjonalne mixed precision na CUDA (domyslnie wylaczone)
+- `--parseq-model-id` - opcjonalny `repo_id` Hugging Face dla niestandardowego checkpointu PARSeq
+- `--parseq-local-files-only` - tryb offline, laduj tylko z lokalnego cache
+- `--parseq-lang` - preferowany jezyk (informacyjnie)
+
 ## EasyOCR i jezyk polski
 
 - Domyslnie EasyOCR uruchamiany jest z jezykiem polskim (`pl`) oraz angielskim (`en`).
@@ -187,6 +212,7 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - TrOCR: `modele/cache/trocr`.
 - RysOCR: `modele/cache/rysocr`.
 - PaddleOCR/PaddleX: `modele/cache/paddlex`.
+- PARSeq/docTR: `modele/cache/parseq`.
 
 ## PaddleOCR i tryb bez detekcji dokumentu
 
@@ -199,6 +225,13 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - Domyslny wariant TrOCR w benchmarku nie jest dotrenowany stricte na jezyku polskim.
 - Nie nalezy oczekiwac stabilnego rozpoznawania polskich diakrytykow (np. ą, ć, ę, ł, ń, ó, ś, ź, ż).
 - TrOCR traktuj jako punkt odniesienia dla transformera OCR, a nie model zoptymalizowany pod polskie dane.
+
+## PARSeq/docTR i jezyk polski
+
+- PARSeq w docTR jest modelem rozpoznawania tekstu (recognition-only), bez detekcji dokumentu.
+- Domyslnie uzywany jest pretrained PARSeq, ktory nie ma twardego przelacznika jezyka jak niektore inne biblioteki OCR.
+- Dla jezyka polskiego jakosc diakrytykow (np. ą, ć, ę, ł, ń, ó, ś, ź, ż) zalezy od charsetu checkpointu; mozna podmienic checkpoint przez `--parseq-model-id`, jesli dostepny jest wariant lepiej wspierajacy PL.
+- Preprocessing wrappera korzysta z flow docTR i resize do `32x128` (lub opcjonalnie `128x128`).
 
 ## Wydajnosc RysOCR
 

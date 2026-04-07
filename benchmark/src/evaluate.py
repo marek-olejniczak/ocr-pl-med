@@ -137,6 +137,20 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 			model_storage_dir=args.easyocr_model_storage_dir,
 		)
 
+	if args.model == "parseq":
+		from modele.parseq_wrapper import PARSeqWrapper
+
+		return PARSeqWrapper(
+			device=args.parseq_device,
+			batch_size=args.parseq_batch_size,
+			cache_dir=args.parseq_cache_dir,
+			input_size=args.parseq_input_size,
+			use_amp=args.parseq_use_amp,
+			language=args.parseq_lang,
+			model_id=args.parseq_model_id,
+			local_files_only=args.parseq_local_files_only,
+		)
+
 	raise ValueError(f"Nieobslugiwany model: {args.model}")
 
 
@@ -145,7 +159,7 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"--model",
 		type=str,
-		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr"],
+		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq"],
 		default="tesseract_pol",
 		help="Model OCR do uruchomienia",
 	)
@@ -359,6 +373,54 @@ def parse_args() -> argparse.Namespace:
 		type=str,
 		default="modele/cache/easyocr",
 		help="Katalog na lokalny cache wag EasyOCR.",
+	)
+	parser.add_argument(
+		"--parseq-device",
+		type=str,
+		choices=["auto", "cpu", "cuda"],
+		default="auto",
+		help="Urzadzenie PARSeq/docTR: auto, cpu lub cuda.",
+	)
+	parser.add_argument(
+		"--parseq-batch-size",
+		type=int,
+		default=8,
+		help="Batch size inferencji PARSeq (domyslnie: 8).",
+	)
+	parser.add_argument(
+		"--parseq-cache-dir",
+		type=str,
+		default="modele/cache/parseq",
+		help="Katalog na lokalny cache wag PARSeq/docTR.",
+	)
+	parser.add_argument(
+		"--parseq-input-size",
+		type=str,
+		choices=["32x128", "128x128"],
+		default="32x128",
+		help="Preset resize preprocessingu PARSeq: 32x128 (domyslny) albo 128x128.",
+	)
+	parser.add_argument(
+		"--parseq-use-amp",
+		action="store_true",
+		help="Wlacz mixed precision (AMP) dla PARSeq na CUDA.",
+	)
+	parser.add_argument(
+		"--parseq-lang",
+		type=str,
+		default="pl",
+		help="Preferowany jezyk dla PARSeq (informacyjnie; pretrained PARSeq nie ma twardego przelacznika jezyka).",
+	)
+	parser.add_argument(
+		"--parseq-model-id",
+		type=str,
+		default=None,
+		help="Opcjonalny repo_id Hugging Face dla checkpointu PARSeq/docTR (gdy dostepny).",
+	)
+	parser.add_argument(
+		"--parseq-local-files-only",
+		action="store_true",
+		help="Tryb offline dla PARSeq: korzystaj tylko z lokalnego cache.",
 	)
 	return parser.parse_args()
 

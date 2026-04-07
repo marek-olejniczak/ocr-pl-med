@@ -11,6 +11,7 @@ einops
 sentencepiece>=0.2.0
 protobuf>=5.0.0
 easyocr>=1.7.1
+python-doctr>=0.11.0
 # Paddle stack for this repo is currently maintained in CPU profile on Python 3.12.
 paddleocr>=3.4.0,<3.5.0; python_version >= "3.11"
 paddlex>=3.4.3,<3.5.0; python_version >= "3.11"
