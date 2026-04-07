@@ -151,6 +151,18 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 			local_files_only=args.parseq_local_files_only,
 		)
 
+	if args.model == "calamari":
+		from modele.calamari_wrapper import CalamariWrapper
+
+		return CalamariWrapper(
+			model=args.calamari_model,
+			batch_size=args.calamari_batch_size,
+			cache_dir=args.calamari_cache_dir,
+			local_files_only=args.calamari_local_files_only,
+			checkpoints=args.calamari_checkpoints,
+			device=args.calamari_device,
+		)
+
 	raise ValueError(f"Nieobslugiwany model: {args.model}")
 
 
@@ -159,7 +171,7 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"--model",
 		type=str,
-		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq"],
+		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq", "calamari"],
 		default="tesseract_pol",
 		help="Model OCR do uruchomienia",
 	)
@@ -421,6 +433,48 @@ def parse_args() -> argparse.Namespace:
 		"--parseq-local-files-only",
 		action="store_true",
 		help="Tryb offline dla PARSeq: korzystaj tylko z lokalnego cache.",
+	)
+	parser.add_argument(
+		"--calamari-model",
+		type=str,
+		default="idiotikon",
+		help=(
+			"Nazwa modelu Calamari z oficjalnego release (np. idiotikon, uw3-modern-english). "
+			"Domyslnie idiotikon (szeroki zestaw diakrytykow)."
+		),
+	)
+	parser.add_argument(
+		"--calamari-batch-size",
+		type=int,
+		default=8,
+		help="Batch size inferencji Calamari (domyslnie: 8).",
+	)
+	parser.add_argument(
+		"--calamari-cache-dir",
+		type=str,
+		default="modele/cache/calamari",
+		help="Katalog na lokalny cache modeli Calamari.",
+	)
+	parser.add_argument(
+		"--calamari-local-files-only",
+		action="store_true",
+		help="Tryb offline Calamari: korzystaj tylko z lokalnego cache modeli.",
+	)
+	parser.add_argument(
+		"--calamari-checkpoints",
+		type=str,
+		default=None,
+		help=(
+			"Opcjonalna lista sciezek do checkpointow .ckpt rozdzielona przecinkami. "
+			"Gdy podane, nadpisuja --calamari-model."
+		),
+	)
+	parser.add_argument(
+		"--calamari-device",
+		type=str,
+		choices=["auto", "cpu", "gpu"],
+		default="auto",
+		help="Preferowane urzadzenie Calamari (informacyjnie; zalezy od backendu TensorFlow).",
 	)
 	return parser.parse_args()
 

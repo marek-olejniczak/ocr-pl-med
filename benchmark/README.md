@@ -12,6 +12,7 @@ Lekki benchmark do porownywania modeli OCR/HTR na danych polskich.
   - `paddleocr_wrapper.py` - wrapper dla PaddleOCR PP-OCRv4 (mobile/server, recognition-only)
   - `easyocr_wrapper.py` - wrapper dla EasyOCR (GPU/CPU, batching, lokalny cache wag)
   - `parseq_wrapper.py` - wrapper dla PARSeq (docTR, recognition-only)
+  - `calamari_wrapper.py` - wrapper dla Calamari OCR (line-based, ensemble checkpointow)
 - `src/`:
   - `data_generator.py` - loader probek i mapowanie `file_name -> image_path`
   - `metrics.py` - metryki (EMA, CER, WER, Levenshtein) + raporty
@@ -119,6 +120,18 @@ python src/evaluate.py --model paddleocr --paddleocr-cache-dir modele/cache/padd
 python src/evaluate.py --model parseq --parseq-cache-dir modele/cache/parseq --limit 50
 ```
 
+17. Uruchom Calamari OCR (domyslnie model `idiotikon`, rekomendowany dla polskich diakrytykow):
+
+```bash
+python src/evaluate.py --model calamari --limit 50
+```
+
+18. Uruchom Calamari z innym modelem i jawnie ustawionym cache:
+
+```bash
+python src/evaluate.py --model calamari --calamari-model uw3-modern-english --calamari-cache-dir modele/cache/calamari --limit 50
+```
+
 Uwaga: PaddleOCR wymaga dodatkowo backendu PaddlePaddle.
 
 Aktualna rekomendacja dla tego repo: profil CPU (Python 3.12).
@@ -198,6 +211,15 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - `--parseq-local-files-only` - tryb offline, laduj tylko z lokalnego cache
 - `--parseq-lang` - preferowany jezyk (informacyjnie)
 
+## Argumenty przydatne dla Calamari OCR
+
+- `--calamari-model` - nazwa modelu Calamari (domyslnie `idiotikon`)
+- `--calamari-batch-size` - batch size inferencji (domyslnie `8`)
+- `--calamari-cache-dir` - katalog na lokalny cache modeli (domyslnie `modele/cache/calamari`)
+- `--calamari-local-files-only` - tryb offline, bez pobierania modeli
+- `--calamari-checkpoints` - opcjonalna lista sciezek do `.ckpt` rozdzielona przecinkami
+- `--calamari-device` - preferowane urzadzenie (`auto`, `cpu`, `gpu`; zalezne od backendu TF)
+
 ## EasyOCR i jezyk polski
 
 - Domyslnie EasyOCR uruchamiany jest z jezykiem polskim (`pl`) oraz angielskim (`en`).
@@ -213,6 +235,7 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - RysOCR: `modele/cache/rysocr`.
 - PaddleOCR/PaddleX: `modele/cache/paddlex`.
 - PARSeq/docTR: `modele/cache/parseq`.
+- Calamari: `modele/cache/calamari`.
 
 ## PaddleOCR i tryb bez detekcji dokumentu
 
@@ -232,6 +255,17 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - Domyslnie uzywany jest pretrained PARSeq, ktory nie ma twardego przelacznika jezyka jak niektore inne biblioteki OCR.
 - Dla jezyka polskiego jakosc diakrytykow (np. ą, ć, ę, ł, ń, ó, ś, ź, ż) zalezy od charsetu checkpointu; mozna podmienic checkpoint przez `--parseq-model-id`, jesli dostepny jest wariant lepiej wspierajacy PL.
 - Preprocessing wrappera korzysta z flow docTR i resize do `32x128` (lub opcjonalnie `128x128`).
+
+## Calamari OCR i jezyk polski
+
+- W oficjalnych modelach Calamari nie ma dedykowanego checkpointu stricte PL.
+- Najlepsza praktyczna opcja wielojezyczna pod polskie znaki to `idiotikon` (szeroki zestaw znakow lacinskich i diakrytykow).
+- Dla najwyzszej jakosci PL warto rozwazyc pozniejszy fine-tuning na lokalnym korpusie.
+
+## Uwaga srodowiskowa dla Calamari
+
+- Calamari 2.x (kompatybilne z aktualnymi modelami release 2.1/2.2) wymaga stosu TensorFlow, ktory w praktyce najlepiej dziala na Python <= 3.11.
+- W tym repo benchmark jest aktualnie utrzymywany na Python 3.12 dla pozostalych modeli; dla Calamari moze byc potrzebne osobne srodowisko (np. conda z Python 3.11).
 
 ## Wydajnosc RysOCR
 
