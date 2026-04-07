@@ -10,6 +10,7 @@ Lekki benchmark do porownywania modeli OCR/HTR na danych polskich.
   - `rysocr_wrapper.py` - wrapper dla RysOCR (LoRA na PaddleOCR-VL)
   - `trocr_wrapper.py` - wrapper dla TrOCR handwritten (Transformer OCR)
   - `paddleocr_wrapper.py` - wrapper dla PaddleOCR PP-OCRv4 (mobile/server, recognition-only)
+  - `easyocr_wrapper.py` - wrapper dla EasyOCR (GPU/CPU, batching, lokalny cache wag)
 - `src/`:
   - `data_generator.py` - loader probek i mapowanie `file_name -> image_path`
   - `metrics.py` - metryki (EMA, CER, WER, Levenshtein) + raporty
@@ -84,6 +85,18 @@ python src/evaluate.py --model paddleocr --paddleocr-variant mobile --paddleocr-
 python src/evaluate.py --model paddleocr --paddleocr-variant server --paddleocr-device cpu --limit 50
 ```
 
+12. Uruchom EasyOCR na GPU (jezyk polski + angielski):
+
+```bash
+python src/evaluate.py --model easyocr --easyocr-device cuda --easyocr-langs pl,en --limit 50
+```
+
+13. Uruchom EasyOCR z lokalnym cache wag i batchingiem:
+
+```bash
+python src/evaluate.py --model easyocr --easyocr-device cuda --easyocr-batch-size 16 --easyocr-model-storage-dir modele/cache/easyocr --limit 50
+```
+
 Uwaga: PaddleOCR wymaga dodatkowo backendu PaddlePaddle.
 
 Aktualna rekomendacja dla tego repo: profil CPU (Python 3.12).
@@ -141,6 +154,20 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - `--paddleocr-device` - `auto`, `cpu` lub `gpu`
 - `--paddleocr-use-angle-cls` - wlacza klasyfikator kata (CLS)
 - `--paddleocr-rec-batch-size` - batch size dla rec (domyslnie `8`)
+
+## Argumenty przydatne dla EasyOCR
+
+- `--easyocr-langs` - lista jezykow rozdzielona przecinkami, domyslnie `pl,en`
+- `--easyocr-device` - `auto`, `cpu` lub `cuda`
+- `--easyocr-batch-size` - batch size inferencji (domyslnie `8`)
+- `--easyocr-model-storage-dir` - katalog na lokalny cache wag EasyOCR
+
+## EasyOCR i jezyk polski
+
+- Domyslnie EasyOCR uruchamiany jest z jezykiem polskim (`pl`) oraz angielskim (`en`).
+- Przy uruchomieniu na GPU (`--easyocr-device cuda`) wrapper automatycznie spadnie do CPU, gdy CUDA jest niedostepna.
+- Wagi modelu sa pobierane raz i zapisywane lokalnie w `--easyocr-model-storage-dir`.
+- Wrapper zaklada heterogeniczne rozmiary obrazow wejsciowych i przetwarza je bezpiecznie per-obraz (w chunkach logicznych wg `--easyocr-batch-size`).
 
 ## PaddleOCR i tryb bez detekcji dokumentu
 

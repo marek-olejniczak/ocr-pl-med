@@ -25,6 +25,9 @@ wyniki/
 # Large local datasets
 dane/
 
+# Model weights
+modele/cache/
+
 # OS files
 .DS_Store
 Thumbs.db

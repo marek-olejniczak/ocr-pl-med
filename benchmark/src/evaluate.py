@@ -71,6 +71,13 @@ def _resolve_paddleocr_rec_model_name(args: argparse.Namespace) -> str:
 	return "PP-OCRv4_mobile_rec"
 
 
+def _parse_easyocr_langs(raw_langs: str) -> list[str]:
+	langs = [lang.strip() for lang in raw_langs.split(",") if lang.strip()]
+	if not langs:
+		return ["pl"]
+	return langs
+
+
 def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 	if args.model == "tesseract_pol":
 		return TesseractPolWrapper(
@@ -117,6 +124,16 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 			rec_batch_size=args.paddleocr_rec_batch_size,
 		)
 
+	if args.model == "easyocr":
+		from modele.easyocr_wrapper import EasyOCRWrapper
+
+		return EasyOCRWrapper(
+			langs=_parse_easyocr_langs(args.easyocr_langs),
+			device=args.easyocr_device,
+			batch_size=args.easyocr_batch_size,
+			model_storage_dir=args.easyocr_model_storage_dir,
+		)
+
 	raise ValueError(f"Nieobslugiwany model: {args.model}")
 
 
@@ -125,7 +142,7 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"--model",
 		type=str,
-		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr"],
+		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr"],
 		default="tesseract_pol",
 		help="Model OCR do uruchomienia",
 	)
@@ -296,6 +313,31 @@ def parse_args() -> argparse.Namespace:
 		type=int,
 		default=8,
 		help="Batch size dla rozpoznawania PaddleOCR (domyslnie: 8).",
+	)
+	parser.add_argument(
+		"--easyocr-langs",
+		type=str,
+		default="pl,en",
+		help="Lista jezykow EasyOCR rozdzielona przecinkami (np. pl,en).",
+	)
+	parser.add_argument(
+		"--easyocr-device",
+		type=str,
+		choices=["auto", "cpu", "cuda"],
+		default="auto",
+		help="Urzadzenie EasyOCR: auto, cpu lub cuda.",
+	)
+	parser.add_argument(
+		"--easyocr-batch-size",
+		type=int,
+		default=8,
+		help="Batch size inferencji EasyOCR (domyslnie: 8).",
+	)
+	parser.add_argument(
+		"--easyocr-model-storage-dir",
+		type=str,
+		default="modele/cache/easyocr",
+		help="Katalog na lokalny cache wag EasyOCR.",
 	)
 	return parser.parse_args()
 
