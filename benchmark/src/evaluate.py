@@ -99,6 +99,7 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 			local_files_only=args.rysocr_local_files_only,
 			batch_size=args.rysocr_batch_size,
 			use_amp=args.rysocr_use_amp,
+			cache_dir=args.rysocr_cache_dir,
 		)
 
 	if args.model == "trocr":
@@ -111,6 +112,7 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 			local_files_only=args.trocr_local_files_only,
 			batch_size=args.trocr_batch_size,
 			use_amp=args.trocr_use_amp,
+			cache_dir=args.trocr_cache_dir,
 		)
 
 	if args.model == "paddleocr":
@@ -122,6 +124,7 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 			device=args.paddleocr_device,
 			use_angle_cls=args.paddleocr_use_angle_cls,
 			rec_batch_size=args.paddleocr_rec_batch_size,
+			cache_dir=args.paddleocr_cache_dir,
 		)
 
 	if args.model == "easyocr":
@@ -231,6 +234,12 @@ def parse_args() -> argparse.Namespace:
 		help="Wlacz mixed precision (AMP) dla RysOCR na CUDA.",
 	)
 	parser.add_argument(
+		"--rysocr-cache-dir",
+		type=str,
+		default="modele/cache/rysocr",
+		help="Katalog cache (Hugging Face) dla RysOCR.",
+	)
+	parser.add_argument(
 		"--trocr-variant",
 		type=str,
 		choices=["small", "base"],
@@ -275,6 +284,12 @@ def parse_args() -> argparse.Namespace:
 		help="Wlacz mixed precision (AMP) dla TrOCR na CUDA.",
 	)
 	parser.add_argument(
+		"--trocr-cache-dir",
+		type=str,
+		default="modele/cache/trocr",
+		help="Katalog cache (Hugging Face) dla TrOCR.",
+	)
+	parser.add_argument(
 		"--paddleocr-variant",
 		type=str,
 		choices=["mobile", "server"],
@@ -313,6 +328,12 @@ def parse_args() -> argparse.Namespace:
 		type=int,
 		default=8,
 		help="Batch size dla rozpoznawania PaddleOCR (domyslnie: 8).",
+	)
+	parser.add_argument(
+		"--paddleocr-cache-dir",
+		type=str,
+		default="modele/cache/paddlex",
+		help="Katalog cache modeli PaddleX/PaddleOCR.",
 	)
 	parser.add_argument(
 		"--easyocr-langs",

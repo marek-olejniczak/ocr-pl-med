@@ -97,6 +97,14 @@ python src/evaluate.py --model easyocr --easyocr-device cuda --easyocr-langs pl,
 python src/evaluate.py --model easyocr --easyocr-device cuda --easyocr-batch-size 16 --easyocr-model-storage-dir modele/cache/easyocr --limit 50
 ```
 
+14. Przykladowe uruchomienie z jawnie ustawionymi katalogami cache modeli:
+
+```bash
+python src/evaluate.py --model trocr --trocr-cache-dir modele/cache/trocr --limit 50
+python src/evaluate.py --model rysocr --rysocr-cache-dir modele/cache/rysocr --limit 50
+python src/evaluate.py --model paddleocr --paddleocr-cache-dir modele/cache/paddlex --paddleocr-device cpu --limit 50
+```
+
 Uwaga: PaddleOCR wymaga dodatkowo backendu PaddlePaddle.
 
 Aktualna rekomendacja dla tego repo: profil CPU (Python 3.12).
@@ -135,6 +143,7 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - `--rysocr-batch-size` - domyslnie `2`, zwieksza throughput kosztem VRAM
 - `--rysocr-use-amp` - opcjonalne mixed precision na CUDA (domyslnie wylaczone)
 - `--rysocr-local-files-only`
+- `--rysocr-cache-dir` - katalog cache wag/modeli dla RysOCR (domyslnie `modele/cache/rysocr`)
 
 ## Argumenty przydatne dla TrOCR
 
@@ -145,6 +154,7 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - `--trocr-batch-size` - domyslnie `4`, zwieksza throughput kosztem VRAM
 - `--trocr-use-amp` - opcjonalne mixed precision na CUDA (domyslnie wylaczone)
 - `--trocr-local-files-only`
+- `--trocr-cache-dir` - katalog cache wag/modeli dla TrOCR (domyslnie `modele/cache/trocr`)
 
 ## Argumenty przydatne dla PaddleOCR
 
@@ -154,6 +164,7 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - `--paddleocr-device` - `auto`, `cpu` lub `gpu`
 - `--paddleocr-use-angle-cls` - wlacza klasyfikator kata (CLS)
 - `--paddleocr-rec-batch-size` - batch size dla rec (domyslnie `8`)
+- `--paddleocr-cache-dir` - katalog cache modeli PaddleX/PaddleOCR (domyslnie `modele/cache/paddlex`)
 
 ## Argumenty przydatne dla EasyOCR
 
@@ -168,6 +179,14 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - Przy uruchomieniu na GPU (`--easyocr-device cuda`) wrapper automatycznie spadnie do CPU, gdy CUDA jest niedostepna.
 - Wagi modelu sa pobierane raz i zapisywane lokalnie w `--easyocr-model-storage-dir`.
 - Wrapper zaklada heterogeniczne rozmiary obrazow wejsciowych i przetwarza je bezpiecznie per-obraz (w chunkach logicznych wg `--easyocr-batch-size`).
+
+## Cache modeli
+
+- Domyslnie cache wag modeli trafia do `modele/cache/*` dla wrapperow, ktore na to pozwalaja.
+- EasyOCR: `modele/cache/easyocr`.
+- TrOCR: `modele/cache/trocr`.
+- RysOCR: `modele/cache/rysocr`.
+- PaddleOCR/PaddleX: `modele/cache/paddlex`.
 
 ## PaddleOCR i tryb bez detekcji dokumentu
 

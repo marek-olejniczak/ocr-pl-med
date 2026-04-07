@@ -20,6 +20,7 @@ class TrOCRWrapper(HTRModelWrapper):
 		local_files_only: bool = False,
 		batch_size: int = 4,
 		use_amp: bool = False,
+		cache_dir: str = "modele/cache/trocr",
 	) -> None:
 		model_slug = model_id.split("/")[-1].replace("-", "_")
 		super().__init__(model_name=f"TrOCR_{model_slug}")
@@ -28,6 +29,7 @@ class TrOCRWrapper(HTRModelWrapper):
 		self.local_files_only = local_files_only
 		self.batch_size = max(1, int(batch_size))
 		self.use_amp = bool(use_amp)
+		self.cache_dir = str(Path(cache_dir))
 
 		try:
 			import torch
@@ -40,6 +42,7 @@ class TrOCRWrapper(HTRModelWrapper):
 		self._torch = torch
 		self._processor_cls = TrOCRProcessor
 		self._model_cls = VisionEncoderDecoderModel
+		Path(self.cache_dir).mkdir(parents=True, exist_ok=True)
 
 		resolved_device = device
 		if resolved_device is None:
@@ -59,18 +62,21 @@ class TrOCRWrapper(HTRModelWrapper):
 			self.processor = self._processor_cls.from_pretrained(
 				self.model_id,
 				local_files_only=self.local_files_only,
+				cache_dir=self.cache_dir,
 			)
 			try:
 				self.model = self._model_cls.from_pretrained(
 					self.model_id,
 					dtype=torch_dtype,
 					local_files_only=self.local_files_only,
+					cache_dir=self.cache_dir,
 				)
 			except TypeError:
 				self.model = self._model_cls.from_pretrained(
 					self.model_id,
 					torch_dtype=torch_dtype,
 					local_files_only=self.local_files_only,
+					cache_dir=self.cache_dir,
 				)
 		except Exception as exc:
 			if self.local_files_only:

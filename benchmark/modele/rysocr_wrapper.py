@@ -23,6 +23,7 @@ class RysOCRWrapper(HTRModelWrapper):
         local_files_only: bool = False,
         batch_size: int = 2,
         use_amp: bool = False,
+        cache_dir: str = "modele/cache/rysocr",
     ) -> None:
         super().__init__(model_name="RysOCR")
         self.adapter_model_id = adapter_model_id
@@ -30,6 +31,7 @@ class RysOCRWrapper(HTRModelWrapper):
         self.prompt = prompt
         self.max_new_tokens = max_new_tokens
         self.local_files_only = local_files_only
+        self.cache_dir = str(Path(cache_dir))
         # batch_size steruje inferencja grupowa wewnatrz predict_batch.
         self.batch_size = max(1, int(batch_size))
         # use_amp wlacza mixed precision podczas generate na CUDA.
@@ -110,6 +112,7 @@ class RysOCRWrapper(HTRModelWrapper):
             masking_utils.create_causal_mask = _create_causal_mask_compat
 
         self._torch = torch
+        Path(self.cache_dir).mkdir(parents=True, exist_ok=True)
 
         resolved_device = device
         if resolved_device is None:
@@ -125,6 +128,7 @@ class RysOCRWrapper(HTRModelWrapper):
             "trust_remote_code": True,
             "device_map": device_map,
             "local_files_only": self.local_files_only,
+            "cache_dir": self.cache_dir,
         }
 
         print(
@@ -156,6 +160,7 @@ class RysOCRWrapper(HTRModelWrapper):
                 base_model,
                 self.adapter_model_id,
                 local_files_only=self.local_files_only,
+                cache_dir=self.cache_dir,
             )
         except Exception as exc:
             if self.local_files_only:
@@ -173,6 +178,7 @@ class RysOCRWrapper(HTRModelWrapper):
             self.adapter_model_id,
             trust_remote_code=True,
             local_files_only=self.local_files_only,
+            cache_dir=self.cache_dir,
         )
         self.image_token = getattr(self.processor, "image_token", "<|IMAGE_PLACEHOLDER|>")
         print("[RysOCR] Model i processor gotowe do inferencji.")

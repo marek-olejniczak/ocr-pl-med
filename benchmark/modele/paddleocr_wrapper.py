@@ -18,6 +18,7 @@ class PaddleOCRWrapper(HTRModelWrapper):
         device: str = "auto",
         use_angle_cls: bool = False,
         rec_batch_size: int = 8,
+        cache_dir: str = "modele/cache/paddlex",
     ) -> None:
         model_slug = rec_model_name.replace("-", "_")
         super().__init__(model_name=f"PaddleOCR_{model_slug}")
@@ -26,8 +27,11 @@ class PaddleOCRWrapper(HTRModelWrapper):
         self.device = device
         self.use_angle_cls = bool(use_angle_cls)
         self.rec_batch_size = max(1, int(rec_batch_size))
+        self.cache_dir = str(Path(cache_dir))
         self._backend = ""
 
+        Path(self.cache_dir).mkdir(parents=True, exist_ok=True)
+        os.environ.setdefault("PADDLE_PDX_CACHE_HOME", self.cache_dir)
         # Wylacza dodatkowy check hostow modeli (przyspiesza start i unika timeoutow).
         os.environ.setdefault("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", "True")
         self._check_paddle_stack_compatibility()
