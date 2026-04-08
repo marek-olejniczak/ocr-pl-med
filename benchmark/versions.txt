@@ -1,0 +1,47 @@
+Wspólne (bazowe) dla benchmarku:
+pandas>=2.1.0
+pillow>=10.0.0
+pytesseract>=0.3.10
+setuptools<82
+
+RysOCR:
+torch>=2.2.0
+torchvision>=0.17.0
+transformers>=4.44.0,<5.0.0
+peft>=0.11.0
+accelerate>=0.30.0
+einops
+sentencepiece>=0.2.0
+protobuf>=5.0.0
+
+TrOCR:
+torch>=2.2.0
+torchvision>=0.17.0
+transformers>=4.44.0,<5.0.0
+sentencepiece>=0.2.0
+(praktycznie też korzysta z protobuf w tym stacku)
+
+EasyOCR:
+easyocr>=1.7.1
+torch>=2.2.0
+torchvision>=0.17.0
+
+PaddleOCR (profil CPU, Python 3.12):
+paddleocr>=3.4.0,<3.5.0
+paddlex>=3.4.3,<3.5.0
+oraz z rozmowy: rekomendowane paddlepaddle==3.3.1
+
+PaddleOCR legacy (gdy stary GPU stack / Python <3.11):
+paddleocr==2.10.0
+paddlex==2.1.0
+paddlepaddle-gpu==2.6.2 (wskazywane jako dostępne)
+
+PARSeq (docTR):
+python-doctr>=0.11.0
+plus backend torch/torchvision (już w bazie)
+
+Calamari OCR:
+celowo: calamari-ocr>=2.3.1
+z ograniczeniem: python_version < "3.12"
+praktyczny wniosek z testów: dla modeli Calamari 2.x najlepiej osobne env na Python 3.11
+w obecnym env wylądowało calamari-ocr 1.0.7 (niekompatybilne z modelami release 2.1/2.2)

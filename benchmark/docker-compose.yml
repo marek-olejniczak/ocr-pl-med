@@ -1,0 +1,96 @@
+services:
+  easyocr:
+    build:
+      context: .
+      dockerfile: docker/easyocr/Dockerfile
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./modele/cache/easyocr:/app/modele/cache/easyocr
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  trocr:
+    build:
+      context: .
+      dockerfile: docker/trocr/Dockerfile
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./modele/cache/trocr:/app/modele/cache/trocr
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  paddleocr:
+    build:
+      context: .
+      dockerfile: docker/paddleocr/Dockerfile
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./modele/cache/paddlex:/app/modele/cache/paddlex
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  parseq:
+    build:
+      context: .
+      dockerfile: docker/parseq/Dockerfile
+    ports:
+      - "8004:8000"
+    volumes:
+      - ./modele/cache/parseq:/app/modele/cache/parseq
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  calamari:
+    build:
+      context: .
+      dockerfile: docker/calamari/Dockerfile
+    ports:
+      - "8005:8000"
+    volumes:
+      - ./modele/cache/calamari:/app/modele/cache/calamari
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  rysocr:
+    build:
+      context: .
+      dockerfile: docker/rysocr/Dockerfile
+    ports:
+      - "8006:8000"
+    volumes:
+      - ./modele/cache/rysocr:/app/modele/cache/rysocr
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  tesseract-pol:
+    build:
+      context: .
+      dockerfile: docker/tesseract_pol/Dockerfile
+    ports:
+      - "8007:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

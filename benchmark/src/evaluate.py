@@ -1,54 +1,17 @@
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 import sys
-from typing import List
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
 	sys.path.insert(0, str(PROJECT_ROOT))
 
-import pandas as pd
-
 from modele.base_wrapper import HTRModelWrapper
 from modele.tesseract_pol_wrapper import TesseractPolWrapper
-from src.data_generator import HTRSample, load_htr_samples
-from src.metrics import HTRMetricsEvaluator
-
-
-def _normalize_text(text: str) -> str:
-	return " ".join(text.strip().split())
-
-
-def evaluate_samples(samples: List[HTRSample], model: HTRModelWrapper) -> pd.DataFrame:
-	if not samples:
-		return pd.DataFrame(
-			columns=["file_name", "document_id", "line_id", "ground_truth", "prediction"]
-		)
-
-	image_paths = [str(sample.image_path) for sample in samples]
-	predictions = model.predict_batch(image_paths)
-	if len(predictions) != len(samples):
-		raise RuntimeError(
-			f"Model zwrocil {len(predictions)} predykcji dla {len(samples)} probek."
-		)
-
-	rows = []
-	for sample, pred in zip(samples, predictions):
-		gt_norm = _normalize_text(sample.ground_truth)
-		pred_norm = _normalize_text(pred)
-		rows.append(
-			{
-				"file_name": sample.file_name,
-				"document_id": sample.document_id,
-				"line_id": sample.line_id,
-				"ground_truth": gt_norm,
-				"prediction": pred_norm,
-			}
-		)
-	return pd.DataFrame(rows)
+from orchestrator.benchmark import BenchmarkRunner
+from orchestrator.client import HTTPModelWrapper
 
 
 def _resolve_trocr_model_id(args: argparse.Namespace) -> str:
@@ -78,7 +41,103 @@ def _parse_easyocr_langs(raw_langs: str) -> list[str]:
 	return langs
 
 
+def _resolve_http_base_url(args: argparse.Namespace) -> str:
+	if args.http_base_url:
+		return args.http_base_url.rstrip("/")
+
+	defaults = {
+		"easyocr": "http://localhost:8001",
+		"trocr": "http://localhost:8002",
+		"paddleocr": "http://localhost:8003",
+		"parseq": "http://localhost:8004",
+		"calamari": "http://localhost:8005",
+		"rysocr": "http://localhost:8006",
+		"tesseract_pol": "http://localhost:8007",
+	}
+	return defaults[args.model]
+
+
+def _build_http_options(args: argparse.Namespace) -> dict:
+	if args.model == "easyocr":
+		return {
+			"langs": _parse_easyocr_langs(args.easyocr_langs),
+			"device": args.easyocr_device,
+			"batch_size": args.easyocr_batch_size,
+		}
+
+	if args.model == "trocr":
+		return {
+			"model_id": _resolve_trocr_model_id(args),
+			"max_new_tokens": args.trocr_max_new_tokens,
+			"device": args.trocr_device,
+			"local_files_only": args.trocr_local_files_only,
+			"batch_size": args.trocr_batch_size,
+			"use_amp": args.trocr_use_amp,
+			"cache_dir": args.trocr_cache_dir,
+		}
+
+	if args.model == "paddleocr":
+		return {
+			"rec_model_name": _resolve_paddleocr_rec_model_name(args),
+			"lang": args.paddleocr_lang,
+			"device": args.paddleocr_device,
+			"use_angle_cls": args.paddleocr_use_angle_cls,
+			"rec_batch_size": args.paddleocr_rec_batch_size,
+			"cache_dir": args.paddleocr_cache_dir,
+		}
+
+	if args.model == "parseq":
+		return {
+			"device": args.parseq_device,
+			"batch_size": args.parseq_batch_size,
+			"cache_dir": args.parseq_cache_dir,
+			"input_size": args.parseq_input_size,
+			"use_amp": args.parseq_use_amp,
+			"language": args.parseq_lang,
+			"model_id": args.parseq_model_id,
+			"local_files_only": args.parseq_local_files_only,
+		}
+
+	if args.model == "calamari":
+		return {
+			"model": args.calamari_model,
+			"batch_size": args.calamari_batch_size,
+			"cache_dir": args.calamari_cache_dir,
+			"local_files_only": args.calamari_local_files_only,
+			"checkpoints": args.calamari_checkpoints,
+			"device": args.calamari_device,
+		}
+
+	if args.model == "rysocr":
+		return {
+			"adapter_model_id": args.rysocr_adapter,
+			"base_model_id": args.rysocr_base,
+			"prompt": args.rysocr_prompt,
+			"max_new_tokens": args.rysocr_max_new_tokens,
+			"device": args.rysocr_device,
+			"local_files_only": args.rysocr_local_files_only,
+			"batch_size": args.rysocr_batch_size,
+			"use_amp": args.rysocr_use_amp,
+			"cache_dir": args.rysocr_cache_dir,
+		}
+
+	return {
+		"language": args.lang,
+		"psm": args.psm,
+		"oem": args.oem,
+		"tesseract_cmd": args.tesseract_cmd,
+	}
+
+
 def build_model(args: argparse.Namespace) -> HTRModelWrapper:
+	if args.inference_mode == "http":
+		return HTTPModelWrapper(
+			model_name=f"{args.model}_http",
+			base_url=_resolve_http_base_url(args),
+			timeout_seconds=args.http_timeout,
+			options=_build_http_options(args),
+		)
+
 	if args.model == "tesseract_pol":
 		return TesseractPolWrapper(
 			language=args.lang,
@@ -174,6 +233,25 @@ def parse_args() -> argparse.Namespace:
 		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq", "calamari"],
 		default="tesseract_pol",
 		help="Model OCR do uruchomienia",
+	)
+	parser.add_argument(
+		"--inference-mode",
+		type=str,
+		choices=["local", "http"],
+		default="local",
+		help="Tryb inferencji: lokalny wrapper lub zdalny serwis HTTP.",
+	)
+	parser.add_argument(
+		"--http-base-url",
+		type=str,
+		default=None,
+		help="Opcjonalny URL serwisu HTTP dla wybranego modelu (np. http://localhost:8002).",
+	)
+	parser.add_argument(
+		"--http-timeout",
+		type=float,
+		default=60.0,
+		help="Timeout (sekundy) dla wywolan HTTP do serwisu modelu.",
 	)
 	parser.add_argument(
 		"--labels-csv",
@@ -481,19 +559,14 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
 	args = parse_args()
-	samples = load_htr_samples(
-		labels_csv_path=args.labels_csv,
-		images_dir_path=args.images_dir,
+	model = build_model(args)
+	runner = BenchmarkRunner(model=model)
+	runner.run(
+		labels_csv=args.labels_csv,
+		images_dir=args.images_dir,
+		output_dir=args.output_dir,
 		limit=args.limit,
 	)
-	model = build_model(args)
-
-	results_df = evaluate_samples(samples, model)
-	metrics_evaluator = HTRMetricsEvaluator()
-	report = metrics_evaluator.build_report(results_df, model.model_name)
-
-	print(json.dumps(report, ensure_ascii=False, indent=2))
-	metrics_evaluator.save_outputs(results_df, report, args.output_dir)
 
 
 if __name__ == "__main__":
