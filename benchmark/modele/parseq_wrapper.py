@@ -52,7 +52,10 @@ class PARSeqWrapper(HTRModelWrapper):
             doctr_transforms = importlib.import_module("doctr.transforms")
         except Exception as exc:
             raise RuntimeError(
-                "Brakuje zaleznosci dla PARSeq/docTR. Zainstaluj: python-doctr, torch, torchvision"
+                "Brakuje zaleznosci dla PARSeq/docTR lub bibliotek systemowych. "
+                "Zainstaluj: python-doctr[torch], torch, torchvision oraz runtime libs "
+                "(np. libgl1, libglib2.0-0, libgomp1). Szczegoly: "
+                f"{exc}"
             ) from exc
 
         self._torch = torch
