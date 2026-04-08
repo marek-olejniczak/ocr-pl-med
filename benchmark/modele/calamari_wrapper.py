@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 import importlib.metadata
+import os
 import tarfile
 import urllib.request
 from pathlib import Path
@@ -38,12 +39,14 @@ class CalamariWrapper(HTRModelWrapper):
         self.device = device
 
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self._configure_runtime_device()
 
         self.calamari_version = self._detect_calamari_version()
         self._ensure_supported_calamari_version()
         self._predictor_cls, self._multi_predictor_cls, self._predictor_params_cls = self._load_calamari_api()
         self.checkpoint_paths = self._resolve_checkpoint_paths()
         self.predictor = self._build_predictor(self.checkpoint_paths)
+        runtime_backend, gpu_count = self._detect_runtime_backend()
 
         if self.model == "idiotikon":
             print(
@@ -53,8 +56,23 @@ class CalamariWrapper(HTRModelWrapper):
 
         print(
             f"[Calamari] Inicjalizacja gotowa. model={self.model}, checkpoints={len(self.checkpoint_paths)}, "
-            f"batch_size={self.batch_size}, cache_dir={self.cache_dir}"
+            f"batch_size={self.batch_size}, cache_dir={self.cache_dir}, "
+            f"device={self.device}, backend={runtime_backend}, gpu_count={gpu_count}"
         )
+
+    def _configure_runtime_device(self) -> None:
+        # Calamari korzysta z backendu TensorFlow; CPU mozna wymusic przez CUDA_VISIBLE_DEVICES.
+        if self.device == "cpu":
+            os.environ.setdefault("CUDA_VISIBLE_DEVICES", "-1")
+
+    @staticmethod
+    def _detect_runtime_backend() -> tuple[str, int]:
+        try:
+            tensorflow = importlib.import_module("tensorflow")
+            devices = tensorflow.config.list_physical_devices("GPU")
+            return "tensorflow", len(devices)
+        except Exception:
+            return "unknown", 0
 
     @staticmethod
     def _detect_calamari_version() -> str:
@@ -205,18 +223,65 @@ class CalamariWrapper(HTRModelWrapper):
 
     @staticmethod
     def _extract_sentence(sample) -> str:
-        outputs = getattr(sample, "outputs", None)
-        if outputs is None:
+        def _extract_from_candidate(candidate) -> str:
+            if candidate is None:
+                return ""
+
+            if isinstance(candidate, str):
+                return candidate.strip()
+
+            if isinstance(candidate, dict):
+                for key in ("sentence", "text", "label", "value"):
+                    value = candidate.get(key)
+                    if isinstance(value, str) and value.strip():
+                        return value.strip()
+                for value in candidate.values():
+                    text = _extract_from_candidate(value)
+                    if text:
+                        return text
+                return ""
+
+            if isinstance(candidate, tuple):
+                # MultiPredictor czesto zwraca tuple: (predictions, voted_prediction).
+                if len(candidate) >= 2:
+                    voted_text = _extract_from_candidate(candidate[1])
+                    if voted_text:
+                        return voted_text
+                for item in candidate:
+                    text = _extract_from_candidate(item)
+                    if text:
+                        return text
+                return ""
+
+            if isinstance(candidate, list):
+                for item in candidate:
+                    text = _extract_from_candidate(item)
+                    if text:
+                        return text
+                return ""
+
+            for attr in ("sentence", "text", "label", "value"):
+                value = getattr(candidate, attr, None)
+                if isinstance(value, str) and value.strip():
+                    return value.strip()
+
+            for attr in (
+                "outputs",
+                "prediction",
+                "predictions",
+                "voted",
+                "voted_prediction",
+                "best_prediction",
+                "sample",
+            ):
+                nested = getattr(candidate, attr, None)
+                text = _extract_from_candidate(nested)
+                if text:
+                    return text
+
             return ""
 
-        sentence = getattr(outputs, "sentence", None)
-        if isinstance(sentence, str):
-            return sentence.strip()
-
-        if isinstance(outputs, str):
-            return outputs.strip()
-
-        return str(outputs).strip()
+        return _extract_from_candidate(sample)
 
     def predict(self, image_path: str) -> str:
         predictions = self.predict_batch([image_path])

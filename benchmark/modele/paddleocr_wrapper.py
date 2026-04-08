@@ -131,7 +131,10 @@ class PaddleOCRWrapper(HTRModelWrapper):
             PaddleOCR = importlib.import_module("paddleocr").PaddleOCR
         except Exception as exc:
             raise RuntimeError(
-                "Brakuje zaleznosci dla PaddleOCR. Zainstaluj: paddleocr oraz paddlepaddle/paddlepaddle-gpu"
+                "Brakuje zaleznosci dla PaddleOCR lub brakuje bibliotek systemowych. "
+                "Zainstaluj: paddleocr, paddlepaddle/paddlepaddle-gpu oraz runtime libs "
+                "(np. libgomp1, libgl1, libglib2.0-0). Szczegoly: "
+                f"{exc}"
             ) from exc
 
         try:

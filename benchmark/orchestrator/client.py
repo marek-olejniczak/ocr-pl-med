@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import json
 from pathlib import Path
 from typing import Iterable
 
@@ -15,6 +16,24 @@ class ModelClient:
     def __init__(self, url: str, timeout_seconds: float = 60.0) -> None:
         self.url = url.rstrip("/")
         self.timeout_seconds = float(timeout_seconds)
+
+    @staticmethod
+    def _raise_with_detail(response: requests.Response, endpoint: str) -> None:
+        message = f"HTTP {response.status_code} z {endpoint}"
+        try:
+            payload = response.json()
+            if isinstance(payload, dict):
+                detail = payload.get("detail")
+                if detail:
+                    raise RuntimeError(f"{message}: {detail}")
+                raise RuntimeError(f"{message}: {json.dumps(payload, ensure_ascii=False)}")
+        except ValueError:
+            pass
+
+        text = response.text.strip()
+        if text:
+            raise RuntimeError(f"{message}: {text}")
+        raise RuntimeError(message)
 
     def health(self) -> dict:
         response = requests.get(f"{self.url}/health", timeout=self.timeout_seconds)
@@ -40,7 +59,8 @@ class ModelClient:
             json=payload,
             timeout=self.timeout_seconds,
         )
-        response.raise_for_status()
+        if response.status_code >= 400:
+            self._raise_with_detail(response, endpoint="/predict")
         data = response.json()
         if not isinstance(data, dict):
             raise RuntimeError("Niepoprawna odpowiedz /predict (oczekiwano obiektu JSON).")
