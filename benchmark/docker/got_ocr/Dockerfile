@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir --timeout 300 --retries 10 \
     pip install --no-cache-dir --timeout 300 --retries 10 \
     -r docker/got_ocr/requirements.txt
 
-COPY . .
+COPY docker/common.py docker/common.py
+COPY docker/got_ocr docker/got_ocr
 
 CMD ["uvicorn", "docker.got_ocr.app:app", "--host", "0.0.0.0", "--port", "8000"]
