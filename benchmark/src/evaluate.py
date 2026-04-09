@@ -54,6 +54,7 @@ def _resolve_http_base_url(args: argparse.Namespace) -> str:
 		"rysocr": "http://localhost:8006",
 		"tesseract_pol": "http://localhost:8007",
 		"surya": "http://localhost:8008",
+		"got_ocr": "http://localhost:8009",
 	}
 	return defaults[args.model]
 
@@ -131,6 +132,15 @@ def _build_http_options(args: argparse.Namespace) -> dict:
 			"cache_dir": args.surya_cache_dir,
 		}
 
+	if args.model == "got_ocr":
+		return {
+			"model_id": args.got_ocr_model_id,
+			"device": args.got_ocr_device,
+			"dtype": args.got_ocr_dtype,
+			"max_new_tokens": args.got_ocr_max_new_tokens,
+			"cache_dir": args.got_ocr_cache_dir,
+		}
+
 	return {
 		"language": args.lang,
 		"psm": args.psm,
@@ -152,6 +162,12 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 		raise RuntimeError(
 			"Model 'surya' jest wspierany tylko w trybie HTTP. "
 			"Uzyj: --model surya --inference-mode http"
+		)
+
+	if args.model == "got_ocr":
+		raise RuntimeError(
+			"Model 'got_ocr' jest wspierany tylko w trybie HTTP. "
+			"Uzyj: --model got_ocr --inference-mode http"
 		)
 
 	if args.model == "tesseract_pol":
@@ -246,7 +262,7 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"--model",
 		type=str,
-		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq", "calamari", "surya"],
+		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq", "calamari", "surya", "got_ocr"],
 		default="tesseract_pol",
 		help="Model OCR do uruchomienia",
 	)
@@ -600,6 +616,38 @@ def parse_args() -> argparse.Namespace:
 		type=str,
 		default="modele/cache/surya",
 		help="Katalog cache modeli Surya OCR.",
+	)
+	parser.add_argument(
+		"--got-ocr-model-id",
+		type=str,
+		default="stepfun-ai/GOT-OCR-2.0-hf",
+		help="Repozytorium modelu GOT-OCR 2.0 (HF-native).",
+	)
+	parser.add_argument(
+		"--got-ocr-device",
+		type=str,
+		choices=["auto", "cpu", "cuda"],
+		default="auto",
+		help="Urzadzenie GOT-OCR: auto, cpu lub cuda.",
+	)
+	parser.add_argument(
+		"--got-ocr-dtype",
+		type=str,
+		choices=["auto", "float32", "float16", "bfloat16"],
+		default="auto",
+		help="Torch dtype dla GOT-OCR (auto zalecane).",
+	)
+	parser.add_argument(
+		"--got-ocr-max-new-tokens",
+		type=int,
+		default=512,
+		help="Maksymalna liczba tokenow generowanych przez GOT-OCR.",
+	)
+	parser.add_argument(
+		"--got-ocr-cache-dir",
+		type=str,
+		default="modele/cache/got_ocr",
+		help="Katalog cache modeli GOT-OCR.",
 	)
 	return parser.parse_args()
 

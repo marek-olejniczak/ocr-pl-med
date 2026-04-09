@@ -108,3 +108,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  got-ocr:
+    build:
+      context: .
+      dockerfile: docker/got_ocr/Dockerfile
+    ports:
+      - "8009:8000"
+    volumes:
+      - ./modele/cache/got_ocr:/app/modele/cache/got_ocr
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
