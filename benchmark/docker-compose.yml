@@ -94,3 +94,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  surya:
+    build:
+      context: .
+      dockerfile: docker/surya/Dockerfile
+    ports:
+      - "8008:8000"
+    volumes:
+      - ./modele/cache/surya:/app/modele/cache/surya
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

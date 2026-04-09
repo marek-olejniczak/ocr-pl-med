@@ -53,6 +53,7 @@ def _resolve_http_base_url(args: argparse.Namespace) -> str:
 		"calamari": "http://localhost:8005",
 		"rysocr": "http://localhost:8006",
 		"tesseract_pol": "http://localhost:8007",
+		"surya": "http://localhost:8008",
 	}
 	return defaults[args.model]
 
@@ -121,6 +122,15 @@ def _build_http_options(args: argparse.Namespace) -> dict:
 			"cache_dir": args.rysocr_cache_dir,
 		}
 
+	if args.model == "surya":
+		return {
+			"device": args.surya_device,
+			"batch_size": args.surya_batch_size,
+			"task_name": args.surya_task_name,
+			"disable_math": args.surya_disable_math,
+			"cache_dir": args.surya_cache_dir,
+		}
+
 	return {
 		"language": args.lang,
 		"psm": args.psm,
@@ -136,6 +146,12 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 			base_url=_resolve_http_base_url(args),
 			timeout_seconds=args.http_timeout,
 			options=_build_http_options(args),
+		)
+
+	if args.model == "surya":
+		raise RuntimeError(
+			"Model 'surya' jest wspierany tylko w trybie HTTP. "
+			"Uzyj: --model surya --inference-mode http"
 		)
 
 	if args.model == "tesseract_pol":
@@ -230,7 +246,7 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"--model",
 		type=str,
-		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq", "calamari"],
+		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq", "calamari", "surya"],
 		default="tesseract_pol",
 		help="Model OCR do uruchomienia",
 	)
@@ -553,6 +569,37 @@ def parse_args() -> argparse.Namespace:
 		choices=["auto", "cpu", "gpu"],
 		default="auto",
 		help="Preferowane urzadzenie Calamari (informacyjnie; zalezy od backendu TensorFlow).",
+	)
+	parser.add_argument(
+		"--surya-device",
+		type=str,
+		choices=["cpu", "cuda", "auto"],
+		default="cpu",
+		help="Urzadzenie dla Surya OCR (v1 line-only, HTTP-only).",
+	)
+	parser.add_argument(
+		"--surya-batch-size",
+		type=int,
+		default=32,
+		help="Batch size inferencji recognition dla Surya OCR.",
+	)
+	parser.add_argument(
+		"--surya-task-name",
+		type=str,
+		choices=["ocr_with_boxes", "ocr_without_boxes", "block_without_boxes"],
+		default="ocr_without_boxes",
+		help="Task recognition Surya dla gotowych wycinkow linii.",
+	)
+	parser.add_argument(
+		"--surya-disable-math",
+		action="store_true",
+		help="Wylacz rozpoznawanie matematyki w Surya (zalecane dla linii tekstowych).",
+	)
+	parser.add_argument(
+		"--surya-cache-dir",
+		type=str,
+		default="modele/cache/surya",
+		help="Katalog cache modeli Surya OCR.",
 	)
 	return parser.parse_args()
 
