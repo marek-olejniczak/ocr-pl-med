@@ -55,8 +55,20 @@ def _resolve_http_base_url(args: argparse.Namespace) -> str:
 		"tesseract_pol": "http://localhost:8007",
 		"surya": "http://localhost:8008",
 		"got_ocr": "http://localhost:8009",
+		"qwen2_5_vl": "http://localhost:8010",
 	}
 	return defaults[args.model]
+
+
+def _resolve_http_timeout(args: argparse.Namespace) -> float:
+	if args.http_timeout is not None:
+		return float(args.http_timeout)
+
+	if args.model == "qwen2_5_vl":
+		# Pierwsze ladowanie Qwen2.5-VL (pobranie + inicjalizacja) potrafi trwac bardzo dlugo.
+		return 3600.0
+
+	return 60.0
 
 
 def _build_http_options(args: argparse.Namespace) -> dict:
@@ -141,6 +153,16 @@ def _build_http_options(args: argparse.Namespace) -> dict:
 			"cache_dir": args.got_ocr_cache_dir,
 		}
 
+	if args.model == "qwen2_5_vl":
+		return {
+			"model_id": args.qwen2_5_vl_model_id,
+			"device": args.qwen2_5_vl_device,
+			"dtype": args.qwen2_5_vl_dtype,
+			"max_new_tokens": args.qwen2_5_vl_max_new_tokens,
+			"cache_dir": args.qwen2_5_vl_cache_dir,
+			"prompt": args.qwen2_5_vl_prompt,
+		}
+
 	return {
 		"language": args.lang,
 		"psm": args.psm,
@@ -154,7 +176,7 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 		return HTTPModelWrapper(
 			model_name=f"{args.model}_http",
 			base_url=_resolve_http_base_url(args),
-			timeout_seconds=args.http_timeout,
+			timeout_seconds=_resolve_http_timeout(args),
 			options=_build_http_options(args),
 		)
 
@@ -168,6 +190,12 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 		raise RuntimeError(
 			"Model 'got_ocr' jest wspierany tylko w trybie HTTP. "
 			"Uzyj: --model got_ocr --inference-mode http"
+		)
+
+	if args.model == "qwen2_5_vl":
+		raise RuntimeError(
+			"Model 'qwen2_5_vl' jest wspierany tylko w trybie HTTP. "
+			"Uzyj: --model qwen2_5_vl --inference-mode http"
 		)
 
 	if args.model == "tesseract_pol":
@@ -262,7 +290,7 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"--model",
 		type=str,
-		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq", "calamari", "surya", "got_ocr"],
+		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq", "calamari", "surya", "got_ocr", "qwen2_5_vl"],
 		default="tesseract_pol",
 		help="Model OCR do uruchomienia",
 	)
@@ -282,8 +310,11 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"--http-timeout",
 		type=float,
-		default=60.0,
-		help="Timeout (sekundy) dla wywolan HTTP do serwisu modelu.",
+		default=None,
+		help=(
+			"Timeout (sekundy) dla wywolan HTTP do serwisu modelu. "
+			"Gdy pominiete: 60s dla standardowych modeli, 3600s dla qwen2_5_vl."
+		),
 	)
 	parser.add_argument(
 		"--labels-csv",
@@ -648,6 +679,48 @@ def parse_args() -> argparse.Namespace:
 		type=str,
 		default="modele/cache/got_ocr",
 		help="Katalog cache modeli GOT-OCR.",
+	)
+	parser.add_argument(
+		"--qwen2-5-vl-model-id",
+		type=str,
+		default="Qwen/Qwen2.5-VL-3B-Instruct",
+		help="Repozytorium modelu Qwen2.5-VL na Hugging Face.",
+	)
+	parser.add_argument(
+		"--qwen2-5-vl-device",
+		type=str,
+		choices=["auto", "cpu", "cuda"],
+		default="auto",
+		help="Urzadzenie Qwen2.5-VL: auto, cpu lub cuda (GPU-first; cpu niezalecane).",
+	)
+	parser.add_argument(
+		"--qwen2-5-vl-dtype",
+		type=str,
+		choices=["auto", "float32", "float16", "bfloat16"],
+		default="auto",
+		help="Torch dtype dla Qwen2.5-VL (auto zalecane).",
+	)
+	parser.add_argument(
+		"--qwen2-5-vl-max-new-tokens",
+		type=int,
+		default=256,
+		help="Maksymalna liczba tokenow generowanych przez Qwen2.5-VL.",
+	)
+	parser.add_argument(
+		"--qwen2-5-vl-cache-dir",
+		type=str,
+		default="modele/cache/qwen2_5_vl",
+		help="Katalog cache modeli Qwen2.5-VL.",
+	)
+	parser.add_argument(
+		"--qwen2-5-vl-prompt",
+		type=str,
+		default=(
+			"Odczytaj dokladnie caly tekst z obrazu w jezyku polskim. "
+			"Zachowaj oryginalne polskie znaki diakrytyczne oraz interpunkcje. "
+			"Zwroc tylko sam tekst bez komentarzy."
+		),
+		help="Domyslny prompt OCR dla Qwen2.5-VL (ukierunkowany na jezyk polski).",
 	)
 	return parser.parse_args()
 

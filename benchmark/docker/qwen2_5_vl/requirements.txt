@@ -1,0 +1,9 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+transformers==4.57.0
+accelerate>=1.7.0
+qwen-vl-utils==0.0.14
+safetensors>=0.4.5
+pillow>=10.0.0
+numpy>=1.26.0
+requests>=2.32.0

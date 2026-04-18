@@ -149,3 +149,23 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  qwen2_5_vl:
+    build:
+      context: .
+      dockerfile: docker/qwen2_5_vl/Dockerfile
+    gpus: all
+    ports:
+      - "8010:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - ./modele/cache/qwen2_5_vl:/app/modele/cache/qwen2_5_vl
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
