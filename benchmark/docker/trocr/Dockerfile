@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir --timeout 300 --retries 10 \
 	-r docker/trocr/requirements.txt
 
 COPY docker/common.py docker/common.py
+COPY docker/logging_utils.py docker/logging_utils.py
 COPY docker/trocr docker/trocr
 COPY modele/__init__.py modele/__init__.py
 COPY modele/base_wrapper.py modele/base_wrapper.py

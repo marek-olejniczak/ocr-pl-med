@@ -5,6 +5,9 @@ services:
       dockerfile: docker/easyocr/Dockerfile
     ports:
       - "8001:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
     volumes:
       - ./modele/cache/easyocr:/app/modele/cache/easyocr
     healthcheck:
@@ -19,6 +22,9 @@ services:
       dockerfile: docker/trocr/Dockerfile
     ports:
       - "8002:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
     volumes:
       - ./modele/cache/trocr:/app/modele/cache/trocr
     healthcheck:
@@ -33,6 +39,9 @@ services:
       dockerfile: docker/paddleocr/Dockerfile
     ports:
       - "8003:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
     volumes:
       - ./modele/cache/paddlex:/app/modele/cache/paddlex
     healthcheck:
@@ -47,6 +56,9 @@ services:
       dockerfile: docker/parseq/Dockerfile
     ports:
       - "8004:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
     volumes:
       - ./modele/cache/parseq:/app/modele/cache/parseq
     healthcheck:
@@ -61,6 +73,9 @@ services:
       dockerfile: docker/calamari/Dockerfile
     ports:
       - "8005:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
     volumes:
       - ./modele/cache/calamari:/app/modele/cache/calamari
     healthcheck:
@@ -75,6 +90,9 @@ services:
       dockerfile: docker/rysocr/Dockerfile
     ports:
       - "8006:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
     volumes:
       - ./modele/cache/rysocr:/app/modele/cache/rysocr
     healthcheck:
@@ -89,6 +107,9 @@ services:
       dockerfile: docker/tesseract_pol/Dockerfile
     ports:
       - "8007:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
@@ -101,6 +122,9 @@ services:
       dockerfile: docker/surya/Dockerfile
     ports:
       - "8008:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
     volumes:
       - ./modele/cache/surya:/app/modele/cache/surya
     healthcheck:
@@ -115,6 +139,9 @@ services:
       dockerfile: docker/got_ocr/Dockerfile
     ports:
       - "8009:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
     volumes:
       - ./modele/cache/got_ocr:/app/modele/cache/got_ocr
     healthcheck:

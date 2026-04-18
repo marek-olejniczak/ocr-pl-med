@@ -16,6 +16,7 @@ RUN pip install --no-cache-dir --timeout 300 --retries 10 \
     -r docker/surya/requirements.txt
 
 COPY docker/common.py docker/common.py
+COPY docker/logging_utils.py docker/logging_utils.py
 COPY docker/surya docker/surya
 
 CMD ["uvicorn", "docker.surya.app:app", "--host", "0.0.0.0", "--port", "8000"]

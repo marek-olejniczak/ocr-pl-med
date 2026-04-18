@@ -12,6 +12,7 @@ COPY docker/paddleocr/requirements.txt docker/paddleocr/requirements.txt
 RUN pip install --no-cache-dir -r docker/paddleocr/requirements.txt
 
 COPY docker/common.py docker/common.py
+COPY docker/logging_utils.py docker/logging_utils.py
 COPY docker/paddleocr docker/paddleocr
 COPY modele/__init__.py modele/__init__.py
 COPY modele/base_wrapper.py modele/base_wrapper.py

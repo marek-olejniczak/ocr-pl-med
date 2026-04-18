@@ -1,29 +1,66 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 
 from docker.common import PredictRequest, decode_base64_image_to_temp_file
+from docker.logging_utils import elapsed_ms, emit_event, get_service_logger, new_request_id, timer_start
 from modele.rysocr_wrapper import RysOCRWrapper
 
 app = FastAPI(title="rysocr-service")
 _MODEL: RysOCRWrapper | None = None
+SERVICE_NAME = "rysocr"
+logger = get_service_logger("rysocr-service")
+
+
+@app.on_event("startup")
+def on_startup() -> None:
+    emit_event(logger, logging.INFO, "service_startup", service=SERVICE_NAME, title=app.title)
 
 
 def get_model(options: dict) -> RysOCRWrapper:
     global _MODEL
     if _MODEL is None:
-        _MODEL = RysOCRWrapper(
-            adapter_model_id=options.get("adapter_model_id", "kacperwikiel/RysOCR"),
-            base_model_id=options.get("base_model_id", "PaddlePaddle/PaddleOCR-VL"),
-            prompt=options.get("prompt", "Transcribe the text exactly."),
-            max_new_tokens=int(options.get("max_new_tokens", 256)),
-            device=options.get("device"),
-            local_files_only=bool(options.get("local_files_only", False)),
-            batch_size=int(options.get("batch_size", 2)),
-            use_amp=bool(options.get("use_amp", False)),
-            cache_dir=options.get("cache_dir", "modele/cache/rysocr"),
+        init_started_at = timer_start()
+        emit_event(
+            logger,
+            logging.INFO,
+            "model_init_started",
+            service=SERVICE_NAME,
+            options_keys=sorted(options.keys()),
+        )
+        try:
+            _MODEL = RysOCRWrapper(
+                adapter_model_id=options.get("adapter_model_id", "kacperwikiel/RysOCR"),
+                base_model_id=options.get("base_model_id", "PaddlePaddle/PaddleOCR-VL"),
+                prompt=options.get("prompt", "Transcribe the text exactly."),
+                max_new_tokens=int(options.get("max_new_tokens", 256)),
+                device=options.get("device"),
+                local_files_only=bool(options.get("local_files_only", False)),
+                batch_size=int(options.get("batch_size", 2)),
+                use_amp=bool(options.get("use_amp", False)),
+                cache_dir=options.get("cache_dir", "modele/cache/rysocr"),
+            )
+        except Exception as exc:
+            emit_event(
+                logger,
+                logging.ERROR,
+                "model_init_failed",
+                service=SERVICE_NAME,
+                error_type=type(exc).__name__,
+                error=str(exc),
+                exc_info=True,
+            )
+            raise
+
+        emit_event(
+            logger,
+            logging.INFO,
+            "model_init_succeeded",
+            service=SERVICE_NAME,
+            duration_ms=elapsed_ms(init_started_at),
         )
     return _MODEL
 
@@ -35,14 +72,91 @@ def health() -> dict:
 
 @app.post("/predict")
 def predict(req: PredictRequest) -> dict:
+    request_id = new_request_id()
+    request_started_at = timer_start()
     temp_path = None
+    success = False
+
+    emit_event(
+        logger,
+        logging.INFO,
+        "predict_request_received",
+        request_id=request_id,
+        service=SERVICE_NAME,
+        image_base64_len=len(req.image_base64),
+        options_keys=sorted(req.options.keys()),
+    )
+
     try:
         model = get_model(req.options)
-        temp_path = decode_base64_image_to_temp_file(req.image_base64)
+        temp_path = decode_base64_image_to_temp_file(
+            req.image_base64,
+            logger=logger,
+            request_id=request_id,
+        )
+
+        inference_started_at = timer_start()
+        emit_event(
+            logger,
+            logging.INFO,
+            "predict_inference_started",
+            request_id=request_id,
+            service=SERVICE_NAME,
+        )
         text = model.predict(temp_path)
+        success = True
+
+        emit_event(
+            logger,
+            logging.INFO,
+            "predict_inference_succeeded",
+            request_id=request_id,
+            service=SERVICE_NAME,
+            duration_ms=elapsed_ms(inference_started_at),
+            text_len=len(text),
+        )
         return {"text": text}
     except Exception as exc:
+        emit_event(
+            logger,
+            logging.ERROR,
+            "predict_request_failed",
+            request_id=request_id,
+            service=SERVICE_NAME,
+            error_type=type(exc).__name__,
+            error=str(exc),
+            exc_info=True,
+        )
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     finally:
         if temp_path:
-            Path(temp_path).unlink(missing_ok=True)
+            try:
+                Path(temp_path).unlink(missing_ok=True)
+                emit_event(
+                    logger,
+                    logging.INFO,
+                    "temp_file_cleanup_succeeded",
+                    request_id=request_id,
+                    service=SERVICE_NAME,
+                )
+            except Exception as cleanup_exc:
+                emit_event(
+                    logger,
+                    logging.WARNING,
+                    "temp_file_cleanup_failed",
+                    request_id=request_id,
+                    service=SERVICE_NAME,
+                    error_type=type(cleanup_exc).__name__,
+                    error=str(cleanup_exc),
+                    exc_info=True,
+                )
+
+        emit_event(
+            logger,
+            logging.INFO,
+            "predict_request_completed",
+            request_id=request_id,
+            service=SERVICE_NAME,
+            success=success,
+            duration_ms=elapsed_ms(request_started_at),
+        )

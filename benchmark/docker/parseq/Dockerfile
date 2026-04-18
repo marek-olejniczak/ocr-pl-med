@@ -12,6 +12,7 @@ COPY docker/parseq/requirements.txt docker/parseq/requirements.txt
 RUN pip install --no-cache-dir -r docker/parseq/requirements.txt
 
 COPY docker/common.py docker/common.py
+COPY docker/logging_utils.py docker/logging_utils.py
 COPY docker/parseq docker/parseq
 COPY modele/__init__.py modele/__init__.py
 COPY modele/base_wrapper.py modele/base_wrapper.py

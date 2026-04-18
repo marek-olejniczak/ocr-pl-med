@@ -6,6 +6,7 @@ COPY docker/calamari/requirements.txt docker/calamari/requirements.txt
 RUN pip install --no-cache-dir -r docker/calamari/requirements.txt
 
 COPY docker/common.py docker/common.py
+COPY docker/logging_utils.py docker/logging_utils.py
 COPY docker/calamari docker/calamari
 COPY modele/__init__.py modele/__init__.py
 COPY modele/base_wrapper.py modele/base_wrapper.py
