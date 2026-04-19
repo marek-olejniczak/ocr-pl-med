@@ -56,6 +56,7 @@ def _resolve_http_base_url(args: argparse.Namespace) -> str:
 		"surya": "http://localhost:8008",
 		"got_ocr": "http://localhost:8009",
 		"qwen2_5_vl": "http://localhost:8010",
+		"kraken": "http://localhost:8011",
 	}
 	return defaults[args.model]
 
@@ -67,6 +68,10 @@ def _resolve_http_timeout(args: argparse.Namespace) -> float:
 	if args.model == "qwen2_5_vl":
 		# Pierwsze ladowanie Qwen2.5-VL (pobranie + inicjalizacja) potrafi trwac bardzo dlugo.
 		return 3600.0
+
+	if args.model == "kraken":
+		# Pierwsze ladowanie modelu Kraken moze byc dluzsze (deserializacja wag + inicjalizacja runtime).
+		return 600.0
 
 	return 60.0
 
@@ -163,6 +168,17 @@ def _build_http_options(args: argparse.Namespace) -> dict:
 			"prompt": args.qwen2_5_vl_prompt,
 		}
 
+	if args.model == "kraken":
+		return {
+			"model_path": args.kraken_model_path,
+			"device": args.kraken_device,
+			"precision": args.kraken_precision,
+			"batch_size": args.kraken_batch_size,
+			"num_line_workers": args.kraken_num_line_workers,
+			"text_direction": args.kraken_text_direction,
+			"no_legacy_polygons": args.kraken_no_legacy_polygons,
+		}
+
 	return {
 		"language": args.lang,
 		"psm": args.psm,
@@ -173,6 +189,11 @@ def _build_http_options(args: argparse.Namespace) -> dict:
 
 def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 	if args.inference_mode == "http":
+		if args.model == "kraken" and not args.kraken_model_path:
+			raise RuntimeError(
+				"Model 'kraken' wymaga opcji --kraken-model-path wskazujacej plik modelu rozpoznawania."
+			)
+
 		return HTTPModelWrapper(
 			model_name=f"{args.model}_http",
 			base_url=_resolve_http_base_url(args),
@@ -196,6 +217,12 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 		raise RuntimeError(
 			"Model 'qwen2_5_vl' jest wspierany tylko w trybie HTTP. "
 			"Uzyj: --model qwen2_5_vl --inference-mode http"
+		)
+
+	if args.model == "kraken":
+		raise RuntimeError(
+			"Model 'kraken' jest wspierany tylko w trybie HTTP. "
+			"Uzyj: --model kraken --inference-mode http"
 		)
 
 	if args.model == "tesseract_pol":
@@ -290,7 +317,7 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"--model",
 		type=str,
-		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq", "calamari", "surya", "got_ocr", "qwen2_5_vl"],
+		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq", "calamari", "surya", "got_ocr", "qwen2_5_vl", "kraken"],
 		default="tesseract_pol",
 		help="Model OCR do uruchomienia",
 	)
@@ -721,6 +748,61 @@ def parse_args() -> argparse.Namespace:
 			"Zwroc tylko sam tekst bez komentarzy."
 		),
 		help="Domyslny prompt OCR dla Qwen2.5-VL (ukierunkowany na jezyk polski).",
+	)
+	parser.add_argument(
+		"--kraken-model-path",
+		type=str,
+		default=None,
+		help=(
+			"Sciezka do pliku modelu rozpoznawania Kraken (.mlmodel/.safetensors). "
+			"Wymagane dla --model kraken."
+		),
+	)
+	parser.add_argument(
+		"--kraken-device",
+		type=str,
+		default="cuda:0",
+		help="Urzadzenie dla Kraken: domyslnie cuda:0 (mozliwe: auto, cpu, cuda:0, cuda:1...).",
+	)
+	parser.add_argument(
+		"--kraken-precision",
+		type=str,
+		choices=[
+			"transformer-engine",
+			"transformer-engine-float16",
+			"16-true",
+			"16-mixed",
+			"bf16-true",
+			"bf16-mixed",
+			"32-true",
+			"64-true",
+		],
+		default="32-true",
+		help="Precyzja inferencji Kraken (zgodna z kraken.registry.PRECISIONS).",
+	)
+	parser.add_argument(
+		"--kraken-batch-size",
+		type=int,
+		default=8,
+		help="Batch size inferencji linii dla Kraken.",
+	)
+	parser.add_argument(
+		"--kraken-num-line-workers",
+		type=int,
+		default=2,
+		help="Liczba workerow CPU do ekstrakcji/preprocessingu linii w Kraken.",
+	)
+	parser.add_argument(
+		"--kraken-text-direction",
+		type=str,
+		choices=["horizontal-tb", "vertical-lr", "vertical-rl"],
+		default="horizontal-tb",
+		help="Kierunek tekstu dla rozpoznawania bbox w Kraken.",
+	)
+	parser.add_argument(
+		"--kraken-no-legacy-polygons",
+		action="store_true",
+		help="Wylacz legacy polygon extractor w Kraken.",
 	)
 	return parser.parse_args()
 
