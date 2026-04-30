@@ -132,6 +132,16 @@ python src/evaluate.py --model calamari --limit 50
 python src/evaluate.py --model calamari --calamari-model uw3-modern-english --calamari-cache-dir modele/cache/calamari --limit 50
 ```
 
+19. Uruchom GLM-4V (HTTP-only, GPU-first):
+
+```bash
+docker compose up -d glm_4v
+python src/evaluate.py --model glm_4v --inference-mode http --limit 10
+```
+
+Uwaga: GLM-4V-9B wymaga znacznie wiecej VRAM (ok. 28-33 GB dla BF16/FP16, ~10 GB dla INT4).
+Na GPU 4 GB model nie startuje (OOM), dlatego w tym repo nie zostal jeszcze przetestowany na GPU.
+
 Uwaga: PaddleOCR wymaga dodatkowo backendu PaddlePaddle.
 
 Aktualna rekomendacja dla tego repo: profil CPU (Python 3.12).
@@ -220,6 +230,17 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - `--calamari-checkpoints` - opcjonalna lista sciezek do `.ckpt` rozdzielona przecinkami
 - `--calamari-device` - preferowane urzadzenie (`auto`, `cpu`, `gpu`; zalezne od backendu TF)
 
+## Argumenty przydatne dla GLM-4V (HTTP)
+
+- `--glm-4v-model-id` - domyslnie `zai-org/glm-4v-9b`
+- `--glm-4v-device` - `auto`, `cpu` lub `cuda` (GPU-first; cpu tylko jawnie)
+- `--glm-4v-dtype` - `auto`, `float16`, `bfloat16` lub `float32`
+- `--glm-4v-max-new-tokens`
+- `--glm-4v-prompt`
+- `--glm-4v-cache-dir` - katalog cache modelu
+- `--glm-4v-local-files-only` - tryb offline, tylko lokalny cache
+- `--http-timeout` - wydluz, jesli pierwsze ladowanie trwa dluzej
+
 ## EasyOCR i jezyk polski
 
 - Domyslnie EasyOCR uruchamiany jest z jezykiem polskim (`pl`) oraz angielskim (`en`).
@@ -236,6 +257,7 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - PaddleOCR/PaddleX: `modele/cache/paddlex`.
 - PARSeq/docTR: `modele/cache/parseq`.
 - Calamari: `modele/cache/calamari`.
+- GLM-4V: `modele/cache/glm_4v`.
 
 ## PaddleOCR i tryb bez detekcji dokumentu
 

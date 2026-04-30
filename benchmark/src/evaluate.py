@@ -57,6 +57,7 @@ def _resolve_http_base_url(args: argparse.Namespace) -> str:
 		"got_ocr": "http://localhost:8009",
 		"qwen2_5_vl": "http://localhost:8010",
 		"kraken": "http://localhost:8011",
+		"glm_4v": "http://localhost:8012",
 	}
 	return defaults[args.model]
 
@@ -72,6 +73,10 @@ def _resolve_http_timeout(args: argparse.Namespace) -> float:
 	if args.model == "kraken":
 		# Pierwsze ladowanie modelu Kraken moze byc dluzsze (deserializacja wag + inicjalizacja runtime).
 		return 600.0
+
+	if args.model == "glm_4v":
+		# Pierwsze ladowanie GLM-4V (pobranie + inicjalizacja) potrafi trwac dlugo.
+		return 1800.0
 
 	return 60.0
 
@@ -168,6 +173,17 @@ def _build_http_options(args: argparse.Namespace) -> dict:
 			"prompt": args.qwen2_5_vl_prompt,
 		}
 
+	if args.model == "glm_4v":
+		return {
+			"model_id": args.glm_4v_model_id,
+			"device": args.glm_4v_device,
+			"dtype": args.glm_4v_dtype,
+			"max_new_tokens": args.glm_4v_max_new_tokens,
+			"cache_dir": args.glm_4v_cache_dir,
+			"prompt": args.glm_4v_prompt,
+			"local_files_only": args.glm_4v_local_files_only,
+		}
+
 	if args.model == "kraken":
 		return {
 			"model_path": args.kraken_model_path,
@@ -217,6 +233,12 @@ def build_model(args: argparse.Namespace) -> HTRModelWrapper:
 		raise RuntimeError(
 			"Model 'qwen2_5_vl' jest wspierany tylko w trybie HTTP. "
 			"Uzyj: --model qwen2_5_vl --inference-mode http"
+		)
+
+	if args.model == "glm_4v":
+		raise RuntimeError(
+			"Model 'glm_4v' jest wspierany tylko w trybie HTTP. "
+			"Uzyj: --model glm_4v --inference-mode http"
 		)
 
 	if args.model == "kraken":
@@ -317,7 +339,7 @@ def parse_args() -> argparse.Namespace:
 	parser.add_argument(
 		"--model",
 		type=str,
-		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq", "calamari", "surya", "got_ocr", "qwen2_5_vl", "kraken"],
+		choices=["tesseract_pol", "rysocr", "trocr", "paddleocr", "easyocr", "parseq", "calamari", "surya", "got_ocr", "qwen2_5_vl", "glm_4v", "kraken"],
 		default="tesseract_pol",
 		help="Model OCR do uruchomienia",
 	)
@@ -340,7 +362,7 @@ def parse_args() -> argparse.Namespace:
 		default=None,
 		help=(
 			"Timeout (sekundy) dla wywolan HTTP do serwisu modelu. "
-			"Gdy pominiete: 60s dla standardowych modeli, 3600s dla qwen2_5_vl."
+			"Gdy pominiete: 60s dla standardowych modeli, 3600s dla qwen2_5_vl, 1800s dla glm_4v."
 		),
 	)
 	parser.add_argument(
@@ -748,6 +770,53 @@ def parse_args() -> argparse.Namespace:
 			"Zwroc tylko sam tekst bez komentarzy."
 		),
 		help="Domyslny prompt OCR dla Qwen2.5-VL (ukierunkowany na jezyk polski).",
+	)
+	parser.add_argument(
+		"--glm-4v-model-id",
+		type=str,
+		default="zai-org/glm-4v-9b",
+		help="Repozytorium modelu GLM-4V na Hugging Face.",
+	)
+	parser.add_argument(
+		"--glm-4v-device",
+		type=str,
+		choices=["auto", "cpu", "cuda"],
+		default="auto",
+		help="Urzadzenie GLM-4V: auto, cpu lub cuda (GPU-first; cpu niezalecane).",
+	)
+	parser.add_argument(
+		"--glm-4v-dtype",
+		type=str,
+		choices=["auto", "float32", "float16", "bfloat16"],
+		default="auto",
+		help="Torch dtype dla GLM-4V (auto zalecane).",
+	)
+	parser.add_argument(
+		"--glm-4v-max-new-tokens",
+		type=int,
+		default=512,
+		help="Maksymalna liczba tokenow generowanych przez GLM-4V.",
+	)
+	parser.add_argument(
+		"--glm-4v-cache-dir",
+		type=str,
+		default="modele/cache/glm_4v",
+		help="Katalog cache modeli GLM-4V.",
+	)
+	parser.add_argument(
+		"--glm-4v-prompt",
+		type=str,
+		default=(
+			"Odczytaj dokladnie caly tekst z obrazu w jezyku polskim. "
+			"Zachowaj oryginalne polskie znaki diakrytyczne oraz interpunkcje. "
+			"Zwroc tylko sam tekst bez komentarzy."
+		),
+		help="Domyslny prompt OCR dla GLM-4V (ukierunkowany na jezyk polski).",
+	)
+	parser.add_argument(
+		"--glm-4v-local-files-only",
+		action="store_true",
+		help="Tryb offline dla GLM-4V: korzystaj tylko z lokalnego cache.",
 	)
 	parser.add_argument(
 		"--kraken-model-path",

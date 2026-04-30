@@ -189,3 +189,23 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  glm_4v:
+    build:
+      context: .
+      dockerfile: docker/glm_4v/Dockerfile
+    gpus: all
+    ports:
+      - "8012:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - ./modele/cache/glm_4v:/app/modele/cache/glm_4v
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
