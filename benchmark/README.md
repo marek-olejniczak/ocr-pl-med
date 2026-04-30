@@ -1,256 +1,260 @@
 # OCR Benchmark (HTR)
 
-Lekki benchmark do porownywania modeli OCR/HTR na danych polskich.
+Lightweight benchmark for comparing OCR/HTR models on Polish data.
 
-## Co jest w projekcie
+## Project contents
 
-- `modele/`:
-  - `base_wrapper.py` - abstrakcja `HTRModelWrapper`
-  - `tesseract_pol_wrapper.py` - wrapper dla Tesseract POL
-  - `rysocr_wrapper.py` - wrapper dla RysOCR (LoRA na PaddleOCR-VL)
-  - `trocr_wrapper.py` - wrapper dla TrOCR handwritten (Transformer OCR)
-  - `paddleocr_wrapper.py` - wrapper dla PaddleOCR PP-OCRv4 (mobile/server, recognition-only)
-  - `easyocr_wrapper.py` - wrapper dla EasyOCR (GPU/CPU, batching, lokalny cache wag)
-  - `parseq_wrapper.py` - wrapper dla PARSeq (docTR, recognition-only)
-  - `calamari_wrapper.py` - wrapper dla Calamari OCR (line-based, ensemble checkpointow)
+- `docker/`:
+  - model services (FastAPI) + Dockerfile
+- `orchestrator/`:
+  - HTTP client and benchmark runner
 - `src/`:
-  - `data_generator.py` - loader probek i mapowanie `file_name -> image_path`
-  - `metrics.py` - metryki (EMA, CER, WER, Levenshtein) + raporty
-  - `evaluate.py` - glowny pipeline benchmarku
-- `wyniki/` - zapisywane raporty CSV/JSON
+  - benchmark pipeline (calls the HTTP client)
+- `wyniki/` - output CSV/JSON reports
 
-## Szybki start
+## Quick start (Docker + HTTP)
 
-1. Zainstaluj zaleznosci:
+1. Start the Docker service for the chosen model:
 
 ```bash
-pip install -r requirements.txt
+docker compose up -d <service>
 ```
 
-2. Uruchom benchmark na Tesseract:
+2. Run the benchmark via HTTP:
 
 ```bash
-python src/evaluate.py --model tesseract_pol --limit 50
+python src/evaluate.py --model <model> --inference-mode http --limit 50
 ```
 
-3. Uruchom benchmark na RysOCR:
+3. Results are stored in `wyniki/`.
+
+### Services and ports
+
+| Model (--model) | Docker service | Port | GPU |
+| --- | --- | --- | --- |
+| easyocr | easyocr | 8001 | CPU |
+| trocr | trocr | 8002 | CPU |
+| paddleocr | paddleocr | 8003 | CPU |
+| parseq | parseq | 8004 | CPU |
+| calamari | calamari | 8005 | CPU |
+| rysocr | rysocr | 8006 | CPU |
+| tesseract_pol | tesseract-pol | 8007 | CPU |
+| surya | surya | 8008 | CPU |
+| got_ocr | got-ocr | 8009 | CPU |
+| qwen2_5_vl | qwen2_5_vl | 8010 | GPU |
+| kraken | kraken | 8011 | GPU |
+| glm_4v | glm_4v | 8012 | GPU |
+
+### Example runs (HTTP)
+
+1. Run benchmark on Tesseract:
 
 ```bash
-python src/evaluate.py --model rysocr --limit 50
+python src/evaluate.py --model tesseract_pol --inference-mode http --limit 50
 ```
 
-4. Uruchom RysOCR z wiekszym batchem na GPU:
+2. Run benchmark on RysOCR:
 
 ```bash
-python src/evaluate.py --model rysocr --rysocr-batch-size 4 --limit 50
+python src/evaluate.py --model rysocr --inference-mode http --limit 50
 ```
 
-5. Uruchom RysOCR z batchem i mixed precision (AMP):
+3. Run RysOCR with a larger batch size on GPU:
 
 ```bash
-python src/evaluate.py --model rysocr --rysocr-batch-size 4 --rysocr-use-amp --limit 50
+python src/evaluate.py --model rysocr --inference-mode http --rysocr-batch-size 4 --limit 50
 ```
 
-6. Uruchom benchmark na TrOCR (wariant handwritten, lzejszy VRAM):
+4. Run RysOCR with batch size and mixed precision (AMP):
 
 ```bash
-python src/evaluate.py --model trocr --limit 50
+python src/evaluate.py --model rysocr --inference-mode http --rysocr-batch-size 4 --rysocr-use-amp --limit 50
 ```
 
-7. Uruchom TrOCR z wiekszym batchem na GPU:
+5. Run benchmark on TrOCR (handwritten variant, lower VRAM):
 
 ```bash
-python src/evaluate.py --model trocr --trocr-batch-size 8 --limit 50
+python src/evaluate.py --model trocr --inference-mode http --limit 50
 ```
 
-8. Uruchom TrOCR z batchem i mixed precision (AMP):
+6. Run TrOCR with a larger batch size on GPU:
 
 ```bash
-python src/evaluate.py --model trocr --trocr-batch-size 8 --trocr-use-amp --limit 50
+python src/evaluate.py --model trocr --inference-mode http --trocr-batch-size 8 --limit 50
 ```
 
-9. Uruchom TrOCR w wariancie base (mocniejsze GPU, wyzsze zuzycie VRAM):
+7. Run TrOCR with batch size and mixed precision (AMP):
 
 ```bash
-python src/evaluate.py --model trocr --trocr-variant base --trocr-batch-size 4 --limit 50
+python src/evaluate.py --model trocr --inference-mode http --trocr-batch-size 8 --trocr-use-amp --limit 50
 ```
 
-10. Uruchom PaddleOCR PP-OCRv4 w wariancie mobile (wydajnosc):
+8. Run TrOCR base variant (heavier GPU usage):
 
 ```bash
-python src/evaluate.py --model paddleocr --paddleocr-variant mobile --paddleocr-device cpu --limit 50
+python src/evaluate.py --model trocr --inference-mode http --trocr-variant base --trocr-batch-size 4 --limit 50
 ```
 
-11. Uruchom PaddleOCR PP-OCRv4 w wariancie server (wyzsza precyzja):
+9. Run PaddleOCR PP-OCRv4 mobile (faster):
 
 ```bash
-python src/evaluate.py --model paddleocr --paddleocr-variant server --paddleocr-device cpu --limit 50
+python src/evaluate.py --model paddleocr --inference-mode http --paddleocr-variant mobile --paddleocr-device cpu --limit 50
 ```
 
-12. Uruchom EasyOCR na GPU (jezyk polski + angielski):
+10. Run PaddleOCR PP-OCRv4 server (higher accuracy):
 
 ```bash
-python src/evaluate.py --model easyocr --easyocr-device cuda --easyocr-langs pl,en --limit 50
+python src/evaluate.py --model paddleocr --inference-mode http --paddleocr-variant server --paddleocr-device cpu --limit 50
 ```
 
-13. Uruchom EasyOCR z lokalnym cache wag i batchingiem:
+11. Run EasyOCR on GPU (Polish + English):
 
 ```bash
-python src/evaluate.py --model easyocr --easyocr-device cuda --easyocr-batch-size 16 --easyocr-model-storage-dir modele/cache/easyocr --limit 50
+python src/evaluate.py --model easyocr --inference-mode http --easyocr-device cuda --easyocr-langs pl,en --limit 50
 ```
 
-14. Uruchom PARSeq (docTR) z domyslnym preprocessingiem 32x128:
+12. Run EasyOCR with local cache and batching:
 
 ```bash
-python src/evaluate.py --model parseq --limit 50
+python src/evaluate.py --model easyocr --inference-mode http --easyocr-device cuda --easyocr-batch-size 16 --easyocr-model-storage-dir modele/cache/easyocr --limit 50
 ```
 
-15. Uruchom PARSeq (docTR) z alternatywnym preprocessingiem 128x128:
+13. Run PARSeq (docTR) with default preprocessing 32x128:
 
 ```bash
-python src/evaluate.py --model parseq --parseq-input-size 128x128 --parseq-batch-size 8 --limit 50
+python src/evaluate.py --model parseq --inference-mode http --limit 50
 ```
 
-16. Przykladowe uruchomienie z jawnie ustawionymi katalogami cache modeli:
+14. Run PARSeq (docTR) with preprocessing 128x128:
 
 ```bash
-python src/evaluate.py --model trocr --trocr-cache-dir modele/cache/trocr --limit 50
-python src/evaluate.py --model rysocr --rysocr-cache-dir modele/cache/rysocr --limit 50
-python src/evaluate.py --model paddleocr --paddleocr-cache-dir modele/cache/paddlex --paddleocr-device cpu --limit 50
-python src/evaluate.py --model parseq --parseq-cache-dir modele/cache/parseq --limit 50
+python src/evaluate.py --model parseq --inference-mode http --parseq-input-size 128x128 --parseq-batch-size 8 --limit 50
 ```
 
-17. Uruchom Calamari OCR (domyslnie model `idiotikon`, rekomendowany dla polskich diakrytykow):
+15. Example with explicit cache directories:
 
 ```bash
-python src/evaluate.py --model calamari --limit 50
+python src/evaluate.py --model trocr --inference-mode http --trocr-cache-dir modele/cache/trocr --limit 50
+python src/evaluate.py --model rysocr --inference-mode http --rysocr-cache-dir modele/cache/rysocr --limit 50
+python src/evaluate.py --model paddleocr --inference-mode http --paddleocr-cache-dir modele/cache/paddlex --paddleocr-device cpu --limit 50
+python src/evaluate.py --model parseq --inference-mode http --parseq-cache-dir modele/cache/parseq --limit 50
 ```
 
-18. Uruchom Calamari z innym modelem i jawnie ustawionym cache:
+16. Run Calamari OCR (default model `idiotikon`, recommended for Polish diacritics):
 
 ```bash
-python src/evaluate.py --model calamari --calamari-model uw3-modern-english --calamari-cache-dir modele/cache/calamari --limit 50
+python src/evaluate.py --model calamari --inference-mode http --limit 50
 ```
 
-19. Uruchom GLM-4V (HTTP-only, GPU-first):
+17. Run Calamari with another model and explicit cache:
+
+```bash
+python src/evaluate.py --model calamari --inference-mode http --calamari-model uw3-modern-english --calamari-cache-dir modele/cache/calamari --limit 50
+```
+
+18. Run GLM-4V (HTTP-only, GPU-first):
 
 ```bash
 docker compose up -d glm_4v
 python src/evaluate.py --model glm_4v --inference-mode http --limit 10
 ```
 
-Uwaga: GLM-4V-9B wymaga znacznie wiecej VRAM (ok. 28-33 GB dla BF16/FP16, ~10 GB dla INT4).
-Na GPU 4 GB model nie startuje (OOM), dlatego w tym repo nie zostal jeszcze przetestowany na GPU.
+Note: GLM-4V-9B requires much more VRAM (~28-33 GB for BF16/FP16, ~10 GB for INT4).
+On 4 GB GPUs the model OOMs, so it has not been tested on GPU in this repo yet.
 
-Uwaga: PaddleOCR wymaga dodatkowo backendu PaddlePaddle.
+Note: the first run of `RysOCR` may download large model weights (~2GB+).
 
-Aktualna rekomendacja dla tego repo: profil CPU (Python 3.12).
+## Offline mode for RysOCR
 
-Rekomendowane profile instalacji:
-- Python 3.12 (CPU): `paddlepaddle==3.3.1` + `paddleocr/paddlex 3.4.x`
-- GPU na tym hostcie: dostepne sa tylko wheel `paddlepaddle-gpu 2.6.x`, co oznacza profil legacy (`paddleocr/paddlex 2.x`) i najlepiej starszy Python (np. 3.10)
-
-Przykladowe komendy instalacji:
-- Py3.12 CPU: `python -m pip install "paddlepaddle==3.3.1" "paddleocr>=3.4.0,<3.5.0" "paddlex>=3.4.3,<3.5.0"`
-- Legacy GPU (Py<=3.10): `python -m pip install "paddlepaddle-gpu==2.6.2" "paddleocr==2.10.0" "paddlex==2.1.0"`
-
-Niezgodny mix wersji (np. `paddleocr/paddlex 3.x` z `paddle 2.x`) moze konczyc sie bledem C++ (`SIGSEGV`).
-
-W praktyce benchmark utrzymujemy obecnie i testujemy na CPU, dlatego przy uruchomieniach PaddleOCR zalecane jest jawne `--paddleocr-device cpu`.
-
-Uwaga: pierwsze uruchomienie `RysOCR` moze pobrac duze wagi modelu (ok. 2GB+).
-
-## Tryb offline dla RysOCR
-
-Po jednokrotnym pobraniu wag mozna uruchamiac offline:
+After downloading weights once, you can run offline:
 
 ```bash
 python src/evaluate.py --model rysocr --rysocr-local-files-only --limit 50
 ```
 
-Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
+If the cache is incomplete, run once without `--rysocr-local-files-only`.
 
-## Argumenty przydatne dla RysOCR
+## Useful arguments for RysOCR
 
-- `--rysocr-adapter` - domyslnie `kacperwikiel/RysOCR`
-- `--rysocr-base` - domyslnie `PaddlePaddle/PaddleOCR-VL`
-- `--rysocr-device` - np. `cpu` lub `cuda`
+- `--rysocr-adapter` - default `kacperwikiel/RysOCR`
+- `--rysocr-base` - default `PaddlePaddle/PaddleOCR-VL`
+- `--rysocr-device` - e.g. `cpu` or `cuda`
 - `--rysocr-max-new-tokens`
 - `--rysocr-prompt`
-- `--rysocr-batch-size` - domyslnie `2`, zwieksza throughput kosztem VRAM
-- `--rysocr-use-amp` - opcjonalne mixed precision na CUDA (domyslnie wylaczone)
+- `--rysocr-batch-size` - default `2`, increases throughput at the cost of VRAM
+- `--rysocr-use-amp` - optional mixed precision on CUDA (disabled by default)
 - `--rysocr-local-files-only`
-- `--rysocr-cache-dir` - katalog cache wag/modeli dla RysOCR (domyslnie `modele/cache/rysocr`)
+- `--rysocr-cache-dir` - cache directory for RysOCR (default `modele/cache/rysocr`)
 
-## Argumenty przydatne dla TrOCR
+## Useful arguments for TrOCR
 
-- `--trocr-variant` - `small` (domyslnie) lub `base`; wybiera domyslny checkpoint handwritten
-- `--trocr-model-id` - opcjonalne nadpisanie checkpointu; gdy pominiete, bierze model z `--trocr-variant`
-- `--trocr-device` - np. `cpu` lub `cuda`
+- `--trocr-variant` - `small` (default) or `base`; selects the default handwritten checkpoint
+- `--trocr-model-id` - optional override; if omitted, uses `--trocr-variant`
+- `--trocr-device` - e.g. `cpu` or `cuda`
 - `--trocr-max-new-tokens`
-- `--trocr-batch-size` - domyslnie `4`, zwieksza throughput kosztem VRAM
-- `--trocr-use-amp` - opcjonalne mixed precision na CUDA (domyslnie wylaczone)
+- `--trocr-batch-size` - default `4`, increases throughput at the cost of VRAM
+- `--trocr-use-amp` - optional mixed precision on CUDA (disabled by default)
 - `--trocr-local-files-only`
-- `--trocr-cache-dir` - katalog cache wag/modeli dla TrOCR (domyslnie `modele/cache/trocr`)
+- `--trocr-cache-dir` - cache directory for TrOCR (default `modele/cache/trocr`)
 
-## Argumenty przydatne dla PaddleOCR
+## Useful arguments for PaddleOCR
 
-- `--paddleocr-variant` - `mobile` (domyslnie) lub `server`
-- `--paddleocr-rec-model-name` - opcjonalne nadpisanie modelu rec; gdy pominiete, bierze model z `--paddleocr-variant`
-- `--paddleocr-lang` - domyslnie `pl`; istotne glownie dla fallbacku legacy OCR
-- `--paddleocr-device` - `auto`, `cpu` lub `gpu`
-- `--paddleocr-use-angle-cls` - wlacza klasyfikator kata (CLS)
-- `--paddleocr-rec-batch-size` - batch size dla rec (domyslnie `8`)
-- `--paddleocr-cache-dir` - katalog cache modeli PaddleX/PaddleOCR (domyslnie `modele/cache/paddlex`)
+- `--paddleocr-variant` - `mobile` (default) or `server`
+- `--paddleocr-rec-model-name` - optional override; if omitted, uses `--paddleocr-variant`
+- `--paddleocr-lang` - default `pl`; mainly for legacy OCR fallback
+- `--paddleocr-device` - `auto`, `cpu`, or `gpu`
+- `--paddleocr-use-angle-cls` - enables angle classifier (CLS)
+- `--paddleocr-rec-batch-size` - batch size for recognition (default `8`)
+- `--paddleocr-cache-dir` - cache directory for PaddleX/PaddleOCR (default `modele/cache/paddlex`)
 
-## Argumenty przydatne dla EasyOCR
+## Useful arguments for EasyOCR
 
-- `--easyocr-langs` - lista jezykow rozdzielona przecinkami, domyslnie `pl,en`
-- `--easyocr-device` - `auto`, `cpu` lub `cuda`
-- `--easyocr-batch-size` - batch size inferencji (domyslnie `8`)
-- `--easyocr-model-storage-dir` - katalog na lokalny cache wag EasyOCR
+- `--easyocr-langs` - comma-separated languages, default `pl,en`
+- `--easyocr-device` - `auto`, `cpu`, or `cuda`
+- `--easyocr-batch-size` - batch size (default `8`)
+- `--easyocr-model-storage-dir` - local cache directory for EasyOCR weights
 
-## Argumenty przydatne dla PARSeq (docTR)
+## Useful arguments for PARSeq (docTR)
 
-- `--parseq-device` - `auto`, `cpu` lub `cuda`
-- `--parseq-batch-size` - batch size inferencji (domyslnie `8`)
-- `--parseq-cache-dir` - katalog na lokalny cache wag PARSeq/docTR (domyslnie `modele/cache/parseq`)
-- `--parseq-input-size` - preset preprocessingu resize: `32x128` (domyslnie) albo `128x128`; gdy checkpoint nie wspiera wybranego rozmiaru, wrapper zrobi fallback do rozmiaru modelu
-- `--parseq-use-amp` - opcjonalne mixed precision na CUDA (domyslnie wylaczone)
-- `--parseq-model-id` - opcjonalny `repo_id` Hugging Face dla niestandardowego checkpointu PARSeq
-- `--parseq-local-files-only` - tryb offline, laduj tylko z lokalnego cache
-- `--parseq-lang` - preferowany jezyk (informacyjnie)
+- `--parseq-device` - `auto`, `cpu`, or `cuda`
+- `--parseq-batch-size` - batch size (default `8`)
+- `--parseq-cache-dir` - cache directory for PARSeq/docTR (default `modele/cache/parseq`)
+- `--parseq-input-size` - resize preset: `32x128` (default) or `128x128`; if unsupported, falls back to model size
+- `--parseq-use-amp` - optional mixed precision on CUDA (disabled by default)
+- `--parseq-model-id` - optional `repo_id` for custom PARSeq checkpoint
+- `--parseq-local-files-only` - offline mode, use local cache only
+- `--parseq-lang` - preferred language (informational)
 
-## Argumenty przydatne dla Calamari OCR
+## Useful arguments for Calamari OCR
 
-- `--calamari-model` - nazwa modelu Calamari (domyslnie `idiotikon`)
-- `--calamari-batch-size` - batch size inferencji (domyslnie `8`)
-- `--calamari-cache-dir` - katalog na lokalny cache modeli (domyslnie `modele/cache/calamari`)
-- `--calamari-local-files-only` - tryb offline, bez pobierania modeli
-- `--calamari-checkpoints` - opcjonalna lista sciezek do `.ckpt` rozdzielona przecinkami
-- `--calamari-device` - preferowane urzadzenie (`auto`, `cpu`, `gpu`; zalezne od backendu TF)
+- `--calamari-model` - Calamari model name (default `idiotikon`)
+- `--calamari-batch-size` - batch size (default `8`)
+- `--calamari-cache-dir` - cache directory (default `modele/cache/calamari`)
+- `--calamari-local-files-only` - offline mode, no downloads
+- `--calamari-checkpoints` - optional list of `.ckpt` paths, comma-separated
+- `--calamari-device` - preferred device (`auto`, `cpu`, `gpu`; depends on TF backend)
 
-## Argumenty przydatne dla GLM-4V (HTTP)
+## Useful arguments for GLM-4V (HTTP)
 
-- `--glm-4v-model-id` - domyslnie `zai-org/glm-4v-9b`
-- `--glm-4v-device` - `auto`, `cpu` lub `cuda` (GPU-first; cpu tylko jawnie)
-- `--glm-4v-dtype` - `auto`, `float16`, `bfloat16` lub `float32`
+- `--glm-4v-model-id` - default `zai-org/glm-4v-9b`
+- `--glm-4v-device` - `auto`, `cpu`, or `cuda` (GPU-first; CPU only when explicit)
+- `--glm-4v-dtype` - `auto`, `float16`, `bfloat16`, or `float32`
 - `--glm-4v-max-new-tokens`
 - `--glm-4v-prompt`
-- `--glm-4v-cache-dir` - katalog cache modelu
-- `--glm-4v-local-files-only` - tryb offline, tylko lokalny cache
-- `--http-timeout` - wydluz, jesli pierwsze ladowanie trwa dluzej
+- `--glm-4v-cache-dir` - model cache directory
+- `--glm-4v-local-files-only` - offline mode, local cache only
+- `--http-timeout` - extend if the first load is slow
 
-## EasyOCR i jezyk polski
+## EasyOCR and Polish language
 
-- Domyslnie EasyOCR uruchamiany jest z jezykiem polskim (`pl`) oraz angielskim (`en`).
-- Przy uruchomieniu na GPU (`--easyocr-device cuda`) wrapper automatycznie spadnie do CPU, gdy CUDA jest niedostepna.
-- Wagi modelu sa pobierane raz i zapisywane lokalnie w `--easyocr-model-storage-dir`.
-- Wrapper zaklada heterogeniczne rozmiary obrazow wejsciowych i przetwarza je bezpiecznie per-obraz (w chunkach logicznych wg `--easyocr-batch-size`).
+- By default EasyOCR runs with Polish (`pl`) and English (`en`).
+- On GPU (`--easyocr-device cuda`) the wrapper falls back to CPU if CUDA is unavailable.
+- Weights are downloaded once and stored under `--easyocr-model-storage-dir`.
+- The wrapper assumes heterogeneous input sizes and processes per-image in safe chunks based on `--easyocr-batch-size`.
 
-## Cache modeli
+## Model cache
 
-- Domyslnie cache wag modeli trafia do `modele/cache/*` dla wrapperow, ktore na to pozwalaja.
+- Default cache locations are `modele/cache/*` where supported.
 - EasyOCR: `modele/cache/easyocr`.
 - TrOCR: `modele/cache/trocr`.
 - RysOCR: `modele/cache/rysocr`.
@@ -259,45 +263,45 @@ Jesli cache jest niepelny, uruchom raz bez `--rysocr-local-files-only`.
 - Calamari: `modele/cache/calamari`.
 - GLM-4V: `modele/cache/glm_4v`.
 
-## PaddleOCR i tryb bez detekcji dokumentu
+## PaddleOCR detection-free mode
 
-- Wrapper PaddleOCR dziala w trybie recognition-only (`det=False`), bo benchmark operuje na wycietych slowach/liniach.
-- Detektor na poziomie dokumentu/strony jest celowo wylaczony.
-- W nowszych wersjach PaddleOCR backend opiera sie o `TextRecognition` (bez detekcji z definicji).
+- The PaddleOCR wrapper runs in recognition-only mode (`det=False`) because the benchmark uses cropped words/lines.
+- The document/page detector is intentionally disabled.
+- In newer PaddleOCR versions the backend uses `TextRecognition` (no detection by design).
 
-## TrOCR i jezyk polski
+## TrOCR and Polish language
 
-- Domyslny wariant TrOCR w benchmarku nie jest dotrenowany stricte na jezyku polskim.
-- Nie nalezy oczekiwac stabilnego rozpoznawania polskich diakrytykow (np. ą, ć, ę, ł, ń, ó, ś, ź, ż).
-- TrOCR traktuj jako punkt odniesienia dla transformera OCR, a nie model zoptymalizowany pod polskie dane.
+- The default TrOCR variant is not fine-tuned for Polish.
+- Do not expect stable Polish diacritics.
+- Treat TrOCR as a transformer OCR baseline, not a Polish-optimized model.
 
-## PARSeq/docTR i jezyk polski
+## PARSeq/docTR and Polish language
 
-- PARSeq w docTR jest modelem rozpoznawania tekstu (recognition-only), bez detekcji dokumentu.
-- Domyslnie uzywany jest pretrained PARSeq, ktory nie ma twardego przelacznika jezyka jak niektore inne biblioteki OCR.
-- Dla jezyka polskiego jakosc diakrytykow (np. ą, ć, ę, ł, ń, ó, ś, ź, ż) zalezy od charsetu checkpointu; mozna podmienic checkpoint przez `--parseq-model-id`, jesli dostepny jest wariant lepiej wspierajacy PL.
-- Preprocessing wrappera korzysta z flow docTR i resize do `32x128` (lub opcjonalnie `128x128`).
+- PARSeq in docTR is a recognition-only model, without document detection.
+- The default pretrained PARSeq has no hard language switch.
+- Polish diacritic quality depends on the checkpoint charset; you can swap a checkpoint via `--parseq-model-id` if available.
+- Preprocessing follows docTR flow and resizes to `32x128` (or `128x128`).
 
-## Calamari OCR i jezyk polski
+## Calamari OCR and Polish language
 
-- W oficjalnych modelach Calamari nie ma dedykowanego checkpointu stricte PL.
-- Najlepsza praktyczna opcja wielojezyczna pod polskie znaki to `idiotikon` (szeroki zestaw znakow lacinskich i diakrytykow).
-- Dla najwyzszej jakosci PL warto rozwazyc pozniejszy fine-tuning na lokalnym korpusie.
+- Official Calamari models do not include a dedicated Polish checkpoint.
+- The best practical multilingual option for Polish diacritics is `idiotikon`.
+- For the highest quality, consider fine-tuning on a local corpus.
 
-## Uwaga srodowiskowa dla Calamari
+## Calamari environment note
 
-- Calamari 2.x (kompatybilne z aktualnymi modelami release 2.1/2.2) wymaga stosu TensorFlow, ktory w praktyce najlepiej dziala na Python <= 3.11.
-- W tym repo benchmark jest aktualnie utrzymywany na Python 3.12 dla pozostalych modeli; dla Calamari moze byc potrzebne osobne srodowisko (np. conda z Python 3.11).
+- Calamari 2.x (compatible with release 2.1/2.2 models) requires a TensorFlow stack that works best on Python <= 3.11.
+- This benchmark is currently maintained on Python 3.12 for other models; Calamari may need a separate env (e.g. conda with Python 3.11).
 
-## Wydajnosc RysOCR
+## RysOCR performance
 
-- Domyslnie RysOCR dziala z `--rysocr-batch-size 2`, co zwykle lepiej wykorzystuje GPU niz inferencja pojedyncza.
-- Przy ograniczonej pamieci GPU startuj od batcha 2 i stopniowo zwiekszaj (`4`, `8`) do momentu najlepszego kompromisu szybkosc/VRAM.
-- `--rysocr-use-amp` przyspiesza inferencje na CUDA, ale na CPU jest ignorowane.
+- Default `--rysocr-batch-size 2` typically uses GPU better than single-image inference.
+- On limited VRAM, start with batch 2 and increase to `4`, `8` for the best speed/VRAM tradeoff.
+- `--rysocr-use-amp` speeds up CUDA inference but is ignored on CPU.
 
-## Wyniki
+## Results
 
-Pipeline zapisuje:
+The pipeline writes:
 
 - `wyniki/results_<timestamp>.csv`
 - `wyniki/summary_<timestamp>.json`
