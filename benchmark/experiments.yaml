@@ -1,0 +1,184 @@
+experiment:
+  name: "ocr-benchmark-autorun-test-01"
+  project_name: "ocr-pl-med"
+  tags: ["autorun", "http", "sequential", "smoke", "laptop"]
+  hardware_note: "Nvidia GTX 1650, 4GB VRAM"
+
+settings:
+  auto_start_services: true
+  stop_service_after_run: true
+  sequential: true
+  warmup_samples: 1
+  cooldown_seconds: 5
+  restart_docker_per_dataset: false
+  http_timeout_default: 120
+  build_run: false
+
+datasets:
+  - id: "lexicography_smoke"
+    labels_csv: "dane/htr_lexicography-main/data/PL-20k-hand-labelled.csv"
+    images_dir: "dane/htr_lexicography-main/data/PL-20k-hand-labelled"
+    limit: 25
+
+  - id: "lexicography_full"
+    labels_csv: "dane/htr_lexicography-main/data/PL-20k-hand-labelled.csv"
+    images_dir: "dane/htr_lexicography-main/data/PL-20k-hand-labelled"
+    limit: null
+
+models:
+  - id: "tesseract_pol"
+    service_name: "tesseract-pol"
+    base_url: "http://localhost:8007"
+    enabled: true
+    timeout: 120
+    options:
+      language: "pol"
+      psm: 7
+      oem: 1
+      tesseract_cmd: "tesseract"
+
+  - id: "easyocr"
+    service_name: "easyocr"
+    base_url: "http://localhost:8001"
+    enabled: true
+    timeout: 120
+    options:
+      langs: ["pl", "en"]
+      device: "cuda"
+      batch_size: 8
+
+  - id: "rysocr"
+    service_name: "rysocr"
+    base_url: "http://localhost:8006"
+    enabled: false
+    timeout: 300
+    options:
+      adapter_model_id: "kacperwikiel/RysOCR"
+      base_model_id: "PaddlePaddle/PaddleOCR-VL"
+      prompt: "Transcribe the text."
+      max_new_tokens: 512
+      device: "cuda"
+      local_files_only: false
+      batch_size: 2
+      use_amp: true
+      cache_dir: "modele/cache/rysocr"
+
+  - id: "trocr"
+    service_name: "trocr"
+    base_url: "http://localhost:8002"
+    enabled: false
+    timeout: 240
+    options:
+      model_id: "microsoft/trocr-small-handwritten"
+      max_new_tokens: 256
+      device: "cuda"
+      local_files_only: false
+      batch_size: 4
+      use_amp: true
+      cache_dir: "modele/cache/trocr"
+
+  - id: "paddleocr"
+    service_name: "paddleocr"
+    base_url: "http://localhost:8003"
+    enabled: false
+    timeout: 240
+    options:
+      rec_model_name: "PP-OCRv4_mobile_rec"
+      lang: "pl"
+      device: "cpu"
+      use_angle_cls: false
+      rec_batch_size: 8
+      cache_dir: "modele/cache/paddlex"
+
+  - id: "parseq"
+    service_name: "parseq"
+    base_url: "http://localhost:8004"
+    enabled: false
+    timeout: 240
+    options:
+      device: "cuda"
+      batch_size: 8
+      cache_dir: "modele/cache/parseq"
+      input_size: "32x128"
+      use_amp: true
+      language: "pl"
+      model_id: null
+      local_files_only: false
+
+  - id: "calamari"
+    service_name: "calamari"
+    base_url: "http://localhost:8005"
+    enabled: false
+    timeout: 240
+    options:
+      model: "idiotikon"
+      batch_size: 8
+      cache_dir: "modele/cache/calamari"
+      local_files_only: false
+      checkpoints: null
+      device: "auto"
+
+  - id: "surya"
+    service_name: "surya"
+    base_url: "http://localhost:8008"
+    enabled: false
+    timeout: 600
+    options:
+      device: "cuda"
+      batch_size: 1
+      task_name: "ocr"
+      disable_math: false
+      cache_dir: "modele/cache/surya"
+
+  - id: "got_ocr"
+    service_name: "got-ocr"
+    base_url: "http://localhost:8009"
+    enabled: false
+    timeout: 900
+    options:
+      model_id: "ucaslcl/GOT-OCR2_0"
+      device: "cuda"
+      dtype: "bfloat16"
+      max_new_tokens: 512
+      cache_dir: "modele/cache/got_ocr"
+
+  - id: "qwen2_5_vl"
+    service_name: "qwen2_5_vl"
+    base_url: "http://localhost:8010"
+    enabled: false
+    timeout: 1800
+    options:
+      model_id: "Qwen/Qwen2.5-VL-7B-Instruct"
+      device: "cuda"
+      dtype: "bfloat16"
+      max_new_tokens: 512
+      cache_dir: "modele/cache/qwen2_5_vl"
+      prompt: "Transcribe the text."
+
+  - id: "kraken"
+    service_name: "kraken"
+    base_url: "http://localhost:8011"
+    enabled: false
+    timeout: 600
+    options:
+      model_path: "modele/cache/kraken/recognition_model.mlmodel"
+      device: "cuda:0"
+      precision: "32-true"
+      batch_size: 8
+      num_line_workers: 2
+      text_direction: "horizontal-tb"
+      no_legacy_polygons: false
+
+  - id: "glm_4v"
+    service_name: "glm_4v"
+    base_url: "http://localhost:8012"
+    enabled: false
+    timeout: 1800
+    options:
+      model_id: "zai-org/glm-4v-9b"
+      device: "cuda"
+      dtype: "bfloat16"
+      max_new_tokens: 512
+      cache_dir: "modele/cache/glm_4v"
+      prompt: "Transcribe the text."
+      local_files_only: false
