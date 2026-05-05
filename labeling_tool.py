@@ -110,6 +110,8 @@ def save():
     for i, ann in enumerate(annotations, 1):
         crop_path = lines_dir / f"line{i}.jpg"
         cropped = img.crop((ann["x_min"], ann["y_min"], ann["x_max"], ann["y_max"]))
+        if cropped.mode != "RGB":
+            cropped = cropped.convert("RGB")
         cropped.save(crop_path)
 
     # Append/update single annotations.csv at dataset root
