@@ -64,13 +64,28 @@ class AutoRunner:
             for model in self.experiment_config.get("models", []):
                 if model.get("enabled", True):
                     start_service(model["service_name"])
+                    options = model.get("options", {})
                     try:
                         # health check
-                        http = HTTPModelWrapper(model_name=model["id"], base_url=model["base_url"], timeout_seconds=model["timeout"])
-                        health = http.client.health()
+                        http_model = HTTPModelWrapper(model_name=model["id"], base_url=model["base_url"], timeout_seconds=model["timeout"], options=options)
+                        health = http_model.client.health()
                         print(f"Health check dla {model['service_name']}: {health}")
+                        if health.get("status") != "ok":
+                            raise RuntimeError(f"Serwis {model['service_name']} nie jest zdrowy: {health}")
+                        
+                        runner = BenchmarkRunner(model=http_model)
+
+                        for dataset in self.experiment_config.get("datasets", []):
+                            print(f"--- Uruchamiam benchmark dla modelu {model['id']} na zbiorze {dataset['id']} ---")
+                            runner.run(
+                                labels_csv=dataset["labels_csv"],
+                                images_dir=dataset["images_dir"],
+                                output_dir=settings.get("output_dir", "wyniki"),
+                                limit=dataset.get("limit", 1),
+                            )
                     finally:
                         stop_service(model["service_name"])
+                    time.sleep(settings.get("cooldown_seconds", 5))
         
 
 

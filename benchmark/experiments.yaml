@@ -5,6 +5,7 @@ experiment:
   hardware_note: "Nvidia GTX 1650, 4GB VRAM"
 
 settings:
+  output_dir: "wyniki"
   auto_start_services: true
   stop_service_after_run: true
   sequential: true
@@ -19,11 +20,6 @@ datasets:
     labels_csv: "dane/htr_lexicography-main/data/PL-20k-hand-labelled.csv"
     images_dir: "dane/htr_lexicography-main/data/PL-20k-hand-labelled"
     limit: 25
-
-  - id: "lexicography_full"
-    labels_csv: "dane/htr_lexicography-main/data/PL-20k-hand-labelled.csv"
-    images_dir: "dane/htr_lexicography-main/data/PL-20k-hand-labelled"
-    limit: null
 
 models:
   - id: "tesseract_pol"
