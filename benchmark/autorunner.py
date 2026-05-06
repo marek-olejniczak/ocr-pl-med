@@ -1,12 +1,13 @@
 import argparse
-from pathlib import Path
-import sys
+import os
 import yaml
 import subprocess
 import time
 
 from orchestrator.benchmark import BenchmarkRunner
 from orchestrator.client import HTTPModelWrapper
+from src.experiment_results import create_run_dir, write_dataset_results
+from src.metrics import HTRMetricsEvaluator
 
 
 
@@ -46,6 +47,68 @@ def cleanup_all():
     print("--- Sprzatanie wszystkich serwisow ---")
     run_docker_command(["down"])
 
+
+def init_wandb_run(experiment: dict, config: dict, run_name: str):
+    try:
+        import wandb
+    except ImportError as exc:
+        raise RuntimeError("Brak pakietu wandb. Zainstaluj: pip install wandb") from exc
+
+    api_key = os.getenv("WANDB_API_KEY")
+    if not api_key:
+        raise RuntimeError("Brak zmiennej WANDB_API_KEY w srodowisku.")
+
+    wandb_project = experiment.get("project_name")
+    if not wandb_project:
+        raise RuntimeError("Brak experiment.wandb_project w experiments.yaml.")
+
+    wandb_entity = experiment.get("wandb_entity")
+    tags = experiment.get("tags") or []
+
+    return wandb.init(
+        project=wandb_project,
+        entity=wandb_entity,
+        name=run_name,
+        tags=tags,
+        config=config,
+    )
+
+
+def build_timing_metrics(prediction_seconds: float, sample_count: int) -> dict:
+    total_seconds = float(prediction_seconds)
+    per_sample = total_seconds / sample_count if sample_count > 0 else 0.0
+    throughput = sample_count / total_seconds if total_seconds > 0 else 0.0
+    return {
+        "prediction_seconds_total": total_seconds,
+        "prediction_seconds_per_sample": per_sample,
+        "prediction_throughput_samples_per_sec": throughput,
+        "prediction_samples": int(sample_count),
+    }
+
+
+def build_wandb_payload(
+    *,
+    model_id: str,
+    dataset_id: str,
+    metrics_level: str,
+    report: dict,
+    timing: dict,
+) -> dict:
+    metrics = report.get("metrics", {}).get(metrics_level, {})
+    prefix = f"{model_id}/{dataset_id}"
+
+    payload = {
+        f"{prefix}/metrics_level": metrics_level,
+    }
+
+    for key, value in metrics.items():
+        payload[f"{prefix}/metrics/{key}"] = value
+
+    for key, value in timing.items():
+        payload[f"{prefix}/timing/{key}"] = value
+
+    return payload
+
 class AutoRunner:
     def __init__(self, config_path = "experiments.yaml"):
         self.experiment_config = load_config(config_path)
@@ -66,39 +129,80 @@ class AutoRunner:
                     run_docker_command(["build", model["service_name"]])
             print("Budowanie zakonczone.")
             return
+
+        output_dir = settings.get("output_dir", "wyniki")
+        experiment_name = experiment.get("name", "Unnamed")
+        run_dir, run_name = create_run_dir(output_dir, experiment_name, self.experiment_config)
+
+        wandb_run = None
+        if settings.get("wandb_log", False):
+            wandb_run = init_wandb_run(experiment, self.experiment_config, run_name)
         
         stop_after_run = settings.get("stop_service_after_run", True)
+        metrics_evaluator = HTRMetricsEvaluator()
 
-        if settings.get("auto_start_services", False) and settings.get("sequential", True):
-            for model in self.experiment_config.get("models", []):
-                if model.get("enabled", True):
-                    start_service(model["service_name"])
-                    options = model.get("options", {})
-                    try:
-                        # health check
-                        http_model = HTTPModelWrapper(model_name=model["id"], base_url=model["base_url"], timeout_seconds=model["timeout"], options=options)
-                        health = http_model.client.health()
-                        print(f"Health check dla {model['service_name']}: {health}")
-                        if health.get("status") != "ok":
-                            raise RuntimeError(f"Serwis {model['service_name']} nie jest zdrowy: {health}")
+        try:
+            if settings.get("auto_start_services", False) and settings.get("sequential", True):
+                for model in self.experiment_config.get("models", []):
+                    if model.get("enabled", True):
+                        start_service(model["service_name"])
+                        options = model.get("options", {})
+                        try:
+                            # health check
+                            http_model = HTTPModelWrapper(model_name=model["id"], base_url=model["base_url"], timeout_seconds=model["timeout"], options=options)
+                            health = http_model.client.health()
+                            print(f"Health check dla {model['service_name']}: {health}")
+                            if health.get("status") != "ok":
+                                raise RuntimeError(f"Serwis {model['service_name']} nie jest zdrowy: {health}")
 
-                        load_info = http_model.load()
-                        print(f"Load dla {model['service_name']}: {load_info}")
-                        
-                        runner = BenchmarkRunner(model=http_model)
+                            load_info = http_model.load()
+                            print(f"Load dla {model['service_name']}: {load_info}")
+                            
+                            runner = BenchmarkRunner(model=http_model)
 
-                        for dataset in self.experiment_config.get("datasets", []):
-                            print(f"--- Uruchamiam benchmark dla modelu {model['id']} na zbiorze {dataset['id']} ---")
-                            runner.run(
-                                labels_csv=dataset["labels_csv"],
-                                images_dir=dataset["images_dir"],
-                                output_dir=settings.get("output_dir", "wyniki"),
-                                limit=dataset.get("limit", 1),
-                            )
-                    finally:
-                        if stop_after_run:
-                            stop_service(model["service_name"])
-                    time.sleep(settings.get("cooldown_seconds", 5))
+                            for dataset in self.experiment_config.get("datasets", []):
+                                print(f"--- Uruchamiam benchmark dla modelu {model['id']} na zbiorze {dataset['id']} ---")
+                                results_df, prediction_seconds, sample_count = runner.run_with_timing(
+                                    labels_csv=dataset["labels_csv"],
+                                    images_dir=dataset["images_dir"],
+                                    limit=dataset.get("limit", 1),
+                                )
+
+                                metrics_level = "word" if dataset.get("single_words", False) else "line"
+                                report = metrics_evaluator.build_report(
+                                    results_df,
+                                    model_name=model["id"],
+                                    levels=(metrics_level,),
+                                )
+
+                                timing = build_timing_metrics(prediction_seconds, sample_count)
+                                report["dataset_id"] = dataset["id"]
+                                report["timing"] = timing
+
+                                write_dataset_results(
+                                    run_dir=run_dir,
+                                    model_id=model["id"],
+                                    dataset_id=dataset["id"],
+                                    results_df=results_df,
+                                    summary=report,
+                                )
+
+                                if wandb_run is not None:
+                                    log_payload = build_wandb_payload(
+                                        model_id=model["id"],
+                                        dataset_id=dataset["id"],
+                                        metrics_level=metrics_level,
+                                        report=report,
+                                        timing=timing,
+                                    )
+                                    wandb_run.log(log_payload)
+                        finally:
+                            if stop_after_run:
+                                stop_service(model["service_name"])
+                        time.sleep(settings.get("cooldown_seconds", 5))
+        finally:
+            if wandb_run is not None:
+                wandb_run.finish()
         
 
 

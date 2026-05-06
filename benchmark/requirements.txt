@@ -5,6 +5,7 @@ requests>=2.32.0
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 setuptools<82
+wandb>=0.16.0
 torch>=2.2.0
 torchvision>=0.17.0
 transformers>=4.44.0,<5.0.0

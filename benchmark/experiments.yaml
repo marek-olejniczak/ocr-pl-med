@@ -1,6 +1,7 @@
 experiment:
   name: "ocr-benchmark-autorun-test-01"
   project_name: "ocr-pl-med"
+  wandb_entity: null
   tags: ["autorun", "http", "sequential", "smoke", "laptop"]
   hardware_note: "Nvidia GTX 1650, 4GB VRAM"
 
@@ -14,12 +15,14 @@ settings:
   restart_docker_per_dataset: false
   http_timeout_default: 120
   build_run: false
+  wandb_log: false
 
 datasets:
   - id: "lexicography_smoke"
     labels_csv: "dane/htr_lexicography-main/data/PL-20k-hand-labelled.csv"
     images_dir: "dane/htr_lexicography-main/data/PL-20k-hand-labelled"
     limit: 25
+    single_words: true
 
 models:
   - id: "tesseract_pol"
@@ -55,14 +58,14 @@ models:
       max_new_tokens: 512
       device: "cuda"
       local_files_only: false
-      batch_size: 2
+      batch_size: 4
       use_amp: true
       cache_dir: "modele/cache/rysocr"
 
   - id: "trocr"
     service_name: "trocr"
     base_url: "http://localhost:8002"
-    enabled: false
+    enabled: true
     timeout: 240
     options:
       model_id: "microsoft/trocr-small-handwritten"
@@ -117,7 +120,7 @@ models:
   - id: "surya"
     service_name: "surya"
     base_url: "http://localhost:8008"
-    enabled: true
+    enabled: false
     timeout: 600
     options:
       device: "cpu"
