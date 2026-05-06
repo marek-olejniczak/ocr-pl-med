@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 import sys
 import yaml
@@ -51,15 +52,23 @@ class AutoRunner:
         if self.experiment_config is None:
             raise ValueError("Nie mozna wczytac konfiguracji eksperymentu.")
         
-    def run(self):
+    def run(self, *, build_only: bool = False) -> None:
         experiment = self.experiment_config.get("experiment", {})
         settings = self.experiment_config.get("settings", {})
         print(f"Uruchamianie eksperymentu: {experiment.get('name', 'Unnamed')}")
 
-        if settings.get("build_run", False):
+        if build_only:
             print("--- Budowanie obrazow Docker ---")
-            run_docker_command(["build", "--no-cache"])
+            models = self.experiment_config.get("models", [])
+            for model in models:
+                if model.get("enabled", True):
+                    print(f"Budowanie obrazu dla serwisu: {model['service_name']}")
+                    run_docker_command(["build", model["service_name"]])
+            print("Budowanie zakonczone.")
+            return
         
+        stop_after_run = settings.get("stop_service_after_run", True)
+
         if settings.get("auto_start_services", False) and settings.get("sequential", True):
             for model in self.experiment_config.get("models", []):
                 if model.get("enabled", True):
@@ -72,6 +81,9 @@ class AutoRunner:
                         print(f"Health check dla {model['service_name']}: {health}")
                         if health.get("status") != "ok":
                             raise RuntimeError(f"Serwis {model['service_name']} nie jest zdrowy: {health}")
+
+                        load_info = http_model.load()
+                        print(f"Load dla {model['service_name']}: {load_info}")
                         
                         runner = BenchmarkRunner(model=http_model)
 
@@ -84,11 +96,16 @@ class AutoRunner:
                                 limit=dataset.get("limit", 1),
                             )
                     finally:
-                        stop_service(model["service_name"])
+                        if stop_after_run:
+                            stop_service(model["service_name"])
                     time.sleep(settings.get("cooldown_seconds", 5))
         
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Autorunner benchmarku OCR")
+    parser.add_argument("--build", action="store_true", help="Zbuduj obrazy Docker i zakoncz")
+    args = parser.parse_args()
+
     autorunner = AutoRunner()
-    autorunner.run()
+    autorunner.run(build_only=args.build)

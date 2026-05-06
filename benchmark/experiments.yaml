@@ -25,7 +25,7 @@ models:
   - id: "tesseract_pol"
     service_name: "tesseract-pol"
     base_url: "http://localhost:8007"
-    enabled: true
+    enabled: false
     timeout: 120
     options:
       language: "pol"
@@ -36,7 +36,7 @@ models:
   - id: "easyocr"
     service_name: "easyocr"
     base_url: "http://localhost:8001"
-    enabled: true
+    enabled: false
     timeout: 120
     options:
       langs: ["pl", "en"]
@@ -117,12 +117,12 @@ models:
   - id: "surya"
     service_name: "surya"
     base_url: "http://localhost:8008"
-    enabled: false
+    enabled: true
     timeout: 600
     options:
-      device: "cuda"
+      device: "cpu"
       batch_size: 1
-      task_name: "ocr"
+      task_name: "ocr_without_boxes"
       disable_math: false
       cache_dir: "modele/cache/surya"
 

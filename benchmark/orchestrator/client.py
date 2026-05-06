@@ -43,6 +43,21 @@ class ModelClient:
             raise RuntimeError("Niepoprawna odpowiedz /health (oczekiwano obiektu JSON).")
         return payload
 
+    def load(self, options: dict | None = None) -> dict:
+        payload = {"options": options or {}}
+        response = requests.post(
+            f"{self.url}/load",
+            json=payload,
+            timeout=self.timeout_seconds,
+        )
+        if response.status_code >= 400:
+            self._raise_with_detail(response, endpoint="/load")
+
+        data = response.json()
+        if not isinstance(data, dict):
+            raise RuntimeError("Niepoprawna odpowiedz /load (oczekiwano obiektu JSON).")
+        return data
+
     def predict(self, image_path: str, options: dict | None = None) -> str:
         path = Path(image_path)
         if not path.exists():
@@ -90,6 +105,9 @@ class HTTPModelWrapper(HTRModelWrapper):
 
     def predict(self, image_path: str) -> str:
         return self.client.predict(image_path=image_path, options=self.options)
+
+    def load(self) -> dict:
+        return self.client.load(options=self.options)
 
     def predict_batch(self, image_paths: Iterable[str]) -> list[str]:
         return self.client.predict_batch(image_paths=image_paths, options=self.options)

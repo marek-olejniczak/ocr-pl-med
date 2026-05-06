@@ -16,6 +16,10 @@ class PredictRequest(BaseModel):
     options: dict[str, Any] = Field(default_factory=dict)
 
 
+class LoadRequest(BaseModel):
+    options: dict[str, Any] = Field(default_factory=dict)
+
+
 def decode_base64_image_to_temp_file(
     image_base64: str,
     suffix: str = ".png",
@@ -63,3 +67,20 @@ def decode_base64_image_to_temp_file(
         )
 
     return temp_path
+
+
+def detect_cache_presence(cache_dir: str | None) -> bool | None:
+    if not cache_dir:
+        return None
+
+    path = Path(cache_dir)
+    if not path.exists():
+        return False
+    if path.is_file():
+        return True
+    if path.is_dir():
+        try:
+            return any(path.iterdir())
+        except OSError:
+            return False
+    return False

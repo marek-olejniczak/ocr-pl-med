@@ -5,7 +5,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 
-from docker.common import PredictRequest, decode_base64_image_to_temp_file
+from docker.common import LoadRequest, PredictRequest, decode_base64_image_to_temp_file, detect_cache_presence
 from docker.logging_utils import elapsed_ms, emit_event, get_service_logger, new_request_id, timer_start
 from modele.rysocr_wrapper import RysOCRWrapper
 
@@ -68,6 +68,72 @@ def get_model(options: dict) -> RysOCRWrapper:
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok", "service": "rysocr"}
+
+
+@app.post("/load")
+def load(req: LoadRequest) -> dict:
+    request_id = new_request_id()
+    started_at = timer_start()
+    options = req.options or {}
+    cache_dir = options.get("cache_dir", "modele/cache/rysocr")
+    cache_present = detect_cache_presence(cache_dir)
+
+    emit_event(
+        logger,
+        logging.INFO,
+        "load_request_started",
+        request_id=request_id,
+        service=SERVICE_NAME,
+        options_keys=sorted(options.keys()),
+        cache_dir=cache_dir,
+        cache_present=cache_present,
+    )
+
+    if _MODEL is not None:
+        emit_event(
+            logger,
+            logging.INFO,
+            "load_skipped",
+            request_id=request_id,
+            service=SERVICE_NAME,
+            duration_ms=elapsed_ms(started_at),
+        )
+        return {
+            "status": "already_loaded",
+            "service": SERVICE_NAME,
+            "cache_present": cache_present,
+        }
+
+    try:
+        get_model(options)
+    except Exception as exc:
+        emit_event(
+            logger,
+            logging.ERROR,
+            "load_request_failed",
+            request_id=request_id,
+            service=SERVICE_NAME,
+            error_type=type(exc).__name__,
+            error=str(exc),
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    duration_ms = elapsed_ms(started_at)
+    emit_event(
+        logger,
+        logging.INFO,
+        "load_request_succeeded",
+        request_id=request_id,
+        service=SERVICE_NAME,
+        duration_ms=duration_ms,
+    )
+    return {
+        "status": "loaded",
+        "service": SERVICE_NAME,
+        "duration_ms": duration_ms,
+        "cache_present": cache_present,
+    }
 
 
 @app.post("/predict")
