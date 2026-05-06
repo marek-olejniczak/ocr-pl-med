@@ -10,7 +10,7 @@ WORKDIR /app
 
 COPY docker/surya/requirements.txt docker/surya/requirements.txt
 RUN pip install --no-cache-dir --timeout 300 --retries 10 \
-    --index-url https://download.pytorch.org/whl/cpu \
+    --index-url https://download.pytorch.org/whl/cu124 \
     torch==2.7.1 torchvision==0.22.1 && \
     pip install --no-cache-dir --timeout 300 --retries 10 \
     -r docker/surya/requirements.txt

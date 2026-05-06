@@ -3,7 +3,11 @@ FROM python:3.11-slim
 WORKDIR /app
 
 COPY docker/rysocr/requirements.txt docker/rysocr/requirements.txt
-RUN pip install --no-cache-dir -r docker/rysocr/requirements.txt
+RUN pip install --no-cache-dir --timeout 300 --retries 10 \
+	--index-url https://download.pytorch.org/whl/cu121 \
+	torch==2.5.1 torchvision==0.20.1 && \
+	pip install --no-cache-dir --timeout 300 --retries 10 \
+	-r docker/rysocr/requirements.txt
 
 COPY docker/common.py docker/common.py
 COPY docker/logging_utils.py docker/logging_utils.py

@@ -21,7 +21,7 @@ datasets:
   - id: "lexicography_smoke"
     labels_csv: "dane/htr_lexicography-main/data/PL-20k-hand-labelled.csv"
     images_dir: "dane/htr_lexicography-main/data/PL-20k-hand-labelled"
-    limit: 25
+    limit: 10
     single_words: true
 
 models:
@@ -39,7 +39,7 @@ models:
   - id: "easyocr"
     service_name: "easyocr"
     base_url: "http://localhost:8001"
-    enabled: false
+    enabled: true
     timeout: 120
     options:
       langs: ["pl", "en"]
@@ -49,7 +49,7 @@ models:
   - id: "rysocr"
     service_name: "rysocr"
     base_url: "http://localhost:8006"
-    enabled: false
+    enabled: true
     timeout: 300
     options:
       adapter_model_id: "kacperwikiel/RysOCR"
@@ -65,7 +65,7 @@ models:
   - id: "trocr"
     service_name: "trocr"
     base_url: "http://localhost:8002"
-    enabled: true
+    enabled: false
     timeout: 240
     options:
       model_id: "microsoft/trocr-small-handwritten"
@@ -92,7 +92,7 @@ models:
   - id: "parseq"
     service_name: "parseq"
     base_url: "http://localhost:8004"
-    enabled: false
+    enabled: true
     timeout: 240
     options:
       device: "cuda"

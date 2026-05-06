@@ -4,10 +4,10 @@ WORKDIR /app
 
 COPY docker/trocr/requirements.txt docker/trocr/requirements.txt
 RUN pip install --no-cache-dir --timeout 300 --retries 10 \
-	--index-url https://download.pytorch.org/whl/cpu \
-	torch==2.6.0 torchvision==0.21.0 && \
-	pip install --no-cache-dir --timeout 300 --retries 10 \
-	-r docker/trocr/requirements.txt
+    --index-url https://download.pytorch.org/whl/cu124 \
+    torch==2.6.0 torchvision==0.21.0 && \
+    pip install --no-cache-dir --timeout 300 --retries 10 \
+    -r docker/trocr/requirements.txt
 
 COPY docker/common.py docker/common.py
 COPY docker/logging_utils.py docker/logging_utils.py
