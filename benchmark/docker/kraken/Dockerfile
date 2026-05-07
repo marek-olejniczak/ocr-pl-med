@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM pytorch/pytorch:2.5.1-cuda12.1-cudnn9-runtime
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
@@ -10,9 +10,6 @@ WORKDIR /app
 
 COPY docker/kraken/requirements.txt docker/kraken/requirements.txt
 RUN pip install --no-cache-dir --timeout 1200 --retries 20 \
-    --index-url https://download.pytorch.org/whl/cu121 \
-    torch==2.5.1 torchvision==0.20.1 && \
-    pip install --no-cache-dir --timeout 1200 --retries 20 \
     -r docker/kraken/requirements.txt
 
 COPY docker/common.py docker/common.py

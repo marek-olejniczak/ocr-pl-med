@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM paddlepaddle/paddle:3.0.0-gpu-cuda11.8-cudnn8.9-trt8.6
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
 	libgomp1 \
@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY docker/paddleocr/requirements.txt docker/paddleocr/requirements.txt
-RUN pip install --no-cache-dir -r docker/paddleocr/requirements.txt
+RUN pip install --no-cache-dir --ignore-installed -r docker/paddleocr/requirements.txt
 
 COPY docker/common.py docker/common.py
 COPY docker/logging_utils.py docker/logging_utils.py

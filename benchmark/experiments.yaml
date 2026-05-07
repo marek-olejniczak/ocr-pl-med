@@ -39,7 +39,7 @@ models:
   - id: "easyocr"
     service_name: "easyocr"
     base_url: "http://localhost:8001"
-    enabled: true
+    enabled: false
     timeout: 120
     options:
       langs: ["pl", "en"]
@@ -49,7 +49,7 @@ models:
   - id: "rysocr"
     service_name: "rysocr"
     base_url: "http://localhost:8006"
-    enabled: true
+    enabled: false
     timeout: 300
     options:
       adapter_model_id: "kacperwikiel/RysOCR"
@@ -84,7 +84,7 @@ models:
     options:
       rec_model_name: "PP-OCRv4_mobile_rec"
       lang: "pl"
-      device: "cpu"
+      device: "cuda"
       use_angle_cls: false
       rec_batch_size: 8
       cache_dir: "modele/cache/paddlex"
@@ -92,7 +92,7 @@ models:
   - id: "parseq"
     service_name: "parseq"
     base_url: "http://localhost:8004"
-    enabled: true
+    enabled: false
     timeout: 240
     options:
       device: "cuda"
@@ -123,7 +123,7 @@ models:
     enabled: false
     timeout: 600
     options:
-      device: "cpu"
+      device: "cuda"
       batch_size: 1
       task_name: "ocr_without_boxes"
       disable_math: false
@@ -138,16 +138,16 @@ models:
       model_id: "ucaslcl/GOT-OCR2_0"
       device: "cuda"
       dtype: "bfloat16"
-      max_new_tokens: 512
       cache_dir: "modele/cache/got_ocr"
+      trust_remote_code: true
 
   - id: "qwen2_5_vl"
     service_name: "qwen2_5_vl"
     base_url: "http://localhost:8010"
     enabled: false
-    timeout: 1800
+    timeout: 7200
     options:
-      model_id: "Qwen/Qwen2.5-VL-7B-Instruct"
+      model_id: "Qwen/Qwen2.5-VL-3B-Instruct" # 7B przy wiekszym VRAM
       device: "cuda"
       dtype: "bfloat16"
       max_new_tokens: 512
@@ -157,10 +157,10 @@ models:
   - id: "kraken"
     service_name: "kraken"
     base_url: "http://localhost:8011"
-    enabled: false
+    enabled: true
     timeout: 600
     options:
-      model_path: "modele/cache/kraken/recognition_model.mlmodel"
+      model_path: "modele/cache/kraken/199fb0ec-cf40-50aa-b99a-69ba1f42f0bc/lectaurep_base.mlmodel"
       device: "cuda:0"
       precision: "32-true"
       batch_size: 8
@@ -171,7 +171,7 @@ models:
   - id: "glm_4v"
     service_name: "glm_4v"
     base_url: "http://localhost:8012"
-    enabled: false
+    enabled: true
     timeout: 1800
     options:
       model_id: "zai-org/glm-4v-9b"

@@ -1,4 +1,11 @@
-FROM python:3.11-slim
+FROM tensorflow/tensorflow:2.14.0-gpu
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+	build-essential \
+	libgl1 \
+	libglib2.0-0 \
+	libgomp1 \
+	&& rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM pytorch/pytorch:2.7.1-cuda11.8-cudnn9-runtime
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
@@ -10,9 +10,6 @@ WORKDIR /app
 
 COPY docker/surya/requirements.txt docker/surya/requirements.txt
 RUN pip install --no-cache-dir --timeout 300 --retries 10 \
-    --index-url https://download.pytorch.org/whl/cu124 \
-    torch==2.7.1 torchvision==0.22.1 && \
-    pip install --no-cache-dir --timeout 300 --retries 10 \
     -r docker/surya/requirements.txt
 
 COPY docker/common.py docker/common.py

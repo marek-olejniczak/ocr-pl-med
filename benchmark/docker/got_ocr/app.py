@@ -37,7 +37,7 @@ def _resolve_dtype(torch_module, dtype_name: str):
 def _build_state(options: dict) -> dict:
     try:
         import torch
-        from transformers import AutoModelForImageTextToText, AutoProcessor
+        from transformers import AutoModel, AutoTokenizer
     except Exception as exc:
         raise RuntimeError(
             "Brakuje zaleznosci dla GOT-OCR 2.0. Zainstaluj: torch, torchvision, transformers oraz runtime libs "
@@ -54,26 +54,34 @@ def _build_state(options: dict) -> dict:
     if device == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("Wybrano device=cuda, ale CUDA nie jest dostepna w kontenerze.")
 
-    model_id = str(options.get("model_id", "stepfun-ai/GOT-OCR-2.0-hf"))
+    model_id = str(options.get("model_id", "ucaslcl/got-ocr-2.0"))
     cache_dir = str(options.get("cache_dir", "modele/cache/got_ocr"))
-    max_new_tokens = int(options.get("max_new_tokens", 512))
     dtype = _resolve_dtype(torch, str(options.get("dtype", "auto")))
+    trust_remote_code = bool(options.get("trust_remote_code", True))
 
-    processor = AutoProcessor.from_pretrained(model_id, cache_dir=cache_dir)
-    model = AutoModelForImageTextToText.from_pretrained(
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_id,
+        cache_dir=cache_dir,
+        trust_remote_code=trust_remote_code,
+    )
+
+    model = AutoModel.from_pretrained(
         model_id,
         torch_dtype=dtype,
         cache_dir=cache_dir,
+        device_map=device,
+        trust_remote_code=trust_remote_code,
         use_safetensors=True,
+        pad_token_id=tokenizer.eos_token_id,
     )
-    model = model.to(device).eval()
+
+    model = model.eval()
 
     return {
         "torch": torch,
-        "processor": processor,
+        "tokenizer": tokenizer,
         "model": model,
         "device": device,
-        "max_new_tokens": max_new_tokens,
     }
 
 
@@ -109,7 +117,6 @@ def get_state(options: dict) -> dict:
             service=SERVICE_NAME,
             duration_ms=elapsed_ms(init_started_at),
             resolved_device=_STATE.get("device"),
-            max_new_tokens=_STATE.get("max_new_tokens"),
         )
     return _STATE
 
@@ -221,25 +228,16 @@ def predict(req: PredictRequest) -> dict:
 
         with Image.open(temp_path) as image:
             image = image.convert("RGB")
-            processor = state["processor"]
+            tokenizer = state["tokenizer"]
             model = state["model"]
             torch = state["torch"]
 
-            inputs = processor(images=image, return_tensors="pt")
-            inputs = {key: value.to(state["device"]) for key, value in inputs.items()}
-
             with torch.inference_mode():
-                generated = model.generate(
-                    **inputs,
-                    do_sample=False,
-                    tokenizer=processor.tokenizer,
-                    stop_strings="<|im_end|>",
-                    max_new_tokens=state["max_new_tokens"],
+                text = model.chat(
+                    tokenizer,
+                    temp_path,
+                    ocr_type="ocr",
                 )
-
-            input_token_len = inputs["input_ids"].shape[1]
-            output_ids = generated[0, input_token_len:]
-            text = processor.decode(output_ids, skip_special_tokens=True).strip()
 
         success = True
         emit_event(

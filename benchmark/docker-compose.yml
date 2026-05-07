@@ -3,11 +3,14 @@ services:
     build:
       context: .
       dockerfile: docker/easyocr/Dockerfile
+    gpus: all
     ports:
       - "8001:8000"
     environment:
       - LOG_LEVEL=INFO
       - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     volumes:
       - ./modele/cache/easyocr:/app/modele/cache/easyocr
     healthcheck:
@@ -20,11 +23,14 @@ services:
     build:
       context: .
       dockerfile: docker/trocr/Dockerfile
+    gpus: all
     ports:
       - "8002:8000"
     environment:
       - LOG_LEVEL=INFO
       - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     volumes:
       - ./modele/cache/trocr:/app/modele/cache/trocr
     healthcheck:
@@ -32,23 +38,19 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
 
   paddleocr:
     build:
       context: .
       dockerfile: docker/paddleocr/Dockerfile
+    gpus: all
     ports:
       - "8003:8000"
     environment:
       - LOG_LEVEL=INFO
       - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     volumes:
       - ./modele/cache/paddlex:/app/modele/cache/paddlex
     healthcheck:
@@ -61,11 +63,14 @@ services:
     build:
       context: .
       dockerfile: docker/parseq/Dockerfile
+    gpus: all
     ports:
       - "8004:8000"
     environment:
       - LOG_LEVEL=INFO
       - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     volumes:
       - ./modele/cache/parseq:/app/modele/cache/parseq
     healthcheck:
@@ -78,11 +83,14 @@ services:
     build:
       context: .
       dockerfile: docker/calamari/Dockerfile
+    gpus: all
     ports:
       - "8005:8000"
     environment:
       - LOG_LEVEL=INFO
       - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     volumes:
       - ./modele/cache/calamari:/app/modele/cache/calamari
     healthcheck:
@@ -95,11 +103,14 @@ services:
     build:
       context: .
       dockerfile: docker/rysocr/Dockerfile
+    gpus: all
     ports:
       - "8006:8000"
     environment:
       - LOG_LEVEL=INFO
       - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     volumes:
       - ./modele/cache/rysocr:/app/modele/cache/rysocr
     healthcheck:
@@ -127,11 +138,14 @@ services:
     build:
       context: .
       dockerfile: docker/surya/Dockerfile
+    gpus: all
     ports:
       - "8008:8000"
     environment:
       - LOG_LEVEL=INFO
       - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     volumes:
       - ./modele/cache/surya:/app/modele/cache/surya
     healthcheck:
@@ -144,11 +158,15 @@ services:
     build:
       context: .
       dockerfile: docker/got_ocr/Dockerfile
+    gpus: all
     ports:
       - "8009:8000"
     environment:
       - LOG_LEVEL=INFO
       - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
     volumes:
       - ./modele/cache/got_ocr:/app/modele/cache/got_ocr
     healthcheck:
