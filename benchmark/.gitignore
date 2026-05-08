@@ -31,3 +31,5 @@ modele/cache/
 # OS files
 .DS_Store
 Thumbs.db
+
+wandb/

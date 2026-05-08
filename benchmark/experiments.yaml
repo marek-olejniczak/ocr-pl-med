@@ -1,7 +1,7 @@
 experiment:
   name: "ocr-benchmark-autorun-test-01"
-  project_name: "ocr-pl-med"
-  wandb_entity: null
+  project_name: "ocr-benchmark"
+  wandb_entity: "ocr-pl-med"
   tags: ["autorun", "http", "sequential", "smoke", "laptop"]
   hardware_note: "Nvidia GTX 1650, 4GB VRAM"
 
@@ -14,21 +14,20 @@ settings:
   cooldown_seconds: 5
   restart_docker_per_dataset: false
   http_timeout_default: 120
-  build_run: false
-  wandb_log: false
+  wandb_log: true
 
 datasets:
   - id: "lexicography_smoke"
     labels_csv: "dane/htr_lexicography-main/data/PL-20k-hand-labelled.csv"
     images_dir: "dane/htr_lexicography-main/data/PL-20k-hand-labelled"
-    limit: 10
+    limit: 50
     single_words: true
 
 models:
   - id: "tesseract_pol"
     service_name: "tesseract-pol"
     base_url: "http://localhost:8007"
-    enabled: false
+    enabled: true
     timeout: 120
     options:
       language: "pol"
@@ -39,7 +38,7 @@ models:
   - id: "easyocr"
     service_name: "easyocr"
     base_url: "http://localhost:8001"
-    enabled: false
+    enabled: true
     timeout: 120
     options:
       langs: ["pl", "en"]
@@ -65,7 +64,7 @@ models:
   - id: "trocr"
     service_name: "trocr"
     base_url: "http://localhost:8002"
-    enabled: false
+    enabled: true
     timeout: 240
     options:
       model_id: "microsoft/trocr-small-handwritten"
@@ -79,7 +78,7 @@ models:
   - id: "paddleocr"
     service_name: "paddleocr"
     base_url: "http://localhost:8003"
-    enabled: false
+    enabled: true
     timeout: 240
     options:
       rec_model_name: "PP-OCRv4_mobile_rec"
@@ -92,7 +91,7 @@ models:
   - id: "parseq"
     service_name: "parseq"
     base_url: "http://localhost:8004"
-    enabled: false
+    enabled: true
     timeout: 240
     options:
       device: "cuda"
@@ -120,7 +119,7 @@ models:
   - id: "surya"
     service_name: "surya"
     base_url: "http://localhost:8008"
-    enabled: false
+    enabled: true
     timeout: 600
     options:
       device: "cuda"
@@ -157,7 +156,7 @@ models:
   - id: "kraken"
     service_name: "kraken"
     base_url: "http://localhost:8011"
-    enabled: true
+    enabled: false
     timeout: 600
     options:
       model_path: "modele/cache/kraken/199fb0ec-cf40-50aa-b99a-69ba1f42f0bc/lectaurep_base.mlmodel"
@@ -171,7 +170,7 @@ models:
   - id: "glm_4v"
     service_name: "glm_4v"
     base_url: "http://localhost:8012"
-    enabled: true
+    enabled: false
     timeout: 1800
     options:
       model_id: "zai-org/glm-4v-9b"

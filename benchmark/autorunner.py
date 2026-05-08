@@ -144,12 +144,26 @@ class AutoRunner:
         try:
             if settings.get("auto_start_services", False) and settings.get("sequential", True):
                 for model in self.experiment_config.get("models", []):
-                    if model.get("enabled", True):
-                        start_service(model["service_name"])
-                        options = model.get("options", {})
+                    
+                    if not model.get("enabled", True):
+                        continue
+
+                    print(f"\n=================================================")
+                    print(f"Ewaluacja modelu: {model['id']}")
+                    print(f"=================================================")
+
+                    start_service(model["service_name"])
+                    options = model.get("options", {})
+                    
+                    try:
                         try:
-                            # health check
-                            http_model = HTTPModelWrapper(model_name=model["id"], base_url=model["base_url"], timeout_seconds=model["timeout"], options=options)
+                            http_model = HTTPModelWrapper(
+                                model_name=model["id"], 
+                                base_url=model["base_url"], 
+                                timeout_seconds=model["timeout"], 
+                                options=options
+                            )
+                            
                             health = http_model.client.health()
                             print(f"Health check dla {model['service_name']}: {health}")
                             if health.get("status") != "ok":
@@ -161,45 +175,57 @@ class AutoRunner:
                             runner = BenchmarkRunner(model=http_model)
 
                             for dataset in self.experiment_config.get("datasets", []):
-                                print(f"--- Uruchamiam benchmark dla modelu {model['id']} na zbiorze {dataset['id']} ---")
-                                results_df, prediction_seconds, sample_count = runner.run_with_timing(
-                                    labels_csv=dataset["labels_csv"],
-                                    images_dir=dataset["images_dir"],
-                                    limit=dataset.get("limit", 1),
-                                )
+                                print(f"--- Uruchamiam benchmark {model['id']} na zbiorze {dataset['id']} ---")
+                                
+                                try:
+                                    results_df, prediction_seconds, sample_count = runner.run_with_timing(
+                                        labels_csv=dataset["labels_csv"],
+                                        images_dir=dataset["images_dir"],
+                                        limit=dataset.get("limit", 1),
+                                    )
 
-                                metrics_level = "word" if dataset.get("single_words", False) else "line"
-                                report = metrics_evaluator.build_report(
-                                    results_df,
-                                    model_name=model["id"],
-                                    levels=(metrics_level,),
-                                )
+                                    metrics_level = "word" if dataset.get("single_words", False) else "line"
+                                    report = metrics_evaluator.build_report(
+                                        results_df,
+                                        model_name=model["id"],
+                                        levels=(metrics_level,),
+                                    )
 
-                                timing = build_timing_metrics(prediction_seconds, sample_count)
-                                report["dataset_id"] = dataset["id"]
-                                report["timing"] = timing
+                                    timing = build_timing_metrics(prediction_seconds, sample_count)
+                                    report["dataset_id"] = dataset["id"]
+                                    report["timing"] = timing
 
-                                write_dataset_results(
-                                    run_dir=run_dir,
-                                    model_id=model["id"],
-                                    dataset_id=dataset["id"],
-                                    results_df=results_df,
-                                    summary=report,
-                                )
-
-                                if wandb_run is not None:
-                                    log_payload = build_wandb_payload(
+                                    write_dataset_results(
+                                        run_dir=run_dir,
                                         model_id=model["id"],
                                         dataset_id=dataset["id"],
-                                        metrics_level=metrics_level,
-                                        report=report,
-                                        timing=timing,
+                                        results_df=results_df,
+                                        summary=report,
                                     )
-                                    wandb_run.log(log_payload)
-                        finally:
-                            if stop_after_run:
-                                stop_service(model["service_name"])
-                        time.sleep(settings.get("cooldown_seconds", 5))
+
+                                    if wandb_run is not None:
+                                        log_payload = build_wandb_payload(
+                                            model_id=model["id"],
+                                            dataset_id=dataset["id"],
+                                            metrics_level=metrics_level,
+                                            report=report,
+                                            timing=timing,
+                                        )
+                                        wandb_run.log(log_payload)
+                                
+                                except Exception as e_dataset:
+                                    print(f"[BLAD DATASETU] Model: {model['id']}, dataset: {dataset['id']}. Szczegoly: {e_dataset}")
+                        
+                        except Exception as e_model:
+                            print(f"[BLAD MODELU] Awaria {model['id']}. Pomijam ten model. Szczegoly: {e_model}")
+                    
+                    finally:
+                        if stop_after_run:
+                            stop_service(model["service_name"])
+                    
+                    print(f"Chłodzenie po modelu {model['id']}...")
+                    time.sleep(settings.get("cooldown_seconds", 5))
+        
         finally:
             if wandb_run is not None:
                 wandb_run.finish()
