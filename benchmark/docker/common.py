@@ -4,7 +4,7 @@ import base64
 import logging
 import tempfile
 from pathlib import Path
-from typing import Any
+from typing import Any, List
 
 from pydantic import BaseModel, Field
 
@@ -14,6 +14,11 @@ from docker.logging_utils import emit_event
 class PredictRequest(BaseModel):
     image_base64: str = Field(..., min_length=1)
     options: dict[str, Any] = Field(default_factory=dict)
+
+
+class PredictBatchRequest(BaseModel):
+    images_base64: List[str]
+    options: dict = {}
 
 
 class LoadRequest(BaseModel):

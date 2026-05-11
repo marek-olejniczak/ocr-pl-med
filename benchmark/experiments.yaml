@@ -1,5 +1,5 @@
 experiment:
-  name: "ocr-benchmark-autorun-test-01"
+  name: "ocr-benchmark-autorun-test-handlabeled-01"
   project_name: "ocr-benchmark"
   wandb_entity: "ocr-pl-med"
   tags: ["autorun", "http", "sequential", "smoke", "laptop"]
@@ -14,20 +14,33 @@ settings:
   cooldown_seconds: 5
   restart_docker_per_dataset: false
   http_timeout_default: 120
-  wandb_log: true
+  wandb_log: false
 
 datasets:
-  - id: "lexicography_smoke"
-    labels_csv: "dane/htr_lexicography-main/data/PL-20k-hand-labelled.csv"
-    images_dir: "dane/htr_lexicography-main/data/PL-20k-hand-labelled"
-    limit: 50
+  # - id: "lexicography_smoke"
+  #   labels_csv: "dane/htr_lexicography-main/data/PL-20k-hand-labelled.csv"
+  #   images_dir: "dane/htr_lexicography-main/data/PL-20k-hand-labelled"
+  #   limit: 50
+  #   single_words: true
+  
+  - id: "testset_800"
+    labels_csv: "dane/testset/labels.csv"
+    images_dir: "dane/testset/images"
+    limit: 32
+    single_words: false
+
+  - id: "prescriptions"
+    labels_csv: "dane/RxHandBD-Raw/Prescription_Labels.csv"
+    images_dir: "dane/RxHandBD-Raw/Images"
+    limit: 32
     single_words: true
+
 
 models:
   - id: "tesseract_pol"
     service_name: "tesseract-pol"
     base_url: "http://localhost:8007"
-    enabled: true
+    enabled: false
     timeout: 120
     options:
       language: "pol"
@@ -38,7 +51,7 @@ models:
   - id: "easyocr"
     service_name: "easyocr"
     base_url: "http://localhost:8001"
-    enabled: true
+    enabled: false
     timeout: 120
     options:
       langs: ["pl", "en"]
@@ -49,25 +62,25 @@ models:
     service_name: "rysocr"
     base_url: "http://localhost:8006"
     enabled: false
-    timeout: 300
+    timeout: 36000
     options:
       adapter_model_id: "kacperwikiel/RysOCR"
       base_model_id: "PaddlePaddle/PaddleOCR-VL"
       prompt: "Transcribe the text."
-      max_new_tokens: 512
+      max_new_tokens: 128
       device: "cuda"
       local_files_only: false
-      batch_size: 4
+      batch_size: 8
       use_amp: true
       cache_dir: "modele/cache/rysocr"
 
   - id: "trocr"
     service_name: "trocr"
     base_url: "http://localhost:8002"
-    enabled: true
-    timeout: 240
+    enabled: false
+    timeout: 3600
     options:
-      model_id: "microsoft/trocr-small-handwritten"
+      model_id: "microsoft/trocr-base-handwritten"
       max_new_tokens: 256
       device: "cuda"
       local_files_only: false
@@ -78,7 +91,7 @@ models:
   - id: "paddleocr"
     service_name: "paddleocr"
     base_url: "http://localhost:8003"
-    enabled: true
+    enabled: false
     timeout: 240
     options:
       rec_model_name: "PP-OCRv4_mobile_rec"
@@ -91,7 +104,7 @@ models:
   - id: "parseq"
     service_name: "parseq"
     base_url: "http://localhost:8004"
-    enabled: true
+    enabled: false
     timeout: 240
     options:
       device: "cuda"
@@ -123,7 +136,7 @@ models:
     timeout: 600
     options:
       device: "cuda"
-      batch_size: 1
+      batch_size: 8
       task_name: "ocr_without_boxes"
       disable_math: false
       cache_dir: "modele/cache/surya"

@@ -35,7 +35,6 @@ def run_docker_command(command_list):
         return None
 
 def start_service(service_name):
-    print(f"--- Uruchamiam serwis: {service_name} ---")
     run_docker_command(["up", "-d", service_name])
     time.sleep(5) 
 
@@ -223,7 +222,7 @@ class AutoRunner:
                         if stop_after_run:
                             stop_service(model["service_name"])
                     
-                    print(f"Chłodzenie po modelu {model['id']}...")
+                    print(f"cooldown {settings.get('cooldown_seconds', 5)}s")
                     time.sleep(settings.get("cooldown_seconds", 5))
         
         finally:

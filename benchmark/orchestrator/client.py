@@ -86,7 +86,34 @@ class ModelClient:
         return text.strip()
 
     def predict_batch(self, image_paths: Iterable[str], options: dict | None = None) -> list[str]:
-        return [self.predict(path, options=options) for path in image_paths]
+        images_b64 = []
+        for image_path in image_paths:
+            path = Path(image_path)
+            if not path.exists():
+                raise FileNotFoundError(f"Nie znaleziono obrazu: {image_path}")
+            images_b64.append(base64.b64encode(path.read_bytes()).decode("utf-8"))
+        
+        # Wieloelementowy payload dla batcha
+        payload = {
+            "images_base64": images_b64,
+            "options": options or {},
+        }
+
+        response = requests.post(
+            f"{self.url}/predict_batch",
+            json=payload,
+            timeout=self.timeout_seconds,
+        )
+        if response.status_code >= 400:
+            self._raise_with_detail(response, endpoint="/predict_batch")
+        data = response.json()
+        if not isinstance(data, dict):
+            raise RuntimeError("Niepoprawna odpowiedz /predict_batch (oczekiwano obiektu JSON).")
+
+        texts = data.get("texts", [])
+        if not isinstance(texts, list):
+            raise RuntimeError("Niepoprawna odpowiedz /predict_batch (oczekiwano listy tekstow).")
+        return [str(text).strip() for text in texts]
 
 
 class HTTPModelWrapper(HTRModelWrapper):

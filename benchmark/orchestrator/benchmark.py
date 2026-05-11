@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import time
-from typing import List
+from typing import List, Iterator
 
 import pandas as pd
 
@@ -29,7 +29,12 @@ class BenchmarkRunner:
             )
 
         image_paths = [str(sample.image_path) for sample in samples]
-        predictions = model.predict_batch(image_paths)
+        options = getattr(model, "options", {})
+        
+        predictions = []
+        for batch in BenchmarkRunner.load_batch(image_paths, options):
+            predictions.extend(model.predict_batch(batch))
+            
         if len(predictions) != len(samples):
             raise RuntimeError(
                 f"Model zwrocil {len(predictions)} predykcji dla {len(samples)} probek."
@@ -62,9 +67,16 @@ class BenchmarkRunner:
             ), 0.0
 
         image_paths = [str(sample.image_path) for sample in samples]
-        prediction_started_at = time.perf_counter()
-        predictions = model.predict_batch(image_paths)
-        prediction_seconds = time.perf_counter() - prediction_started_at
+        options = getattr(model, "options", {})
+        
+        predictions = []
+        prediction_seconds = 0.0
+        
+        for batch in BenchmarkRunner.load_batch(image_paths, options):
+            prediction_started_at = time.perf_counter()
+            batch_preds = model.predict_batch(batch)
+            prediction_seconds += time.perf_counter() - prediction_started_at
+            predictions.extend(batch_preds)
 
         if len(predictions) != len(samples):
             raise RuntimeError(
@@ -117,3 +129,10 @@ class BenchmarkRunner:
             model=self.model,
         )
         return results_df, prediction_seconds, len(samples)
+    
+    @staticmethod
+    def load_batch(all_image_paths: List[str], options: dict | None = None) -> Iterator[List[str]]:
+        batch_size = int((options or {}).get("batch_size", 8))
+        for i in range(0, len(all_image_paths), batch_size):
+            yield all_image_paths[i : i + batch_size]
+
