@@ -7,7 +7,13 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from PIL import Image
 
-from docker.common import LoadRequest, PredictRequest, decode_base64_image_to_temp_file, detect_cache_presence
+from docker.common import (
+    LoadRequest,
+    PredictRequest,
+    PredictBatchRequest,
+    decode_base64_image_to_temp_file,
+    detect_cache_presence,
+)
 from docker.logging_utils import elapsed_ms, emit_event, get_service_logger, new_request_id, timer_start
 
 app = FastAPI(title="qwen2_5_vl-service")
@@ -396,6 +402,155 @@ def predict(req: PredictRequest) -> dict:
             logger,
             logging.INFO,
             "predict_request_completed",
+            request_id=request_id,
+            service=SERVICE_NAME,
+            success=success,
+            duration_ms=elapsed_ms(request_started_at),
+        )
+
+
+@app.post("/predict_batch")
+def predict_batch(req: PredictBatchRequest) -> dict:
+    request_id = new_request_id()
+    request_started_at = timer_start()
+    temp_paths = []
+    success = False
+
+    emit_event(
+        logger,
+        logging.INFO,
+        "predict_batch_request_received",
+        request_id=request_id,
+        service=SERVICE_NAME,
+        num_images=len(req.images_base64),
+        options_keys=sorted(req.options.keys()),
+    )
+
+    if not req.images_base64:
+        return {"texts": []}
+
+    try:
+        state = get_state(req.options)
+
+        for idx, img_b64 in enumerate(req.images_base64):
+            path = decode_base64_image_to_temp_file(
+                img_b64,
+                logger=logger,
+                request_id=f"{request_id}_{idx}",
+            )
+            temp_paths.append(path)
+
+        inference_started_at = timer_start()
+        emit_event(
+            logger,
+            logging.INFO,
+            "predict_batch_inference_started",
+            request_id=request_id,
+            service=SERVICE_NAME,
+            batch_size=len(temp_paths),
+        )
+
+        prompt = str(req.options.get("prompt", state["prompt"]))
+        processor = state["processor"]
+        model = state["model"]
+        torch = state["torch"]
+        process_vision_info = state["process_vision_info"]
+        device = state["device"]
+
+        texts = []
+        for path in temp_paths:
+            image_uri = f"file://{path}"
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "image": image_uri},
+                        {"type": "text", "text": prompt},
+                    ],
+                }
+            ]
+
+            with Image.open(path) as image:
+                image.convert("RGB")
+
+            text = processor.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True,
+            )
+            image_inputs, video_inputs = process_vision_info(messages)
+
+            inputs = processor(
+                text=[text],
+                images=image_inputs,
+                videos=video_inputs,
+                padding=True,
+                return_tensors="pt",
+            )
+            inputs = {key: value.to(device) for key, value in inputs.items()}
+
+            with torch.inference_mode():
+                generated_ids = model.generate(
+                    **inputs,
+                    max_new_tokens=state["max_new_tokens"],
+                    do_sample=False,
+                )
+
+            generated_ids_trimmed = [
+                out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs["input_ids"], generated_ids)
+            ]
+            outputs = processor.batch_decode(
+                generated_ids_trimmed,
+                skip_special_tokens=True,
+                clean_up_tokenization_spaces=False,
+            )
+
+            result_text = str(outputs[0]).strip() if outputs else ""
+            texts.append(result_text)
+
+        success = True
+        emit_event(
+            logger,
+            logging.INFO,
+            "predict_batch_inference_succeeded",
+            request_id=request_id,
+            service=SERVICE_NAME,
+            duration_ms=elapsed_ms(inference_started_at),
+            num_results=len(texts),
+        )
+        return {"texts": texts}
+    except Exception as exc:
+        emit_event(
+            logger,
+            logging.ERROR,
+            "predict_batch_request_failed",
+            request_id=request_id,
+            service=SERVICE_NAME,
+            error_type=type(exc).__name__,
+            error=str(exc),
+            exc_info=True,
+        )
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    finally:
+        for path in temp_paths:
+            try:
+                Path(path).unlink(missing_ok=True)
+            except Exception as cleanup_exc:
+                emit_event(
+                    logger,
+                    logging.WARNING,
+                    "temp_file_cleanup_failed",
+                    request_id=request_id,
+                    service=SERVICE_NAME,
+                    error_type=type(cleanup_exc).__name__,
+                    error=str(cleanup_exc),
+                    file_path=path,
+                )
+
+        emit_event(
+            logger,
+            logging.INFO,
+            "predict_batch_request_completed",
             request_id=request_id,
             service=SERVICE_NAME,
             success=success,

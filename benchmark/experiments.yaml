@@ -23,11 +23,11 @@ datasets:
   #   limit: 50
   #   single_words: true
   
-  - id: "testset_800"
-    labels_csv: "dane/testset/labels.csv"
-    images_dir: "dane/testset/images"
-    limit: 32
-    single_words: false
+  # - id: "testset_800"
+  #   labels_csv: "dane/testset/labels.csv"
+  #   images_dir: "dane/testset/images"
+  #   limit: 32
+  #   single_words: false
 
   - id: "prescriptions"
     labels_csv: "dane/RxHandBD-Raw/Prescription_Labels.csv"
@@ -40,7 +40,7 @@ models:
   - id: "tesseract_pol"
     service_name: "tesseract-pol"
     base_url: "http://localhost:8007"
-    enabled: false
+    enabled: true
     timeout: 120
     options:
       language: "pol"
@@ -51,7 +51,7 @@ models:
   - id: "easyocr"
     service_name: "easyocr"
     base_url: "http://localhost:8001"
-    enabled: false
+    enabled: true
     timeout: 120
     options:
       langs: ["pl", "en"]
@@ -61,7 +61,7 @@ models:
   - id: "rysocr"
     service_name: "rysocr"
     base_url: "http://localhost:8006"
-    enabled: false
+    enabled: true
     timeout: 36000
     options:
       adapter_model_id: "kacperwikiel/RysOCR"
@@ -77,7 +77,7 @@ models:
   - id: "trocr"
     service_name: "trocr"
     base_url: "http://localhost:8002"
-    enabled: false
+    enabled: true
     timeout: 3600
     options:
       model_id: "microsoft/trocr-base-handwritten"
@@ -91,7 +91,7 @@ models:
   - id: "paddleocr"
     service_name: "paddleocr"
     base_url: "http://localhost:8003"
-    enabled: false
+    enabled: true
     timeout: 240
     options:
       rec_model_name: "PP-OCRv4_mobile_rec"
@@ -104,7 +104,7 @@ models:
   - id: "parseq"
     service_name: "parseq"
     base_url: "http://localhost:8004"
-    enabled: false
+    enabled: true
     timeout: 240
     options:
       device: "cuda"
@@ -119,7 +119,7 @@ models:
   - id: "calamari"
     service_name: "calamari"
     base_url: "http://localhost:8005"
-    enabled: false
+    enabled: true
     timeout: 240
     options:
       model: "idiotikon"
@@ -132,7 +132,7 @@ models:
   - id: "surya"
     service_name: "surya"
     base_url: "http://localhost:8008"
-    enabled: true
+    enabled: false
     timeout: 600
     options:
       device: "cuda"
@@ -144,7 +144,7 @@ models:
   - id: "got_ocr"
     service_name: "got-ocr"
     base_url: "http://localhost:8009"
-    enabled: false
+    enabled: true
     timeout: 900
     options:
       model_id: "ucaslcl/GOT-OCR2_0"
@@ -156,7 +156,7 @@ models:
   - id: "qwen2_5_vl"
     service_name: "qwen2_5_vl"
     base_url: "http://localhost:8010"
-    enabled: false
+    enabled: true
     timeout: 7200
     options:
       model_id: "Qwen/Qwen2.5-VL-3B-Instruct" # 7B przy wiekszym VRAM
@@ -169,7 +169,7 @@ models:
   - id: "kraken"
     service_name: "kraken"
     base_url: "http://localhost:8011"
-    enabled: false
+    enabled: true
     timeout: 600
     options:
       model_path: "modele/cache/kraken/199fb0ec-cf40-50aa-b99a-69ba1f42f0bc/lectaurep_base.mlmodel"

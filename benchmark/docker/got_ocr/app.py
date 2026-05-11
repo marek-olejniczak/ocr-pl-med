@@ -6,7 +6,13 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from PIL import Image
 
-from docker.common import LoadRequest, PredictRequest, decode_base64_image_to_temp_file, detect_cache_presence
+from docker.common import (
+    LoadRequest,
+    PredictRequest,
+    PredictBatchRequest,
+    decode_base64_image_to_temp_file,
+    detect_cache_presence,
+)
 from docker.logging_utils import elapsed_ms, emit_event, get_service_logger, new_request_id, timer_start
 
 app = FastAPI(title="got-ocr-service")
@@ -289,6 +295,113 @@ def predict(req: PredictRequest) -> dict:
             logger,
             logging.INFO,
             "predict_request_completed",
+            request_id=request_id,
+            service=SERVICE_NAME,
+            success=success,
+            duration_ms=elapsed_ms(request_started_at),
+        )
+
+
+@app.post("/predict_batch")
+def predict_batch(req: PredictBatchRequest) -> dict:
+    request_id = new_request_id()
+    request_started_at = timer_start()
+    temp_paths = []
+    success = False
+
+    emit_event(
+        logger,
+        logging.INFO,
+        "predict_batch_request_received",
+        request_id=request_id,
+        service=SERVICE_NAME,
+        num_images=len(req.images_base64),
+        options_keys=sorted(req.options.keys()),
+    )
+
+    if not req.images_base64:
+        return {"texts": []}
+
+    try:
+        state = get_state(req.options)
+
+        for idx, img_b64 in enumerate(req.images_base64):
+            path = decode_base64_image_to_temp_file(
+                img_b64,
+                logger=logger,
+                request_id=f"{request_id}_{idx}",
+            )
+            temp_paths.append(path)
+
+        inference_started_at = timer_start()
+        emit_event(
+            logger,
+            logging.INFO,
+            "predict_batch_inference_started",
+            request_id=request_id,
+            service=SERVICE_NAME,
+            batch_size=len(temp_paths),
+        )
+
+        tokenizer = state["tokenizer"]
+        model = state["model"]
+        torch = state["torch"]
+
+        texts = []
+        with torch.inference_mode():
+            for path in temp_paths:
+                with Image.open(path) as image:
+                    image.convert("RGB")
+                    text = model.chat(
+                        tokenizer,
+                        path,
+                        ocr_type="ocr",
+                    )
+                texts.append(str(text).strip())
+
+        success = True
+        emit_event(
+            logger,
+            logging.INFO,
+            "predict_batch_inference_succeeded",
+            request_id=request_id,
+            service=SERVICE_NAME,
+            duration_ms=elapsed_ms(inference_started_at),
+            num_results=len(texts),
+        )
+        return {"texts": texts}
+    except Exception as exc:
+        emit_event(
+            logger,
+            logging.ERROR,
+            "predict_batch_request_failed",
+            request_id=request_id,
+            service=SERVICE_NAME,
+            error_type=type(exc).__name__,
+            error=str(exc),
+            exc_info=True,
+        )
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    finally:
+        for path in temp_paths:
+            try:
+                Path(path).unlink(missing_ok=True)
+            except Exception as cleanup_exc:
+                emit_event(
+                    logger,
+                    logging.WARNING,
+                    "temp_file_cleanup_failed",
+                    request_id=request_id,
+                    service=SERVICE_NAME,
+                    error_type=type(cleanup_exc).__name__,
+                    error=str(cleanup_exc),
+                    file_path=path,
+                )
+
+        emit_event(
+            logger,
+            logging.INFO,
+            "predict_batch_request_completed",
             request_id=request_id,
             service=SERVICE_NAME,
             success=success,
