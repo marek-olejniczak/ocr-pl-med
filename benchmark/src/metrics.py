@@ -18,9 +18,11 @@ class HTRMetricsEvaluator:
 	rejestrowac dodatkowe metryki bez zmian w evaluatorze glownym.
 	"""
 
-	def __init__(self) -> None:
+	def __init__(self, near_perfect_tolerance: int = 1) -> None:
 		self._metrics: Dict[str, MetricFn] = {}
+		self.set_near_perfect_tolerance(near_perfect_tolerance)
 		self.register_metric("ema", self.exact_match_accuracy)
+		self.register_metric("near_perfect_match", self.near_perfect_match_accuracy)
 		self.register_metric("cer", self.character_error_rate)
 		self.register_metric("wer", self.word_error_rate)
 		self.register_metric("levenshtein_distance", self.mean_levenshtein_distance)
@@ -28,6 +30,12 @@ class HTRMetricsEvaluator:
 	def register_metric(self, name: str, func: MetricFn) -> None:
 		"""Dodaje nowa metryke obliczana na parach (label, prediction)."""
 		self._metrics[name] = func
+
+	def set_near_perfect_tolerance(self, tolerance: int) -> None:
+		"""Ustawia tolerancje (w znakach) dla near-perfect matching."""
+		if tolerance < 0:
+			raise ValueError("Tolerancja musi byc >= 0")
+		self._near_perfect_tolerance = int(tolerance)
 
 	@staticmethod
 	def _normalize_text(text: str) -> str:
@@ -93,7 +101,7 @@ class HTRMetricsEvaluator:
 	@classmethod
 	def mean_levenshtein_distance(cls, labels: Sequence[str], predictions: Sequence[str]) -> float:
 		"""
-		Srednia odleglosc Levenshteina miedzy znormalizowanymi etykietami a predykcjami.
+		Srednia odleglosc Levenshteina (po znakach) miedzy znormalizowanymi etykietami a predykcjami.
         """
 		if not labels:
 			return 0.0
@@ -102,6 +110,22 @@ class HTRMetricsEvaluator:
 			for gt, pred in zip(labels, predictions)
 		]
 		return float(sum(distances) / len(distances))
+
+	def near_perfect_match_accuracy(self, labels: Sequence[str], predictions: Sequence[str]) -> float:
+		"""
+		Procent przypadkow, w ktorych odleglosc Levenshteina nie przekracza tolerancji.
+		"""
+		if not labels:
+			return 0.0
+		matches = sum(
+			1
+			for gt, pred in zip(labels, predictions)
+			if self._levenshtein_distance(
+				self._normalize_text(gt), self._normalize_text(pred)
+			)
+			<= self._near_perfect_tolerance
+		)
+		return matches / len(labels)
 
 	@classmethod
 	def character_error_rate(cls, labels: Sequence[str], predictions: Sequence[str]) -> float:
