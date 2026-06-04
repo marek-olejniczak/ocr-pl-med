@@ -6,7 +6,7 @@ import time
 
 from orchestrator.benchmark import BenchmarkRunner
 from orchestrator.client import HTTPModelWrapper
-from src.experiment_results import create_run_dir, write_dataset_results
+from src.experiment_results import create_run_dir, export_overleaf_tables, write_dataset_results
 from src.metrics import HTRMetricsEvaluator
 
 
@@ -174,6 +174,8 @@ class AutoRunner:
                             runner = BenchmarkRunner(model=http_model)
 
                             for dataset in self.experiment_config.get("datasets", []):
+                                if not dataset.get("enabled", True):
+                                    continue
                                 print(f"--- Uruchamiam benchmark {model['id']} na zbiorze {dataset['id']} ---")
                                 
                                 try:
@@ -226,6 +228,13 @@ class AutoRunner:
                     time.sleep(settings.get("cooldown_seconds", 5))
         
         finally:
+            if settings.get("export_overleaf_table", False):
+                try:
+                    output_path = export_overleaf_tables(run_dir, self.experiment_config)
+                    print(f"Zapisano tabele Overleaf: {output_path}")
+                except Exception as exc:
+                    print(f"[BLAD EKSPORTU] Nie udalo sie zapisac tabel Overleaf: {exc}")
+
             if wandb_run is not None:
                 wandb_run.finish()
         
