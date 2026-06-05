@@ -1,2 +1,4 @@
-Pillow
-Flask
+opencv-python
+numpy
+noteshrink
+ultralytics

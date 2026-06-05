@@ -1,0 +1,7 @@
+.DS_Store
+__pycache__/
+*.pyc
+yolo_dataset/
+inference_compare/
+runs/
+wandb/
