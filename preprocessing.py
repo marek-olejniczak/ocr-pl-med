@@ -41,6 +41,9 @@ class DocumentPreprocessor:
         "morph_iters": 1,
         # _add_border — white padding around the final image
         "border_px": 10,
+        # _load_bgr — crop to the opaque alpha bounding box; disable to keep
+        # geometry intact (benchmark needs GT boxes to stay valid)
+        "alpha_crop": True,
     }
 
     def __init__(self, config: dict = None):
@@ -72,17 +75,18 @@ class DocumentPreprocessor:
         if img.ndim == 2:
             return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
         if img.shape[2] == 4:
-            alpha = img[:, :, 3]
-            # Use a high opacity threshold (>200) to exclude semi-transparent shadow
-            # gradients at the page edge — these have alpha 20-150 and corrupt detection.
-            # A column/row must have >50% of its pixels above the threshold to be kept.
-            opaque = (alpha > 200).astype(np.float32)
-            rows = opaque.mean(axis=1) > 0.5
-            cols = opaque.mean(axis=0) > 0.5
-            r0, r1 = np.argmax(rows), len(rows) - np.argmax(rows[::-1])
-            c0, c1 = np.argmax(cols), len(cols) - np.argmax(cols[::-1])
-            img = img[r0:r1, c0:c1]
-            # composite cropped region against white
+            if self.config["alpha_crop"]:
+                alpha = img[:, :, 3]
+                # Use a high opacity threshold (>200) to exclude semi-transparent shadow
+                # gradients at the page edge — these have alpha 20-150 and corrupt detection.
+                # A column/row must have >50% of its pixels above the threshold to be kept.
+                opaque = (alpha > 200).astype(np.float32)
+                rows = opaque.mean(axis=1) > 0.5
+                cols = opaque.mean(axis=0) > 0.5
+                r0, r1 = np.argmax(rows), len(rows) - np.argmax(rows[::-1])
+                c0, c1 = np.argmax(cols), len(cols) - np.argmax(cols[::-1])
+                img = img[r0:r1, c0:c1]
+            # composite against white
             a = img[:, :, 3:4].astype(np.float32) / 255.0
             bgr = img[:, :, :3].astype(np.float32)
             img = (bgr * a + np.full_like(bgr, 255.0) * (1.0 - a)).astype(np.uint8)
