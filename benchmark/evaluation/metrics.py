@@ -57,3 +57,113 @@ def match_greedy(gt_boxes, pred_boxes, scores, iou_thresh=0.5):
             matched_gt.add(g)
             matches.append((g, int(p), float(col[g])))
     return matches
+
+
+def detection_metrics(n_matched, n_gt, n_pred):
+    """Precision/recall/F1 from one-to-one match counts."""
+    precision = n_matched / n_pred if n_pred else 0.0
+    recall = n_matched / n_gt if n_gt else 0.0
+    f1 = (2 * precision * recall / (precision + recall)
+          if (precision + recall) else 0.0)
+    return {"precision": precision, "recall": recall, "f1": f1}
+
+
+def line_metrics(gt_boxes, pred_boxes, scores, iou_thresh=0.5,
+                 part_thresh=0.5, coverage_thresh=0.25):
+    """Line-level error analysis for a single image.
+
+    split: GT containing >=2 preds mostly inside it (inter/area_pred >= part_thresh)
+    merge: pred containing >=2 GTs mostly inside it (inter/area_gt >= part_thresh);
+           merge_rate counts absorbed GTs, so split_rate and merge_rate share a
+           denominator (n_gt)
+    missed: GT unmatched 1:1, not split, with total coverage < coverage_thresh.
+            Coverage sums per-pred intersections so overlapping preds overcount;
+            upper bound is fine here - it only makes "missed" stricter.
+    """
+    gt = np.asarray(gt_boxes, dtype=float).reshape(-1, 4)
+    pred = np.asarray(pred_boxes, dtype=float).reshape(-1, 4)
+    n_gt, n_pred = gt.shape[0], pred.shape[0]
+
+    matches = match_greedy(gt, pred, scores, iou_thresh) if n_pred else []
+    matched_gts = {g for g, _, _ in matches}
+    matched_ious = [iou for _, _, iou in matches]
+
+    split_ids, absorbed_gts = set(), set()
+    coverage = np.zeros(n_gt)
+    if n_gt and n_pred:
+        inter = intersection_matrix(gt, pred)
+        area_gt = gt[:, 2] * gt[:, 3]
+        area_pred = pred[:, 2] * pred[:, 3]
+        frac_of_pred = inter / np.maximum(area_pred[None, :], 1e-9)
+        frac_of_gt = inter / np.maximum(area_gt[:, None], 1e-9)
+        coverage = np.minimum(1.0, frac_of_gt.sum(axis=1))
+        for g in range(n_gt):
+            if (frac_of_pred[g] >= part_thresh).sum() >= 2:
+                split_ids.add(g)
+        for p in range(n_pred):
+            inside = np.where(frac_of_gt[:, p] >= part_thresh)[0]
+            if len(inside) >= 2:
+                absorbed_gts.update(inside.tolist())
+
+    missed = [g for g in range(n_gt)
+              if g not in matched_gts and g not in split_ids
+              and coverage[g] < coverage_thresh]
+
+    return {
+        "n_gt": n_gt,
+        "n_pred": n_pred,
+        "n_matched": len(matches),
+        "n_missed": len(missed),
+        "n_split": len(split_ids),
+        "n_merged": len(absorbed_gts),
+        "missed_rate": len(missed) / n_gt if n_gt else 0.0,
+        "split_rate": len(split_ids) / n_gt if n_gt else 0.0,
+        "merge_rate": len(absorbed_gts) / n_gt if n_gt else 0.0,
+        "iou_mean": float(np.mean(matched_ious)) if matched_ious else 0.0,
+        "iou_median": float(np.median(matched_ious)) if matched_ious else 0.0,
+        "matched_ious": matched_ious,
+        "matched_pred_ids": sorted(p for _, p, _ in matches),
+    }
+
+
+def coco_map(gt_json_path, predictions):
+    """COCO mAP via pycocotools (reference implementation).
+
+    predictions: list of dicts in COCO results format
+    Returns {"ap": AP@[.5:.95], "ap50": ..., "ap75": ..., "ar100": ...}.
+    """
+    import contextlib
+    import io
+
+    from pycocotools.coco import COCO
+    from pycocotools.cocoeval import COCOeval
+
+    with contextlib.redirect_stdout(io.StringIO()):
+        coco_gt = COCO(str(gt_json_path))
+        if not predictions:
+            return {"ap": 0.0, "ap50": 0.0, "ap75": 0.0, "ar100": 0.0}
+        coco_dt = coco_gt.loadRes(predictions)
+        ev = COCOeval(coco_gt, coco_dt, iouType="bbox")
+        ev.evaluate()
+        ev.accumulate()
+        ev.summarize()
+    s = ev.stats
+    # stats: [AP, AP50, AP75, APs, APm, APl, AR1, AR10, AR100, ARs, ARm, ARl]
+    return {"ap": float(s[0]), "ap50": float(s[1]),
+            "ap75": float(s[2]), "ar100": float(s[8])}
+
+
+def ece(confs, corrects, n_bins=10):
+    """Expected Calibration Error over equal-width confidence bins."""
+    confs = np.asarray(confs, dtype=float)
+    corrects = np.asarray(corrects, dtype=float)
+    if confs.size == 0:
+        return 0.0
+    edges = np.linspace(0, 1, n_bins + 1)
+    total = 0.0
+    for lo, hi in zip(edges[:-1], edges[1:]):
+        mask = (confs >= lo) & (confs < hi) if hi < 1 else (confs >= lo) & (confs <= hi)
+        if not mask.any():
+            continue
+        total += mask.mean() * abs(corrects[mask].mean() - confs[mask].mean())
+    return float(total)

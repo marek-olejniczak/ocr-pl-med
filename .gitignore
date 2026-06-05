@@ -5,3 +5,5 @@ yolo_dataset/
 inference_compare/
 runs/
 wandb/
+benchmark/dataset/
+benchmark/results/
