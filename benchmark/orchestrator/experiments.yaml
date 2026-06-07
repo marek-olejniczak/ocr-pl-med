@@ -16,7 +16,11 @@ data:
     yolo: dataset/yolo_prep/data.yaml
     images_root: dataset/prep
 
+# anotacje sa wspolne dla raw i prep (preprocessing zachowuje geometrie),
+# wiec train/val coco sa globalne; per-wariant rozni sie tylko images_root
 test_coco: dataset/annotations/instances_test.json
+train_coco: dataset/annotations/instances_train.json
+val_coco: dataset/annotations/instances_val.json
 
 models:
   # lr0: dodac per-model po lr-find (yolov8n potwierdzony ~5e-4 = default;
@@ -24,4 +28,13 @@ models:
   yolov8:  {service: ultralytics, weights: yolov8n.pt,  finetune: true, zeroshot: false, lr0: 0.0005}
   yolo11:  {service: ultralytics, weights: yolo11n.pt,  finetune: true, zeroshot: false}
   rtdetr:  {service: ultralytics, weights: rtdetr-l.pt, finetune: true, zeroshot: false}
-  # maskrcnn / dbnet / kraken / surya — dolozymy z kolejnymi kontenerami
+  # Faster R-CNN R50-FPN (detekcja, COCO-native -> data_format: coco). Diagnostyka/
+  # line-val sa ultralytics-only, wiec train_flags puste; lr0 po lr-find.
+  frcnn:
+    service: detectron2
+    weights: COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml
+    finetune: true
+    zeroshot: false
+    data_format: coco
+    train_flags: []
+  # dbnet / kraken / surya — dolozymy z kolejnymi kontenerami

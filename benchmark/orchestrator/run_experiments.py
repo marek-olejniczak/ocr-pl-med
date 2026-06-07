@@ -26,7 +26,16 @@ import yaml
 BENCH_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BENCH_ROOT))
 
-CANONICAL_CKPT = "train/weights/best.pt"   # ultralytics fitness; best_<metric>.pt = analysis
+# canonical checkpoint to evaluate, per framework (best_<metric>.pt are analysis extras)
+CKPT_REL = {
+    "ultralytics": "train/weights/best.pt",  # ultralytics fitness
+    "detectron2": "model_final.pth",
+}
+DEFAULT_CKPT = "train/weights/best.pt"
+
+
+def _ckpt_rel(service):
+    return CKPT_REL.get(service, DEFAULT_CKPT)
 
 
 def load_config(path):
@@ -41,10 +50,12 @@ def build_matrix(cfg, results_dir="results"):
         if mc.get("finetune"):
             for variant, dc in cfg["data"].items():
                 train_id = f"{model}_ft-{variant}"
-                ckpts[train_id] = f"{results_dir}/checkpoints/{train_id}/{CANONICAL_CKPT}"
+                ckpts[train_id] = (f"{results_dir}/checkpoints/{train_id}/"
+                                   f"{_ckpt_rel(mc['service'])}")
                 jobs.append({"kind": "train", "exp_id": train_id,
                              "model": model, "service": mc["service"],
-                             "weights": mc["weights"], "data_yaml": dc["yolo"]})
+                             "weights": mc["weights"], "data_yaml": dc["yolo"],
+                             "images_root": dc["images_root"]})
                 for ev, edc in cfg["data"].items():
                     eid = f"{train_id}_eval-{ev}"
                     jobs.append({"kind": "predict", "exp_id": eid,
@@ -66,18 +77,30 @@ def build_matrix(cfg, results_dir="results"):
 def job_command(job, cfg, local, results_dir="results"):
     d = cfg["defaults"]
     if job["kind"] == "train":
+        mc = cfg["models"][job["model"]]
         # per-model lr0 (from lr-find) overrides defaults.lr0; ultralytics 'auto'
         # default (~0.002) sits on the unstable side for these models
-        lr0 = cfg["models"][job["model"]].get("lr0", d.get("lr0"))
+        lr0 = mc.get("lr0", d.get("lr0"))
+        # data_format seam: YOLO models take a data.yaml; COCO-native frameworks
+        # (detectron2) take the shared train/val COCO + the variant's images_root
+        if mc.get("data_format", "yolo") == "coco":
+            data_args = ["--train-coco", cfg["train_coco"],
+                         "--val-coco", cfg["val_coco"],
+                         "--images-root", job["images_root"]]
+        else:
+            data_args = ["--data", job["data_yaml"]]
+        # train flags are framework-specific (--line-val/--diagnostics are
+        # ultralytics-only); per-model override falls back to defaults
+        flags = mc.get("train_flags", d.get("train_flags", []))
         argv = ["python", f"docker/{job['service']}/cli.py", "train",
                 "--weights", job["weights"],
-                "--data", job["data_yaml"],
+                *data_args,
                 "--out", f"{results_dir}/checkpoints/{job['exp_id']}",
                 "--epochs", str(d["epochs"]),
                 "--imgsz", str(d["imgsz"]),
                 "--batch", str(d["batch"]),
                 *(["--lr0", str(lr0)] if lr0 is not None else []),
-                *d.get("train_flags", [])]
+                *flags]
     elif job["kind"] == "predict":
         argv = ["python", f"docker/{job['service']}/cli.py", "predict",
                 "--weights", job["weights"],
@@ -104,8 +127,8 @@ def job_command(job, cfg, local, results_dir="results"):
 def is_done(job, results_dir):
     results_dir = Path(results_dir)
     if job["kind"] == "train":
-        return (results_dir / "checkpoints" / job["exp_id"]
-                / "train" / "weights" / "best.pt").exists()
+        ckpt = _ckpt_rel(job.get("service", "ultralytics"))
+        return (results_dir / "checkpoints" / job["exp_id"] / ckpt).exists()
     if job["kind"] == "predict":
         return (results_dir / "predictions" / job["exp_id"]
                 / "predictions.json").exists()

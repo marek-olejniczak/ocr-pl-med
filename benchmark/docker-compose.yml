@@ -21,3 +21,19 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+
+  detectron2:
+    build: ./docker/detectron2
+    shm_size: "8gb"
+    volumes:
+      - .:/benchmark
+    working_dir: /benchmark
+    environment:
+      - WANDB_API_KEY
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
