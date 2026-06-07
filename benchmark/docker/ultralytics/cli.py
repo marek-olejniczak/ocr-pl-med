@@ -42,8 +42,20 @@ def speed_stats(speeds_ms):
 
 
 def cmd_train(args):
+    trainer = None
+    if args.diagnostics:
+        import sys
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # benchmark/
+        from training_diagnostics.core import JsonlSink
+        from training_diagnostics.ultralytics_hooks import pick_trainer
+        cls = pick_trainer(args.weights)
+        cls.sink = JsonlSink(Path(args.out) / "train" / "diagnostics.jsonl")
+        cls.probe_every = args.probe_every
+        trainer = cls
+
     model = get_model(args.weights)
     model.train(
+        trainer=trainer,
         data=args.data,
         epochs=args.epochs,
         imgsz=args.imgsz,
@@ -114,6 +126,11 @@ def main(argv=None):
     t.add_argument("--warmup-epochs", type=float, default=3.0)
     t.add_argument("--seed", type=int, default=0)
     t.add_argument("--device", default=None)
+    t.add_argument("--diagnostics", action="store_true",
+                   help="log per-step optimisation diagnostics to "
+                        "train/diagnostics.jsonl")
+    t.add_argument("--probe-every", type=int, default=100,
+                   help="probe-batch diagnostics interval (0 disables)")
     t.set_defaults(fn=cmd_train)
 
     p = sub.add_parser("predict")
