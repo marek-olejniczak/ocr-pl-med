@@ -7,3 +7,5 @@ runs/
 wandb/
 benchmark/dataset/
 benchmark/results/
+benchmark/*.pt
+benchmark/.venv/

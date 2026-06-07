@@ -89,7 +89,9 @@ def job_command(job, cfg, local, results_dir="results"):
                 "--exp-id", job["exp_id"],
                 "--out-dir", str(results_dir),
                 "--conf-thresh", str(d["conf_thresh"])]
-    if not local:
+    # eval is model-agnostic host-side python; only train/predict need the
+    # model's container (pycocotools lives in the host env, not in images)
+    if not local and job["kind"] != "eval":
         argv = ["docker", "compose", "run", "--rm",
                 job.get("service", "ultralytics")] + argv
     return argv
@@ -140,7 +142,7 @@ def main(argv=None):
     ran = skipped = failed = 0
     for job in jobs:
         cmd = job_command(job, cfg, args.local, args.results_dir)
-        if args.local:
+        if cmd[0] == "python":
             cmd = [sys.executable] + cmd[1:]   # the env's python, not PATH's
         if not args.force and is_done(job, args.results_dir):
             print(f"skip  {job['kind']:8s} {job['exp_id']}")
