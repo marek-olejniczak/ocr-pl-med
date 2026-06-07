@@ -54,11 +54,32 @@ def cmd_train(args):
     import sys
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # benchmark/
 
+    # single source of truth for the training hyperparameters: the same dict
+    # feeds model.train() and the wandb config, so the config can never drift
+    # from what actually ran (e.g. optimizer, cos_lr were hardcoded before and
+    # showed up as null in wandb)
+    train_kwargs = dict(
+        data=args.data,
+        epochs=args.epochs,
+        imgsz=args.imgsz,
+        batch=args.batch,
+        optimizer="AdamW",
+        lr0=args.lr0,
+        lrf=args.lrf,
+        warmup_epochs=args.warmup_epochs,
+        cos_lr=True,
+        seed=args.seed,
+        deterministic=True,
+        patience=args.patience,
+        device=args.device,
+    )
+
     wandb_run = None
     if args.wandb:
         import wandb
         wandb_run = wandb.init(project=args.wandb_project,
-                               name=Path(args.out).name, config=vars(args))
+                               name=Path(args.out).name,
+                               config={**vars(args), **train_kwargs})
 
     trainer = None
     if args.diagnostics:
@@ -92,24 +113,12 @@ def cmd_train(args):
 
     model.train(
         trainer=trainer,
-        data=args.data,
-        epochs=args.epochs,
-        imgsz=args.imgsz,
-        batch=args.batch,
-        optimizer="AdamW",
-        lr0=args.lr0,
-        lrf=args.lrf,
-        warmup_epochs=args.warmup_epochs,
-        cos_lr=True,
-        seed=args.seed,
-        deterministic=True,
-        patience=args.patience,
-        device=args.device,
         # absolute, else ultralytics buries a relative project under
         # runs/detect/<project> and our paths (+ wandb artifacts) miss it
         project=str(Path(args.out).resolve()),
         name="train",
         exist_ok=True,
+        **train_kwargs,
     )
 
     weights_dir = Path(args.out).resolve() / "train" / "weights"
