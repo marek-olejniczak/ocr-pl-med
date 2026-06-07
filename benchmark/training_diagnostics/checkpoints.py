@@ -68,14 +68,15 @@ class ValLineMetrics:
         import cv2
         from ultralytics import YOLO
 
-        from evaluation.metrics import detection_metrics, line_metrics
+        from evaluation.metrics import detection_metrics, ece, line_metrics
 
         last = Path(trainer.save_dir) / "weights" / "last.pt"
         if not last.exists():
             return
         model = YOLO(str(last))
-        totals = {"n_gt": 0, "n_pred": 0, "n_matched": 0, "n_missed": 0}
-        ious = []
+        totals = {"n_gt": 0, "n_pred": 0, "n_matched": 0,
+                  "n_missed": 0, "n_split": 0, "n_merged": 0}
+        ious, confs, correct = [], [], []
         for img_path in self.val_images:
             lbl = self.val_labels / f"{img_path.stem}.txt"
             if not lbl.exists():
@@ -87,18 +88,26 @@ class ValLineMetrics:
             gt = read_yolo_labels(lbl, w, h)
             r = model.predict(str(img_path), conf=self.conf, imgsz=self.imgsz,
                               verbose=False)[0]
+            scores = r.boxes.conf.tolist()
             pred = [[float(a), float(b), float(c - a), float(d - b)]
                     for a, b, c, d in r.boxes.xyxy.tolist()]
-            m = line_metrics(gt, pred, r.boxes.conf.tolist())
+            m = line_metrics(gt, pred, scores)
             for k in totals:
                 totals[k] += m[k]
             ious.extend(m["matched_ious"])
+            matched = set(m["matched_pred_ids"])
+            confs.extend(scores)
+            correct.extend(1.0 if i in matched else 0.0
+                           for i in range(len(scores)))
 
-        agg = detection_metrics(totals["n_matched"], totals["n_gt"],
-                                totals["n_pred"])
-        agg["missed_rate"] = (totals["n_missed"] / totals["n_gt"]
-                              if totals["n_gt"] else 0.0)
+        n_gt = totals["n_gt"]
+        agg = detection_metrics(totals["n_matched"], n_gt, totals["n_pred"])
+        agg["missed_rate"] = totals["n_missed"] / n_gt if n_gt else 0.0
+        agg["split_rate"] = totals["n_split"] / n_gt if n_gt else 0.0
+        agg["merge_rate"] = totals["n_merged"] / n_gt if n_gt else 0.0
+        agg["iou_mean"] = float(np.mean(ious)) if ious else 0.0
         agg["iou_median"] = float(np.median(ious)) if ious else 0.0
+        agg["ece"] = ece(np.array(confs), np.array(correct))
 
         for key in self.tracker.update(agg):
             dst = last.parent / f"best_{key}.pt"
