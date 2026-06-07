@@ -9,3 +9,5 @@ benchmark/dataset/
 benchmark/results/
 benchmark/*.pt
 benchmark/.venv/
+benchmark/.env
+.env

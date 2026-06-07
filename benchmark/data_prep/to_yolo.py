@@ -73,8 +73,12 @@ def convert_coco_to_yolo(coco_path, images_root, out_dir, split, copy=False):
 
 
 def write_data_yaml(out_dir):
+    # No `path:` key on purpose: ultralytics then resolves train/val/test
+    # against the data.yaml's own directory, so the layout works wherever the
+    # tree is mounted (host venv AND the /benchmark bind mount in Docker).
+    # Baking an absolute path here breaks the moment host and container paths
+    # differ.
     (Path(out_dir) / "data.yaml").write_text(
-        f"path: {Path(out_dir).resolve()}\n"
         "train: images/train\n"
         "val: images/val\n"
         "test: images/test\n"
