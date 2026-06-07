@@ -108,7 +108,10 @@ def cmd_train(args):
             max_images=args.line_val_max_images,
             sink=Fanout(
                 JsonlSink(Path(args.out) / "train" / "val_metrics.jsonl"),
-                wandb_run.log if wandb_run else None))
+                wandb_run.log if wandb_run else None),
+            image_logger=wandb_run.log if wandb_run else None,
+            viz_per_source=args.viz_per_source,
+            viz_every=args.viz_every)
         model.add_callback("on_fit_epoch_end", cb)
 
     model.train(
@@ -235,6 +238,10 @@ def main(argv=None):
     t.add_argument("--line-val", action="store_true",
                    help="per-epoch line metrics on val + best_<metric>.pt")
     t.add_argument("--line-val-max-images", type=int, default=100)
+    t.add_argument("--viz-per-source", type=int, default=2,
+                   help="GT-vs-pred overlays logged per source (needs --wandb)")
+    t.add_argument("--viz-every", type=int, default=10,
+                   help="log prediction overlays every N epochs")
     t.add_argument("--wandb", action="store_true")
     t.add_argument("--wandb-project", default="line-benchmark")
     t.set_defaults(fn=cmd_train)
