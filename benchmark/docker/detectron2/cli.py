@@ -66,7 +66,14 @@ def cmd_train(args):
     from detectron2 import model_zoo
     from detectron2.data import DatasetCatalog
     from detectron2.data.datasets import register_coco_instances
-    from detectron2.engine import DefaultTrainer
+    from detectron2.engine import DefaultTrainer, HookBase
+    from detectron2.utils.events import get_event_storage
+
+    wandb_run = None
+    if args.wandb:
+        import wandb
+        wandb_run = wandb.init(project=args.wandb_project,
+                               name=Path(args.out).name, config=vars(args))
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -93,8 +100,34 @@ def cmd_train(args):
 
     trainer = DefaultTrainer(cfg)
     trainer.resume_or_load(resume=False)
+
+    if wandb_run:
+        # push detectron2's EventStorage scalars (losses, lr, and bbox/AP from
+        # the periodic COCO eval) to wandb. Our 9 line metrics are ultralytics-
+        # only during training; detectron2 gets them at the end via predict->eval.
+        class _WandbHook(HookBase):
+            def __init__(self, period):
+                self._period = period
+
+            def after_step(self):
+                it = self.trainer.iter
+                if (it + 1) % self._period:
+                    return
+                latest = get_event_storage().latest()
+                wandb.log({k: v for k, (v, _) in latest.items()}, step=it)
+
+        trainer.register_hooks([_WandbHook(args.wandb_period)])
+
     trainer.train()              # writes OUTPUT_DIR/model_final.pth
-    print(f"best checkpoint: {out / 'model_final.pth'}")
+
+    ckpt = out / "model_final.pth"
+    if wandb_run:
+        if ckpt.exists():
+            art = wandb.Artifact(f"{wandb_run.name}-model_final", type="model")
+            art.add_file(str(ckpt))
+            wandb.log_artifact(art)
+        wandb_run.finish()
+    print(f"best checkpoint: {ckpt}")
 
 
 def cmd_predict(args):
@@ -154,6 +187,10 @@ def main(argv=None):
     t.add_argument("--batch", type=int, default=16)
     t.add_argument("--lr0", type=float, default=0.0005)
     t.add_argument("--device", default=None)
+    t.add_argument("--wandb", action="store_true")
+    t.add_argument("--wandb-project", default="line-benchmark")
+    t.add_argument("--wandb-period", type=int, default=20,
+                   help="log detectron2 metrics to wandb every N iterations")
     t.set_defaults(fn=cmd_train)
 
     p = sub.add_parser("predict")
