@@ -3,6 +3,9 @@ defaults:
   imgsz: 640
   batch: 64
   conf_thresh: 0.25
+  # default LR z lr-find yolov8n (krzywa: pasmo 3e-4..1e-3, default ultralytics
+  # 0.002 juz na zboczu rosnacym). Per-model override ponizej po lr-find.
+  lr0: 0.0005
   train_flags: [--line-val, --diagnostics]
 
 data:
@@ -16,7 +19,9 @@ data:
 test_coco: dataset/annotations/instances_test.json
 
 models:
-  yolov8:  {service: ultralytics, weights: yolov8n.pt,  finetune: true, zeroshot: false}
+  # lr0: dodac per-model po lr-find (yolov8n potwierdzony ~5e-4 = default;
+  # yolo11n + rtdetr-l TODO, na razie biora defaults.lr0)
+  yolov8:  {service: ultralytics, weights: yolov8n.pt,  finetune: true, zeroshot: false, lr0: 0.0005}
   yolo11:  {service: ultralytics, weights: yolo11n.pt,  finetune: true, zeroshot: false}
   rtdetr:  {service: ultralytics, weights: rtdetr-l.pt, finetune: true, zeroshot: false}
   # maskrcnn / dbnet / kraken / surya — dolozymy z kolejnymi kontenerami

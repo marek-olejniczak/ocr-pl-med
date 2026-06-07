@@ -66,6 +66,9 @@ def build_matrix(cfg, results_dir="results"):
 def job_command(job, cfg, local, results_dir="results"):
     d = cfg["defaults"]
     if job["kind"] == "train":
+        # per-model lr0 (from lr-find) overrides defaults.lr0; ultralytics 'auto'
+        # default (~0.002) sits on the unstable side for these models
+        lr0 = cfg["models"][job["model"]].get("lr0", d.get("lr0"))
         argv = ["python", f"docker/{job['service']}/cli.py", "train",
                 "--weights", job["weights"],
                 "--data", job["data_yaml"],
@@ -73,6 +76,7 @@ def job_command(job, cfg, local, results_dir="results"):
                 "--epochs", str(d["epochs"]),
                 "--imgsz", str(d["imgsz"]),
                 "--batch", str(d["batch"]),
+                *(["--lr0", str(lr0)] if lr0 is not None else []),
                 *d.get("train_flags", [])]
     elif job["kind"] == "predict":
         argv = ["python", f"docker/{job['service']}/cli.py", "predict",
