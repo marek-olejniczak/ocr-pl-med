@@ -1,6 +1,10 @@
 services:
   ultralytics:
     build: ./docker/ultralytics
+    # Docker's default /dev/shm is 64MB; PyTorch DataLoader workers share
+    # tensors through it and overflow → "No space left on device". 8GB is
+    # plenty for batch 64 with 8 workers.
+    shm_size: "8gb"
     volumes:
       - .:/benchmark
       # UWAGA: symlinki w dataset/yolo_*/images wskazuja sciezki hosta -
