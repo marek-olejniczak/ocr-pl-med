@@ -207,7 +207,7 @@ def main(argv=None):
     t.add_argument("--out", required=True)
     t.add_argument("--epochs", type=int, default=100)
     t.add_argument("--imgsz", type=int, default=640)
-    t.add_argument("--batch", type=int, default=16)
+    t.add_argument("--batch", type=int, default=64)
     t.add_argument("--lr0", type=float, default=0.002)
     t.add_argument("--lrf", type=float, default=0.01)
     t.add_argument("--warmup-epochs", type=float, default=3.0)
@@ -246,7 +246,7 @@ def main(argv=None):
     f.add_argument("--lr-min", type=float, default=1e-6)
     f.add_argument("--lr-max", type=float, default=1e-1)
     f.add_argument("--imgsz", type=int, default=640)
-    f.add_argument("--batch", type=int, default=16)
+    f.add_argument("--batch", type=int, default=64)
     f.add_argument("--device", default=None)
     f.set_defaults(fn=cmd_lr_find)
 

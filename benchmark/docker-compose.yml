@@ -1,0 +1,19 @@
+services:
+  ultralytics:
+    build: ./docker/ultralytics
+    volumes:
+      - .:/benchmark
+      # UWAGA: symlinki w dataset/yolo_*/images wskazuja sciezki hosta -
+      # w kontenerze musza byc widoczne pod TA SAMA sciezka, np.:
+      # - /home/user/datasets/lines:/home/user/datasets/lines:ro
+      # albo generowac layout przez to_yolo --copy
+    working_dir: /benchmark
+    environment:
+      - WANDB_API_KEY
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

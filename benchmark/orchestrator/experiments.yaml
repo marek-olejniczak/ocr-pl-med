@@ -1,0 +1,22 @@
+defaults:
+  epochs: 100        # docelowy budzet ustalimy po pilocie na serwerze
+  imgsz: 640
+  batch: 64
+  conf_thresh: 0.25
+  train_flags: [--line-val, --diagnostics]
+
+data:
+  raw:
+    yolo: dataset/yolo_raw/data.yaml
+    images_root: ../../dataset
+  prep:
+    yolo: dataset/yolo_prep/data.yaml
+    images_root: dataset/prep
+
+test_coco: dataset/annotations/instances_test.json
+
+models:
+  yolov8:  {service: ultralytics, weights: yolov8n.pt,  finetune: true, zeroshot: false}
+  yolo11:  {service: ultralytics, weights: yolo11n.pt,  finetune: true, zeroshot: false}
+  rtdetr:  {service: ultralytics, weights: rtdetr-l.pt, finetune: true, zeroshot: false}
+  # maskrcnn / dbnet / kraken / surya — dolozymy z kolejnymi kontenerami
