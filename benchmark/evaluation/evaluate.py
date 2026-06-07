@@ -21,6 +21,7 @@ from evaluation.metrics import coco_map, detection_metrics, ece, line_metrics
 
 SUMMARY_COLUMNS = [
     "exp_id",
+    "conf_thresh",
     "ap",
     "ap50",
     "ap75",
@@ -50,12 +51,15 @@ def _group_by_image(gt, predictions):
     return gt_by_img, pred_by_img
 
 
-def _aggregate(gt, predictions, gt_json_path, image_ids):
+def _aggregate(gt, op_preds, all_preds, gt_json_path, image_ids):
     """Micro-averaged metrics over the given image subset.
 
     Matching happens per image - boxes from different pages can never pair up.
+    Line/detection/calibration metrics use op_preds (operating point, already
+    filtered by confidence); COCO mAP uses all_preds - the PR curve needs the
+    low-confidence detections too.
     """
-    gt_by_img, pred_by_img = _group_by_image(gt, predictions)
+    gt_by_img, pred_by_img = _group_by_image(gt, op_preds)
     totals = defaultdict(float)
     all_ious, all_confs, all_correct = [], [], []
     n_missed = n_split = n_merged = 0
@@ -96,7 +100,7 @@ def _aggregate(gt, predictions, gt_json_path, image_ids):
         }
     )
     ids = set(image_ids)
-    out.update(coco_map(gt_json_path, [p for p in predictions if p["image_id"] in ids]))
+    out.update(coco_map(gt_json_path, [p for p in all_preds if p["image_id"] in ids]))
     return out
 
 
@@ -120,10 +124,14 @@ def _subset_gt_file(gt, image_ids, tmp_dir):
     return path
 
 
-def evaluate_run(gt_json_path, predictions):
+def evaluate_run(gt_json_path, predictions, conf_thresh=0.25):
     gt = json.loads(Path(gt_json_path).read_text())
+    op_preds = [p for p in predictions if p["score"] >= conf_thresh]
     all_ids = [i["id"] for i in gt["images"]]
-    result = {"overall": _aggregate(gt, predictions, gt_json_path, all_ids)}
+    result = {
+        "conf_thresh": conf_thresh,
+        "overall": _aggregate(gt, op_preds, predictions, gt_json_path, all_ids),
+    }
 
     sources = _image_sources(gt)
     by_source = defaultdict(list)
@@ -134,18 +142,20 @@ def evaluate_run(gt_json_path, predictions):
         with tempfile.TemporaryDirectory() as td:
             for s, ids in by_source.items():
                 sub_path = _subset_gt_file(gt, ids, td)
-                result["per_source"][s] = _aggregate(gt, predictions, sub_path, ids)
+                result["per_source"][s] = _aggregate(
+                    gt, op_preds, predictions, sub_path, ids)
     return result
 
 
-def _append_summary(out_dir, exp_id, overall):
+def _append_summary(out_dir, exp_id, result):
     path = Path(out_dir) / "summary.csv"
     new = not path.exists()
     with path.open("a", newline="") as f:
         w = csv.DictWriter(f, fieldnames=SUMMARY_COLUMNS, extrasaction="ignore")
         if new:
             w.writeheader()
-        w.writerow({"exp_id": exp_id, **overall})
+        w.writerow({"exp_id": exp_id, "conf_thresh": result["conf_thresh"],
+                    **result["overall"]})
 
 
 def main(argv=None):
@@ -154,15 +164,18 @@ def main(argv=None):
     ap.add_argument("--pred", required=True)
     ap.add_argument("--exp-id", required=True)
     ap.add_argument("--out-dir", default="results")
+    ap.add_argument("--conf-thresh", type=float, default=0.25,
+                    help="operating point for line/detection metrics; "
+                         "mAP always uses all predictions")
     args = ap.parse_args(argv)
 
     predictions = json.loads(Path(args.pred).read_text())
-    result = evaluate_run(args.gt, predictions)
+    result = evaluate_run(args.gt, predictions, conf_thresh=args.conf_thresh)
 
     metrics_dir = Path(args.out_dir) / "metrics"
     metrics_dir.mkdir(parents=True, exist_ok=True)
     (metrics_dir / f"{args.exp_id}.json").write_text(json.dumps(result, indent=2))
-    _append_summary(args.out_dir, args.exp_id, result["overall"])
+    _append_summary(args.out_dir, args.exp_id, result)
     print(
         f"{args.exp_id}: AP50={result['overall']['ap50']:.3f} "
         f"F1={result['overall']['f1']:.3f} "

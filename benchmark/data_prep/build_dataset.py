@@ -11,7 +11,7 @@ import json
 import random
 from pathlib import Path
 
-SEED = 42
+SEED = 0
 
 
 def split_image_ids(image_ids, val_frac, test_frac, seed=SEED):
