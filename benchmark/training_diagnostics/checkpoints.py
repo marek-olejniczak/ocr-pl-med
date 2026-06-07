@@ -119,6 +119,7 @@ class ValLineMetrics:
         totals = {"n_gt": 0, "n_pred": 0, "n_matched": 0,
                   "n_missed": 0, "n_split": 0, "n_merged": 0}
         ious, confs, correct = [], [], []
+        cy_errors, ar_errors, count_exact, count_within1 = [], [], [], []
         for img_path in self.val_images:
             lbl = self.val_labels / f"{img_path.stem}.txt"
             if not lbl.exists():
@@ -141,6 +142,17 @@ class ValLineMetrics:
             confs.extend(scores)
             correct.extend(1.0 if i in matched else 0.0
                            for i in range(len(scores)))
+            # per-matched-pair localisation errors (matches notebook):
+            # cy normalised by image height, aspect ratio = w/h
+            for g, p, _ in m["matches"]:
+                gx, gy, gw, gh = gt[g]
+                px, py, pw, ph = pred[p]
+                if gh > 0 and ph > 0 and h > 0:
+                    cy_errors.append(abs((py + ph / 2) - (gy + gh / 2)) / h)
+                    ar_errors.append(abs(pw / ph - gw / gh))
+            count_exact.append(1.0 if m["n_pred"] == m["n_gt"] else 0.0)
+            count_within1.append(1.0 if abs(m["n_pred"] - m["n_gt"]) <= 1
+                                 else 0.0)
 
         n_gt = totals["n_gt"]
         agg = detection_metrics(totals["n_matched"], n_gt, totals["n_pred"])
@@ -150,15 +162,42 @@ class ValLineMetrics:
         agg["iou_mean"] = float(np.mean(ious)) if ious else 0.0
         agg["iou_median"] = float(np.median(ious)) if ious else 0.0
         agg["ece"] = ece(np.array(confs), np.array(correct))
+        agg["median_cy_error_norm"] = (float(np.median(cy_errors))
+                                       if cy_errors else 0.0)
+        agg["median_ar_error"] = (float(np.median(ar_errors))
+                                  if ar_errors else 0.0)
+        agg["line_count_acc_exact"] = (float(np.mean(count_exact))
+                                       if count_exact else 0.0)
+        agg["line_count_acc_within1"] = (float(np.mean(count_within1))
+                                         if count_within1 else 0.0)
 
         for key in self.tracker.update(agg):
             dst = last.parent / f"best_{key}.pt"
             shutil.copy2(last, dst)
             if self.artifact_logger:
                 self.artifact_logger(dst, f"best_{key}")
+        # ultralytics validation losses + mAP from this epoch (gives the
+        # classic train-vs-val loss picture and standard mAP curves)
+        extra, val_loss_parts = {}, []
+        for k, v in (getattr(trainer, "metrics", None) or {}).items():
+            try:
+                fv = float(v)
+            except (TypeError, ValueError):
+                continue
+            if "loss" in k:
+                extra[k if k.startswith("val/") else f"val/{k}"] = fv
+                val_loss_parts.append(fv)
+            elif "mAP50-95" in k:
+                extra["val/map"] = fv
+            elif "mAP50" in k:
+                extra["val/map50"] = fv
+        if val_loss_parts:
+            extra["val/loss"] = round(sum(val_loss_parts), 5)   # total, mirrors train/loss
+
         if self.sink:
             self.sink({"epoch": int(trainer.epoch),
-                       **{f"val/{k}": v for k, v in agg.items()}})
+                       **{f"val/{k}": v for k, v in agg.items()},
+                       **extra})
 
         self._log_predictions(trainer, model, cv2)
 

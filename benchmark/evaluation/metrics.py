@@ -123,6 +123,7 @@ def line_metrics(gt_boxes, pred_boxes, scores, iou_thresh=0.5,
         "iou_median": float(np.median(matched_ious)) if matched_ious else 0.0,
         "matched_ious": matched_ious,
         "matched_pred_ids": sorted(p for _, p, _ in matches),
+        "matches": matches,   # (gt_idx, pred_idx, iou) for per-pair errors
     }
 
 

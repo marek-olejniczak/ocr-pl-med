@@ -1,5 +1,5 @@
 defaults:
-  epochs: 100        # docelowy budzet ustalimy po pilocie na serwerze
+  epochs: 60         # z pilota yolov8n: f1 maksuje ~ep20, iou_median ~ep48; 60 + patience lapie cały zysk
   imgsz: 640
   batch: 64
   conf_thresh: 0.25

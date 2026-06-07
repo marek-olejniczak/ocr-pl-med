@@ -63,9 +63,14 @@ class DiagnosticMixin:
             rec.update(self._probe_diagnostics())
         rec.update(self._diag_ema.update(rec))
         if self.sink is not None:
-            # diag/ prefix groups these into their own wandb section
-            # instead of the catch-all "Charts"
-            self.sink({f"diag/{k}": v for k, v in rec.items()})
+            # diag/ prefix groups these into their own wandb section instead of
+            # the catch-all "Charts"; train losses go under their own train/
+            out = {f"diag/{k}": v for k, v in rec.items()}
+            if getattr(self, "loss_items", None) is not None:
+                li = self.label_loss_items(self.loss_items, prefix="train")
+                li["train/loss"] = round(sum(li.values()), 5)   # total
+                out.update(li)
+            self.sink(out)
         self._diag_step += 1
 
     def _probe_loss(self):
