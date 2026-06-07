@@ -63,7 +63,9 @@ class DiagnosticMixin:
             rec.update(self._probe_diagnostics())
         rec.update(self._diag_ema.update(rec))
         if self.sink is not None:
-            self.sink(rec)
+            # diag/ prefix groups these into their own wandb section
+            # instead of the catch-all "Charts"
+            self.sink({f"diag/{k}": v for k, v in rec.items()})
         self._diag_step += 1
 
     def _probe_loss(self):

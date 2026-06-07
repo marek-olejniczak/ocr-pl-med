@@ -87,8 +87,7 @@ def cmd_train(args):
             max_images=args.line_val_max_images,
             sink=Fanout(
                 JsonlSink(Path(args.out) / "train" / "val_metrics.jsonl"),
-                wandb_run.log if wandb_run else None),
-            artifact_logger=_wandb_artifact_logger if wandb_run else None)
+                wandb_run.log if wandb_run else None))
         model.add_callback("on_fit_epoch_end", cb)
 
     model.train(
@@ -115,10 +114,12 @@ def cmd_train(args):
 
     weights_dir = Path(args.out).resolve() / "train" / "weights"
     if wandb_run:
-        for name in ("last.pt", "best.pt"):
-            if (weights_dir / name).exists():
-                _wandb_artifact_logger(weights_dir / name,
-                                       name.replace(".pt", ""))
+        # upload every checkpoint once at the end. best_<metric>.pt are
+        # overwritten in place during training, so these are the final best
+        # of each - one wandb artifact version per file instead of a new
+        # version on every val improvement (which fills storage).
+        for ckpt in sorted(weights_dir.glob("*.pt")):
+            _wandb_artifact_logger(ckpt, ckpt.stem)
         wandb_run.finish()
     print(f"best checkpoint: {weights_dir / 'best.pt'}")
 

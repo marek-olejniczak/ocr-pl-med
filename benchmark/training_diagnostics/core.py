@@ -1,6 +1,7 @@
 """Framework-agnostic training-diagnostics primitives (pure torch)."""
 
 import json
+import math
 from pathlib import Path
 
 import torch
@@ -70,7 +71,9 @@ class Ema:
     def update(self, values):
         out = {}
         for k, v in values.items():
-            if not isinstance(v, (int, float)):
+            # skip non-finite inputs: AMP produces inf/nan grads on scaler
+            # back-off steps, and a single NaN would poison the EMA forever
+            if not isinstance(v, (int, float)) or not math.isfinite(v):
                 continue
             prev = self.state.get(k, float(v))
             self.state[k] = self.decay * prev + (1 - self.decay) * float(v)
