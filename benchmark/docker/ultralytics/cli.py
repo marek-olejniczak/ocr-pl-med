@@ -106,12 +106,14 @@ def cmd_train(args):
         deterministic=True,
         patience=args.patience,
         device=args.device,
-        project=str(args.out),
+        # absolute, else ultralytics buries a relative project under
+        # runs/detect/<project> and our paths (+ wandb artifacts) miss it
+        project=str(Path(args.out).resolve()),
         name="train",
         exist_ok=True,
     )
 
-    weights_dir = Path(args.out) / "train" / "weights"
+    weights_dir = Path(args.out).resolve() / "train" / "weights"
     if wandb_run:
         for name in ("last.pt", "best.pt"):
             if (weights_dir / name).exists():
