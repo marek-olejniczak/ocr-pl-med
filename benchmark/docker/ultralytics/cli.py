@@ -41,19 +41,56 @@ def speed_stats(speeds_ms):
             "ms_per_image_median": float(statistics.median(speeds_ms))}
 
 
+def _wandb_artifact_logger(path, name):
+    import wandb
+    if wandb.run is None:
+        return
+    art = wandb.Artifact(f"{wandb.run.name}-{name}", type="model")
+    art.add_file(str(path))
+    wandb.log_artifact(art)
+
+
 def cmd_train(args):
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # benchmark/
+
+    wandb_run = None
+    if args.wandb:
+        import wandb
+        wandb_run = wandb.init(project=args.wandb_project,
+                               name=Path(args.out).name, config=vars(args))
+
     trainer = None
     if args.diagnostics:
-        import sys
-        sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # benchmark/
-        from training_diagnostics.core import JsonlSink
+        from training_diagnostics.core import Fanout, JsonlSink
         from training_diagnostics.ultralytics_hooks import pick_trainer
         cls = pick_trainer(args.weights)
-        cls.sink = JsonlSink(Path(args.out) / "train" / "diagnostics.jsonl")
+        cls.sink = Fanout(
+            JsonlSink(Path(args.out) / "train" / "diagnostics.jsonl"),
+            wandb_run.log if wandb_run else None)
         cls.probe_every = args.probe_every
         trainer = cls
 
     model = get_model(args.weights)
+
+    if args.line_val:
+        import yaml
+        from training_diagnostics.checkpoints import ValLineMetrics
+        from training_diagnostics.core import Fanout, JsonlSink
+        data = yaml.safe_load(Path(args.data).read_text())
+        root = Path(data.get("path", str(Path(args.data).parent)))
+        val_rel = str(data.get("val", "images/val"))
+        cb = ValLineMetrics(
+            val_images_dir=root / val_rel,
+            val_labels_dir=root / val_rel.replace("images", "labels"),
+            imgsz=args.imgsz,
+            max_images=args.line_val_max_images,
+            sink=Fanout(
+                JsonlSink(Path(args.out) / "train" / "val_metrics.jsonl"),
+                wandb_run.log if wandb_run else None),
+            artifact_logger=_wandb_artifact_logger if wandb_run else None)
+        model.add_callback("on_fit_epoch_end", cb)
+
     model.train(
         trainer=trainer,
         data=args.data,
@@ -67,12 +104,21 @@ def cmd_train(args):
         cos_lr=True,
         seed=args.seed,
         deterministic=True,
+        patience=args.patience,
         device=args.device,
         project=str(args.out),
         name="train",
         exist_ok=True,
     )
-    print(f"best checkpoint: {Path(args.out) / 'train' / 'weights' / 'best.pt'}")
+
+    weights_dir = Path(args.out) / "train" / "weights"
+    if wandb_run:
+        for name in ("last.pt", "best.pt"):
+            if (weights_dir / name).exists():
+                _wandb_artifact_logger(weights_dir / name,
+                                       name.replace(".pt", ""))
+        wandb_run.finish()
+    print(f"best checkpoint: {weights_dir / 'best.pt'}")
 
 
 def cmd_predict(args):
@@ -110,6 +156,47 @@ def cmd_predict(args):
     print(f"{len(predictions)} predictions for {len(coco['images'])} images")
 
 
+def cmd_lr_find(args):
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # benchmark/
+    from training_diagnostics.lr_finder import pick_lr_finder
+
+    cls = pick_lr_finder(args.weights)
+    cls.lr_min = args.lr_min
+    cls.lr_max = args.lr_max
+    cls.n_steps = args.steps
+    cls.out_path = Path(args.out) / "lr_find.json"
+
+    model = get_model(args.weights)
+    try:
+        model.train(
+            trainer=cls,
+            data=args.data,
+            epochs=50,             # self.stop ends the sweep much earlier
+            imgsz=args.imgsz,
+            batch=args.batch,
+            optimizer="AdamW",
+            lr0=args.lr_min,
+            lrf=1.0,               # flat scheduler - the sweep owns the LR
+            warmup_epochs=0,       # warmup would overwrite per-step LR!
+            nbs=args.batch,        # no grad accumulation - step every batch
+            cos_lr=False,
+            seed=0,
+            device=args.device,
+            project=str(args.out),
+            name="lr_find_run",
+            exist_ok=True,
+            val=False,
+            plots=False,
+            save=False,
+        )
+    except FileNotFoundError:
+        # expected: save=False means no checkpoint, which ultralytics'
+        # post-train bookkeeping treats as an error; lr_find.json is
+        # already written by the sweep's _finish()
+        pass
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -131,6 +218,13 @@ def main(argv=None):
                         "train/diagnostics.jsonl")
     t.add_argument("--probe-every", type=int, default=100,
                    help="probe-batch diagnostics interval (0 disables)")
+    t.add_argument("--patience", type=int, default=30,
+                   help="early-stopping patience (ultralytics fitness)")
+    t.add_argument("--line-val", action="store_true",
+                   help="per-epoch line metrics on val + best_<metric>.pt")
+    t.add_argument("--line-val-max-images", type=int, default=100)
+    t.add_argument("--wandb", action="store_true")
+    t.add_argument("--wandb-project", default="line-benchmark")
     t.set_defaults(fn=cmd_train)
 
     p = sub.add_parser("predict")
@@ -143,6 +237,18 @@ def main(argv=None):
     p.add_argument("--max-det", type=int, default=300)
     p.add_argument("--device", default=None)
     p.set_defaults(fn=cmd_predict)
+
+    f = sub.add_parser("lr-find")
+    f.add_argument("--weights", required=True)
+    f.add_argument("--data", required=True)
+    f.add_argument("--out", required=True)
+    f.add_argument("--steps", type=int, default=200)
+    f.add_argument("--lr-min", type=float, default=1e-6)
+    f.add_argument("--lr-max", type=float, default=1e-1)
+    f.add_argument("--imgsz", type=int, default=640)
+    f.add_argument("--batch", type=int, default=16)
+    f.add_argument("--device", default=None)
+    f.set_defaults(fn=cmd_lr_find)
 
     args = ap.parse_args(argv)
     args.fn(args)

@@ -78,6 +78,22 @@ class Ema:
         return out
 
 
+class Fanout:
+    """Broadcast a record to many sinks. A class (not a closure) on purpose:
+    plain functions stored as class attributes get bound as methods and
+    silently receive self - callable objects don't."""
+
+    def __init__(self, *sinks):
+        self.sinks = [s for s in sinks if s]
+
+    def __call__(self, record):
+        for s in self.sinks:
+            s(record)
+
+    def __bool__(self):
+        return bool(self.sinks)
+
+
 class JsonlSink:
     """Append-only JSONL writer; one record per diagnostic step."""
 
