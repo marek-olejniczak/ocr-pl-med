@@ -12,9 +12,11 @@ data:
   raw:
     yolo: dataset/yolo_raw/data.yaml
     images_root: ../../dataset
+    pagexml: dataset/pagexml_raw      # kraken: generuj to_pagexml przed treningiem
   prep:
     yolo: dataset/yolo_prep/data.yaml
     images_root: dataset/prep
+    pagexml: dataset/pagexml_prep
 
 # anotacje sa wspolne dla raw i prep (preprocessing zachowuje geometrie),
 # wiec train/val coco sa globalne; per-wariant rozni sie tylko images_root
@@ -44,4 +46,15 @@ models:
     weights: surya
     finetune: false
     zeroshot: true
-  # dbnet / kraken — dolozymy z kolejnymi kontenerami
+  # Kraken BLLA: segmentacja linii HTR. zero-shot (model blla) + finetuning
+  # (ketos segtrain na PAGE XML z to_pagexml). data_format: pagexml; diagnostyka
+  # ultralytics-only -> train_flags puste. UWAGA: przed treningiem wygeneruj
+  # PAGE XML: python data_prep/converters/to_pagexml.py --coco ... --out-dir dataset/pagexml_raw
+  kraken:
+    service: kraken
+    weights: blla
+    finetune: true
+    zeroshot: true
+    data_format: pagexml
+    train_flags: []
+  # dbnet (docTR) — ostatni z designu, opcjonalny
