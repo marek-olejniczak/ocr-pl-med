@@ -7,10 +7,10 @@ services:
     shm_size: "8gb"
     volumes:
       - .:/benchmark
-      # UWAGA: symlinki w dataset/yolo_*/images wskazuja sciezki hosta -
-      # w kontenerze musza byc widoczne pod TA SAMA sciezka, np.:
+      # NOTE: symlinks under dataset/yolo_*/images point at host paths - they
+      # must be visible in the container at the SAME path, e.g.:
       # - /home/user/datasets/lines:/home/user/datasets/lines:ro
-      # albo generowac layout przez to_yolo --copy
+      # or generate the layout with to_yolo --copy
     working_dir: /benchmark
     environment:
       - WANDB_API_KEY

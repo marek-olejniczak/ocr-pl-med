@@ -10,7 +10,7 @@ Creates:
     out/data.yaml
 
 Usage (from benchmark/):
-    python data_prep/to_yolo.py --annotations-dir dataset/annotations \
+    python data_prep/converters/to_yolo.py --annotations-dir dataset/annotations \
         --images-root ../../dataset --out-dir dataset/yolo_raw
 """
 
