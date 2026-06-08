@@ -77,6 +77,7 @@ def cmd_predict(args):
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
+    dev = args.device or "cuda"   # blla.segment defaults to cpu; we want GPU
     predictions, speeds = [], []
     for img in tqdm(coco["images"], desc="kraken predict"):
         path = Path(args.images_root) / img["file_name"]
@@ -85,7 +86,8 @@ def cmd_predict(args):
         except (FileNotFoundError, OSError):
             continue
         t0 = time.perf_counter()
-        seg = blla.segment(im, model=model) if model else blla.segment(im)
+        seg = (blla.segment(im, model=model, device=dev) if model
+               else blla.segment(im, device=dev))
         speeds.append((time.perf_counter() - t0) * 1000.0)
         boundaries = [getattr(ln, "boundary", None) for ln in seg.lines]
         predictions.extend(lines_to_coco(boundaries, img["id"]))
