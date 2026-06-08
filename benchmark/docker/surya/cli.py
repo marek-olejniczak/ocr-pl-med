@@ -46,9 +46,14 @@ def cmd_train(args):
 
 
 def cmd_predict(args):
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # benchmark/
+    from common.resources import reset_gpu_peak, resource_meta
     from PIL import Image
     from surya.detection import DetectionPredictor
 
+    reset_gpu_peak()
     det = DetectionPredictor()
     coco = json.loads(Path(args.coco).read_text())
     out = Path(args.out)
@@ -79,6 +84,7 @@ def cmd_predict(args):
             "n_images": len(coco["images"]),
             "n_predictions": len(predictions),
             **speed_stats(speeds),
+            **resource_meta(),
             "versions": {"surya": getattr(surya, "__version__", "unknown"),
                          "python": platform.python_version()}}
     (out / "meta.json").write_text(json.dumps(meta, indent=2))

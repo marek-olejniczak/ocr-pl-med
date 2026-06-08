@@ -40,7 +40,13 @@ SUMMARY_COLUMNS = [
     "n_pred",
     "ms_per_image_mean",
     "ms_per_image_median",
+    "peak_gpu_mem_mb",
+    "peak_ram_mb",
 ]
+
+# numeric fields copied from the predict step's meta.json into the result/summary
+META_FIELDS = ("ms_per_image_mean", "ms_per_image_median",
+               "peak_gpu_mem_mb", "peak_ram_mb")
 
 
 def _group_by_image(gt, predictions):
@@ -180,7 +186,7 @@ def main(argv=None):
     meta_path = Path(args.pred).parent / "meta.json"
     if meta_path.exists():
         meta = json.loads(meta_path.read_text())
-        for k in ("ms_per_image_mean", "ms_per_image_median"):
+        for k in META_FIELDS:
             if k in meta:
                 result["overall"][k] = meta[k]
 

@@ -131,8 +131,13 @@ def cmd_train(args):
 
 
 def cmd_predict(args):
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # benchmark/
+    from common.resources import reset_gpu_peak, resource_meta
     from detectron2.engine import DefaultPredictor
 
+    reset_gpu_peak()
     # architecture is fixed (frcnn R50-FPN); --weights is the trained .pth, not
     # a config, so the config comes from DEFAULT_ZOO, weights are set separately
     cfg = _base_cfg(args, DEFAULT_ZOO)
@@ -168,6 +173,7 @@ def cmd_predict(args):
             "n_images": len(coco["images"]),
             "n_predictions": len(predictions),
             **speed_stats(speeds),
+            **resource_meta(),
             "versions": {"detectron2": detectron2.__version__,
                          "torch": torch.__version__,
                          "python": platform.python_version()}}

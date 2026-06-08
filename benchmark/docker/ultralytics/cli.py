@@ -137,6 +137,12 @@ def cmd_train(args):
 
 
 def cmd_predict(args):
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # benchmark/
+    from common.resources import reset_gpu_peak, resource_meta
+
+    reset_gpu_peak()
     model = get_model(args.weights)
     coco = json.loads(Path(args.coco).read_text())
     out = Path(args.out)
@@ -166,6 +172,7 @@ def cmd_predict(args):
             "n_images": len(coco["images"]),
             "n_predictions": len(predictions),
             **speed_stats(speeds),
+            **resource_meta(),
             "versions": {"ultralytics": ultralytics.__version__,
                          "torch": torch.__version__,
                          "python": platform.python_version()}}

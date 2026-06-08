@@ -65,11 +65,16 @@ def cmd_train(args):
 
 def cmd_predict(args):
     import importlib.resources as ir
+    import sys
 
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # benchmark/
+    from common.resources import reset_gpu_peak, resource_meta
     from PIL import Image
     from kraken import blla
     from kraken.lib import vgsl
     from tqdm import tqdm
+
+    reset_gpu_peak()
 
     # Load the model ONCE. blla.segment(model=None) reloads kraken's bundled
     # blla.mlmodel from disk on EVERY call - that, not CPU vs GPU, was the
@@ -108,6 +113,7 @@ def cmd_predict(args):
             "n_predictions": len(predictions),
             "note": "score=1.0 (kraken segmentation has no per-line confidence)",
             **speed_stats(speeds),
+            **resource_meta(),
             "versions": {"kraken": getattr(kraken, "__version__", "unknown"),
                          "python": platform.python_version()}}
     (out / "meta.json").write_text(json.dumps(meta, indent=2))
