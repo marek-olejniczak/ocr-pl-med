@@ -141,13 +141,14 @@ def cmd_predict(args):
     predictor = DefaultPredictor(cfg)
 
     import cv2
+    from tqdm import tqdm
 
     coco = json.loads(Path(args.coco).read_text())
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
     predictions, speeds = [], []
-    for img in coco["images"]:
+    for img in tqdm(coco["images"], desc="detectron2 predict"):
         im = cv2.imread(str(Path(args.images_root) / img["file_name"]))
         if im is None:
             continue

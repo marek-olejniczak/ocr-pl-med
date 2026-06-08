@@ -67,6 +67,7 @@ def cmd_predict(args):
     from PIL import Image
     from kraken import blla
     from kraken.lib import vgsl
+    from tqdm import tqdm
 
     model = None
     if args.weights and args.weights not in ("blla", "default"):
@@ -77,7 +78,7 @@ def cmd_predict(args):
     out.mkdir(parents=True, exist_ok=True)
 
     predictions, speeds = [], []
-    for img in coco["images"]:
+    for img in tqdm(coco["images"], desc="kraken predict"):
         path = Path(args.images_root) / img["file_name"]
         try:
             im = Image.open(path).convert("RGB")

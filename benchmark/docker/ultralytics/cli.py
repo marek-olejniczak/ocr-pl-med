@@ -142,8 +142,10 @@ def cmd_predict(args):
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
+    from tqdm import tqdm
+
     predictions, speeds = [], []
-    for img in coco["images"]:
+    for img in tqdm(coco["images"], desc="predict"):
         path = Path(args.images_root) / img["file_name"]
         result = model.predict(str(path), conf=args.conf, imgsz=args.imgsz,
                                max_det=args.max_det, device=args.device,
