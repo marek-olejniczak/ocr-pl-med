@@ -48,18 +48,17 @@ def _zoo_id(weights):
     return DEFAULT_ZOO if weights in ("frcnn_r50.yaml", "frcnn", "") else weights
 
 
-def _base_cfg(args, num_classes=1):
+def _base_cfg(args, zoo_config, num_classes=1):
     from detectron2 import model_zoo
     from detectron2.config import get_cfg
 
     cfg = get_cfg()
-    zoo = _zoo_id(args.weights)
-    cfg.merge_from_file(model_zoo.get_config_file(zoo))
+    cfg.merge_from_file(model_zoo.get_config_file(zoo_config))
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = num_classes
     cfg.INPUT.MIN_SIZE_TRAIN = (args.imgsz,)
     cfg.INPUT.MIN_SIZE_TEST = args.imgsz
     cfg.MODEL.DEVICE = args.device or "cuda"
-    return cfg, zoo
+    return cfg
 
 
 def cmd_train(args):
@@ -86,7 +85,8 @@ def cmd_train(args):
     n_train = len(json.loads(Path(args.train_coco).read_text())["images"])
     iters_per_epoch = max(1, n_train // args.batch)
 
-    cfg, zoo = _base_cfg(args)
+    zoo = _zoo_id(args.weights)            # for train, --weights is the zoo cfg id
+    cfg = _base_cfg(args, zoo)
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(zoo)  # COCO-pretrained
     cfg.DATASETS.TRAIN = ("bench_train",)
     cfg.DATASETS.TEST = ("bench_val",)
@@ -133,7 +133,9 @@ def cmd_train(args):
 def cmd_predict(args):
     from detectron2.engine import DefaultPredictor
 
-    cfg, _ = _base_cfg(args)
+    # architecture is fixed (frcnn R50-FPN); --weights is the trained .pth, not
+    # a config, so the config comes from DEFAULT_ZOO, weights are set separately
+    cfg = _base_cfg(args, DEFAULT_ZOO)
     cfg.MODEL.WEIGHTS = args.weights
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.conf
     predictor = DefaultPredictor(cfg)
