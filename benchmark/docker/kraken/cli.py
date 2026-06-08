@@ -64,14 +64,21 @@ def cmd_train(args):
 
 
 def cmd_predict(args):
+    import importlib.resources as ir
+
     from PIL import Image
     from kraken import blla
     from kraken.lib import vgsl
     from tqdm import tqdm
 
-    model = None
-    if args.weights and args.weights not in ("blla", "default"):
-        model = vgsl.TorchVGSLModel.load_model(args.weights)
+    # Load the model ONCE. blla.segment(model=None) reloads kraken's bundled
+    # blla.mlmodel from disk on EVERY call - that, not CPU vs GPU, was the
+    # bottleneck. We load the same default model once and reuse it.
+    if args.weights in ("blla", "default"):
+        model_path = str(ir.files("kraken").joinpath("blla.mlmodel"))
+    else:
+        model_path = args.weights
+    model = vgsl.TorchVGSLModel.load_model(model_path)
 
     coco = json.loads(Path(args.coco).read_text())
     out = Path(args.out)
@@ -86,8 +93,7 @@ def cmd_predict(args):
         except (FileNotFoundError, OSError):
             continue
         t0 = time.perf_counter()
-        seg = (blla.segment(im, model=model, device=dev) if model
-               else blla.segment(im, device=dev))
+        seg = blla.segment(im, model=model, device=dev)
         speeds.append((time.perf_counter() - t0) * 1000.0)
         boundaries = [getattr(ln, "boundary", None) for ln in seg.lines]
         predictions.extend(lines_to_coco(boundaries, img["id"]))
