@@ -38,6 +38,8 @@ SUMMARY_COLUMNS = [
     "n_images",
     "n_gt",
     "n_pred",
+    "ms_per_image_mean",
+    "ms_per_image_median",
 ]
 
 
@@ -171,6 +173,16 @@ def main(argv=None):
 
     predictions = json.loads(Path(args.pred).read_text())
     result = evaluate_run(args.gt, predictions, conf_thresh=args.conf_thresh)
+
+    # inference speed comes from the predict step's meta.json (sibling of the
+    # predictions file); fold it into the result + summary so cost sits next to
+    # quality - kraken is slow, yolo/surya are cheap, and that matters
+    meta_path = Path(args.pred).parent / "meta.json"
+    if meta_path.exists():
+        meta = json.loads(meta_path.read_text())
+        for k in ("ms_per_image_mean", "ms_per_image_median"):
+            if k in meta:
+                result["overall"][k] = meta[k]
 
     metrics_dir = Path(args.out_dir) / "metrics"
     metrics_dir.mkdir(parents=True, exist_ok=True)
