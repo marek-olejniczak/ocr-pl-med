@@ -1,7 +1,8 @@
-# Match CUDA to the server driver before first build (like the other images).
-# Surya's detection model is light; runs on the constrained GPU or CPU.
-ARG BASE_IMAGE=pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
-FROM ${BASE_IMAGE}
+# Plain python base on purpose: surya-ocr pins its own torch, and starting from
+# the pytorch image left torch/torchvision mismatched ("torchvision::nms does
+# not exist"). Letting pip resolve torch+torchvision together with surya gives a
+# consistent CUDA set (PyPI linux wheels are CUDA-enabled; driver 580 supports them).
+FROM python:3.11-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
