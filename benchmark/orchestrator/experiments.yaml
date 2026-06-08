@@ -37,4 +37,11 @@ models:
     zeroshot: false
     data_format: coco
     train_flags: []
-  # dbnet / kraken / surya — dolozymy z kolejnymi kontenerami
+  # Surya: natywna detekcja linii, predict-only (finetuning niedostepny) ->
+  # zeroshot=true, finetune=false. Generuje tylko predict+eval (raw i prep).
+  surya:
+    service: surya
+    weights: surya
+    finetune: false
+    zeroshot: true
+  # dbnet / kraken — dolozymy z kolejnymi kontenerami
