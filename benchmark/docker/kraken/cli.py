@@ -85,8 +85,9 @@ def cmd_predict(args):
     out.mkdir(parents=True, exist_ok=True)
 
     dev = args.device or "cuda"   # blla.segment defaults to cpu; we want GPU
+    images = coco["images"][:args.limit] if args.limit else coco["images"]
     predictions, speeds = [], []
-    for img in tqdm(coco["images"], desc="kraken predict"):
+    for img in tqdm(images, desc="kraken predict"):
         path = Path(args.images_root) / img["file_name"]
         try:
             im = Image.open(path).convert("RGB")
@@ -136,6 +137,8 @@ def main(argv=None):
     p.add_argument("--conf", type=float, default=0.0)  # accepted, unused
     p.add_argument("--imgsz", type=int, default=640)   # accepted, unused
     p.add_argument("--device", default=None)
+    p.add_argument("--limit", type=int, default=0,
+                   help="predict on the first N images only (0 = all)")
     p.set_defaults(fn=cmd_predict)
 
     args = ap.parse_args(argv)
