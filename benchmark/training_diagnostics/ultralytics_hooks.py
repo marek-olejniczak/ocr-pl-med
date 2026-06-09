@@ -92,34 +92,43 @@ class DiagnosticMixin:
         """Expensive metrics on a frozen probe batch - isolates optimisation
         dynamics from data noise. model.eval() freezes BN running stats
         (the loss path is keyed on dict input, not module mode)."""
+        import contextlib
+
         was_training = self.model.training
         self.model.eval()
         out = {}
+        # run the probe in full precision: AMP autocast breaks the extra
+        # backward passes (autograd.grad / HVP) on GPU
+        amp_off = (torch.autocast("cuda", enabled=False)
+                   if torch.cuda.is_available() else contextlib.nullcontext())
         try:
-            params = [p for p in self.model.parameters() if p.requires_grad]
-            loss = self._probe_loss()
-            gs = torch.autograd.grad(loss, params, allow_unused=True)
-            pg = torch.cat(
-                [
-                    (g if g is not None else torch.zeros_like(p)).flatten()
-                    for g, p in zip(gs, params)
-                ]
-            ).detach()
-            if self._prev_probe_grads is not None:
-                out["probe_grad_cosine"] = core.cosine(pg, self._prev_probe_grads)
-            self._prev_probe_grads = pg
-            out["probe_curvature"] = curvature.directional_curvature(
-                self._probe_loss, params, pg
-            )
-            if self._hvp_ok:
-                lam = curvature.dominant_eig(self._probe_loss, params)
-                if lam is None:
-                    self._hvp_ok = False  # HVP unsupported - stop trying
-                else:
-                    out["hessian_dominant_eig"] = lam
-            out["hessian_eig_supported"] = float(self._hvp_ok)
-        except RuntimeError:
+            with amp_off:
+                params = [p for p in self.model.parameters() if p.requires_grad]
+                loss = self._probe_loss()
+                gs = torch.autograd.grad(loss, params, allow_unused=True)
+                pg = torch.cat(
+                    [
+                        (g if g is not None else torch.zeros_like(p)).flatten()
+                        for g, p in zip(gs, params)
+                    ]
+                ).detach()
+                if self._prev_probe_grads is not None:
+                    out["probe_grad_cosine"] = core.cosine(
+                        pg, self._prev_probe_grads)
+                self._prev_probe_grads = pg
+                out["probe_curvature"] = curvature.directional_curvature(
+                    self._probe_loss, params, pg
+                )
+                if self._hvp_ok:
+                    lam = curvature.dominant_eig(self._probe_loss, params)
+                    if lam is None:
+                        self._hvp_ok = False  # HVP unsupported - stop trying
+                    else:
+                        out["hessian_dominant_eig"] = lam
+                out["hessian_eig_supported"] = float(self._hvp_ok)
+        except RuntimeError as e:
             out["probe_error"] = 1.0
+            out["probe_error_msg"] = str(e)[:120]   # so we know WHY, not guess
         finally:
             self.model.train(was_training)
         return out
