@@ -142,15 +142,21 @@ def is_done(job, results_dir):
 
 
 def _log_run(results_dir, job, status):
+    # Auxiliary audit log - must never crash the matrix. results/ can be
+    # root-owned (containers write as root) while the orchestrator runs as the
+    # host user, so writing the log may fail; degrade gracefully.
     path = Path(results_dir) / "run_log.csv"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    new = not path.exists()
-    with path.open("a", newline="") as f:
-        w = csv.writer(f)
-        if new:
-            w.writerow(["timestamp", "kind", "exp_id", "status"])
-        w.writerow([datetime.now().isoformat(timespec="seconds"),
-                    job["kind"], job["exp_id"], status])
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        new = not path.exists()
+        with path.open("a", newline="") as f:
+            w = csv.writer(f)
+            if new:
+                w.writerow(["timestamp", "kind", "exp_id", "status"])
+            w.writerow([datetime.now().isoformat(timespec="seconds"),
+                        job["kind"], job["exp_id"], status])
+    except OSError as e:
+        print(f"  (run_log not written: {e})")
 
 
 def main(argv=None):
