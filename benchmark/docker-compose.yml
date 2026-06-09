@@ -1,6 +1,13 @@
+# Containers run as the host user (HUID/HGID) so everything they write into the
+# bind-mounted /benchmark (checkpoints, predictions, results) is owned by you,
+# not root. Set HUID/HGID once in a local .env file (gitignored), e.g.:
+#   printf 'HUID=%s\nHGID=%s\n' "$(id -u)" "$(id -g)" > .env
+# HOME=/tmp because a non-root user cannot write /root; wandb/torch/ultralytics
+# caches land in /tmp, model downloads go to /benchmark (writable by you).
 services:
   ultralytics:
     build: ./docker/ultralytics
+    user: "${HUID:-1000}:${HGID:-1000}"
     # Docker's default /dev/shm is 64MB; PyTorch DataLoader workers share
     # tensors through it and overflow → "No space left on device". 8GB is
     # plenty for batch 64 with 8 workers.
@@ -14,6 +21,7 @@ services:
     working_dir: /benchmark
     environment:
       - WANDB_API_KEY
+      - HOME=/tmp
     deploy:
       resources:
         reservations:
@@ -24,12 +32,14 @@ services:
 
   detectron2:
     build: ./docker/detectron2
+    user: "${HUID:-1000}:${HGID:-1000}"
     shm_size: "8gb"
     volumes:
       - .:/benchmark
     working_dir: /benchmark
     environment:
       - WANDB_API_KEY
+      - HOME=/tmp
     deploy:
       resources:
         reservations:
@@ -40,12 +50,14 @@ services:
 
   surya:
     build: ./docker/surya
+    user: "${HUID:-1000}:${HGID:-1000}"
     shm_size: "8gb"
     volumes:
       - .:/benchmark
     working_dir: /benchmark
     environment:
       - WANDB_API_KEY
+      - HOME=/tmp
     deploy:
       resources:
         reservations:
@@ -56,12 +68,14 @@ services:
 
   kraken:
     build: ./docker/kraken
+    user: "${HUID:-1000}:${HGID:-1000}"
     shm_size: "8gb"
     volumes:
       - .:/benchmark
     working_dir: /benchmark
     environment:
       - WANDB_API_KEY
+      - HOME=/tmp
     deploy:
       resources:
         reservations:
