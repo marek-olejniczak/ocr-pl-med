@@ -6,6 +6,7 @@ Opens browser at http://127.0.0.1:5000
 
 import csv
 import io
+import json
 import os
 import threading
 import webbrowser
@@ -24,6 +25,7 @@ except ImportError:
 APP_DIR = Path(__file__).parent.resolve()
 DATASET_DIR = APP_DIR / "dataset"
 DATASET_DIR.mkdir(exist_ok=True)
+COCO_PATH = DATASET_DIR / "annotations.json"
 
 app = Flask(__name__, template_folder=str(APP_DIR / "templates"))
 app.config["MAX_CONTENT_LENGTH"] = 200 * 1024 * 1024  # 200 MB
@@ -136,8 +138,8 @@ def save():
             cropped = cropped.convert("RGB")
         cropped.save(crop_path)
 
-    # Append/update single annotations.csv at dataset root
-    _save_csv(base, name, annotations)
+    # Append/update single COCO annotations.json at dataset root
+    _save_coco(name, img.width, img.height, annotations)
 
     # Persist timing for this image, if provided
     time_seconds = data.get("time_seconds")
@@ -145,7 +147,7 @@ def save():
     if time_seconds is not None:
         _save_timing(name, time_seconds, started_at)
 
-    return jsonify({"ok": True, "csv": str(DATASET_DIR / "annotations.csv"), "crops": len(annotations)})
+    return jsonify({"ok": True, "coco": str(COCO_PATH), "crops": len(annotations)})
 
 
 def _pdf_to_pngs(pdf_bytes, dpi=200):
@@ -184,25 +186,83 @@ def _save_timing(filename, time_seconds, started_at):
         writer.writerows(rows)
 
 
-def _save_csv(base, filename, annotations):
-    """Update the single annotations.csv — replace rows for this image, keep others."""
-    csv_path = DATASET_DIR / "annotations.csv"
-    existing_rows = []
-    if csv_path.exists():
-        with open(csv_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if row["filename"] != filename:
-                    existing_rows.append(row)
+def _load_coco():
+    if COCO_PATH.exists():
+        with open(COCO_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {"images": [], "annotations": [], "categories": []}
 
-    with open(csv_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["filename", "label", "x_min", "y_min", "x_max", "y_max", "crop"])
-        for row in existing_rows:
-            writer.writerow([row["filename"], row["label"], row["x_min"], row["y_min"], row["x_max"], row["y_max"], row.get("crop", "")])
-        for i, ann in enumerate(annotations, 1):
-            crop_name = f"line{i}.jpg"
-            writer.writerow([filename, ann["label"], ann["x_min"], ann["y_min"], ann["x_max"], ann["y_max"], crop_name])
+
+def _write_coco(coco):
+    with open(COCO_PATH, "w", encoding="utf-8") as f:
+        json.dump(coco, f, ensure_ascii=False, indent=2)
+
+
+def _category_id(coco, label):
+    for cat in coco["categories"]:
+        if cat["name"] == label:
+            return cat["id"]
+    new_id = max((c["id"] for c in coco["categories"]), default=0) + 1
+    coco["categories"].append({"id": new_id, "name": label})
+    return new_id
+
+
+def _save_coco(filename, width, height, annotations):
+    """Update annotations.json — replace annotations for this image, keep others."""
+    coco = _load_coco()
+
+    image = next((im for im in coco["images"] if im["file_name"] == filename), None)
+    if image is None:
+        image = {"id": max((im["id"] for im in coco["images"]), default=0) + 1,
+                 "file_name": filename}
+        coco["images"].append(image)
+    image["width"] = width
+    image["height"] = height
+
+    coco["annotations"] = [a for a in coco["annotations"] if a["image_id"] != image["id"]]
+    next_ann_id = max((a["id"] for a in coco["annotations"]), default=0) + 1
+    for i, ann in enumerate(annotations, 1):
+        w = ann["x_max"] - ann["x_min"]
+        h = ann["y_max"] - ann["y_min"]
+        coco["annotations"].append({
+            "id": next_ann_id,
+            "image_id": image["id"],
+            "category_id": _category_id(coco, ann["label"]),
+            "bbox": [ann["x_min"], ann["y_min"], w, h],
+            "area": w * h,
+            "iscrowd": 0,
+            "crop": f"line{i}.jpg",
+        })
+        next_ann_id += 1
+
+    _write_coco(coco)
+
+
+def _migrate_csv_to_coco():
+    """One-time: convert legacy annotations.csv to COCO annotations.json."""
+    csv_path = DATASET_DIR / "annotations.csv"
+    if COCO_PATH.exists() or not csv_path.exists():
+        return
+    by_image = {}
+    with open(csv_path, "r", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            by_image.setdefault(row["filename"], []).append(row)
+    for filename, rows in by_image.items():
+        img_path = DATASET_DIR / Path(filename).stem / filename
+        if img_path.exists():
+            with Image.open(img_path) as img:
+                width, height = img.size
+        else:
+            # Image copy missing — fall back to bbox extents
+            width = max(int(r["x_max"]) for r in rows)
+            height = max(int(r["y_max"]) for r in rows)
+        annotations = [{
+            "label": r["label"],
+            "x_min": int(r["x_min"]), "y_min": int(r["y_min"]),
+            "x_max": int(r["x_max"]), "y_max": int(r["y_max"]),
+        } for r in rows]
+        _save_coco(filename, width, height, annotations)
+    print(f"Migrated {csv_path.name} -> {COCO_PATH.name} ({len(by_image)} images)")
 
 
 @app.route("/api/load-annotations/<fid>")
@@ -211,17 +271,20 @@ def load_annotations(fid):
     if not entry:
         return jsonify({"annotations": []})
     name = entry["name"]
-    csv_path = DATASET_DIR / "annotations.csv"
+    coco = _load_coco()
     annotations = []
-    if csv_path.exists():
-        with open(csv_path, "r", encoding="utf-8") as f:
-            for row in csv.DictReader(f):
-                if row["filename"] == name:
-                    annotations.append({
-                        "label": row["label"],
-                        "x_min": int(row["x_min"]), "y_min": int(row["y_min"]),
-                        "x_max": int(row["x_max"]), "y_max": int(row["y_max"]),
-                    })
+    image = next((im for im in coco["images"] if im["file_name"] == name), None)
+    if image is not None:
+        labels = {c["id"]: c["name"] for c in coco["categories"]}
+        for a in coco["annotations"]:
+            if a["image_id"] != image["id"]:
+                continue
+            x, y, w, h = a["bbox"]
+            annotations.append({
+                "label": labels.get(a["category_id"], ""),
+                "x_min": int(x), "y_min": int(y),
+                "x_max": int(x + w), "y_max": int(y + h),
+            })
     return jsonify({"annotations": annotations})
 
 
@@ -236,6 +299,7 @@ def _all_image_info():
 
 
 def main():
+    _migrate_csv_to_coco()
     url = "http://127.0.0.1:5000"
     threading.Timer(1.0, lambda: webbrowser.open(url)).start()
     print(f"Labeling tool running at {url}")
