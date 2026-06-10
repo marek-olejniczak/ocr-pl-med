@@ -35,6 +35,11 @@ class LineTransformConfig:
     baseline_wander_amplitude: float = 3.0
     spacing_jitter_px: float = 2.0
     slant_max_deg: float = 12.0
+    # Linear baseline drift: text gradually climbs or falls across the line
+    # (very characteristic of real handwriting on unruled fields). Max total
+    # vertical drift in px over the whole string; the actual drift is drawn
+    # from [-max, +max] once per render.
+    baseline_drift_max_px: float = 0.0
 
 
 @dataclass
@@ -88,12 +93,14 @@ class WordStyle:
         rotation_jitter: float,
         scale_jitter: float,
         do_thicken: bool,
+        thicken_kernel: int = 3,
     ) -> None:
         self.base_rotation = base_rotation
         self.base_scale = base_scale
         self.rotation_jitter = rotation_jitter
         self.scale_jitter = scale_jitter
         self.do_thicken = do_thicken
+        self.thicken_kernel = thicken_kernel
 
     @classmethod
     def random(cls, cfg: CharTransformConfig) -> "WordStyle":
@@ -154,7 +161,7 @@ def char_scale(img: Image.Image, factor: float) -> Image.Image:
     return img.resize((new_w, new_h), Image.BICUBIC)
 
 
-def char_stroke_variation(img: Image.Image) -> Image.Image:
+def char_stroke_variation(img: Image.Image, kernel_size: int = 3) -> Image.Image:
     """Thicken character strokes using a morphological MaxFilter.
 
     Applied uniformly to the whole word (the decision to thicken
@@ -162,11 +169,15 @@ def char_stroke_variation(img: Image.Image) -> Image.Image:
 
     Args:
         img: RGBA character image.
+        kernel_size: Odd integer (3, 5, 7) — bigger = thicker strokes.
 
     Returns:
         Image with thickened strokes.
     """
-    return img.filter(ImageFilter.MaxFilter(3))
+    if kernel_size % 2 == 0:
+        kernel_size += 1
+    kernel_size = max(3, kernel_size)
+    return img.filter(ImageFilter.MaxFilter(kernel_size))
 
 
 # ---------------------------------------------------------------------------
@@ -373,7 +384,7 @@ def uneven_brightness(img: Image.Image, variation: float) -> Image.Image:
     return Image.fromarray(result)
 
 
-def page_rotation(img: Image.Image, max_deg: float) -> Image.Image:
+def page_rotation(img: Image.Image, max_deg: float) -> tuple[Image.Image, float]:
     """Rotate the entire image by a small random angle.
 
     Args:
@@ -381,10 +392,82 @@ def page_rotation(img: Image.Image, max_deg: float) -> Image.Image:
         max_deg: Maximum rotation in degrees.
 
     Returns:
-        Rotated image with white fill.
+        Tuple of (rotated image with white fill, chosen angle in degrees).
+        The angle is needed downstream to rotate ground-truth bboxes the same way.
     """
     angle = random.uniform(-max_deg, max_deg)
-    return img.rotate(angle, resample=Image.BICUBIC, expand=True, fillcolor=(255, 255, 255))
+    rotated = img.rotate(angle, resample=Image.BICUBIC, expand=True, fillcolor=(255, 255, 255))
+    return rotated, angle
+
+
+def rotate_bbox(
+    bbox: tuple[float, float, float, float],
+    angle_deg: float,
+    src_size: tuple[int, int],
+    dst_size: tuple[int, int],
+) -> tuple[int, int, int, int]:
+    """Rotate an axis-aligned bbox to match PIL's rotate(expand=True) behavior.
+
+    PIL rotates around the source-image center, then expands the canvas to fit
+    the rotated content. Both the rotated content and the new canvas are
+    re-centered, so the effective transform of a point (x, y) is:
+
+        1. translate to source center: (x - sx/2, y - sy/2)
+        2. rotate by -angle (PIL rotates content counterclockwise but the
+           coordinate system is image-style so we use the angle's sign as-is)
+        3. translate to destination center: (+ dx/2, + dy/2)
+
+    For an axis-aligned bbox, all 4 corners are rotated; the axis-aligned
+    bounding box of those 4 transformed corners is returned.
+
+    Args:
+        bbox: (x_min, y_min, x_max, y_max) in source image coordinates.
+        angle_deg: Rotation angle that was applied (same value page_rotation returns).
+        src_size: (width, height) of the source image before rotation.
+        dst_size: (width, height) of the destination image after rotation.
+
+    Returns:
+        Axis-aligned (x_min, y_min, x_max, y_max) in destination coords,
+        clamped to the destination image bounds.
+    """
+    x1, y1, x2, y2 = bbox
+    sx, sy = src_size
+    dx, dy = dst_size
+
+    # PIL.Image.rotate(angle) rotates counterclockwise. Our pixel-space
+    # rotation of points around the center uses standard image coords
+    # (y grows downward). Counterclockwise visual rotation corresponds to
+    # a clockwise rotation of the coordinate frame, so to map a point's
+    # original (x, y) to its rotated location we use angle = -angle_deg
+    # in the standard rotation matrix.
+    theta = math.radians(-angle_deg)
+    cos_t = math.cos(theta)
+    sin_t = math.sin(theta)
+
+    cx_src, cy_src = sx / 2.0, sy / 2.0
+    cx_dst, cy_dst = dx / 2.0, dy / 2.0
+
+    corners = [(x1, y1), (x2, y1), (x2, y2), (x1, y2)]
+    rotated = []
+    for px, py in corners:
+        # Translate to source center
+        tx = px - cx_src
+        ty = py - cy_src
+        # Rotate
+        rx = tx * cos_t - ty * sin_t
+        ry = tx * sin_t + ty * cos_t
+        # Translate to destination center
+        rotated.append((rx + cx_dst, ry + cy_dst))
+
+    xs = [p[0] for p in rotated]
+    ys = [p[1] for p in rotated]
+
+    nx1 = max(0, int(math.floor(min(xs))))
+    ny1 = max(0, int(math.floor(min(ys))))
+    nx2 = min(dx, int(math.ceil(max(xs))))
+    ny2 = min(dy, int(math.ceil(max(ys))))
+
+    return (nx1, ny1, nx2, ny2)
 
 
 def jpeg_artifacts(img: Image.Image, quality_min: int, quality_max: int) -> Image.Image:
@@ -458,7 +541,7 @@ class TransformPipeline:
             if cfg.scan.blur_radius > 0:
                 img = gaussian_blur(img, cfg.scan.blur_radius)
             if cfg.scan.rotation_max_deg > 0:
-                img = page_rotation(img, cfg.scan.rotation_max_deg)
+                img, _ = page_rotation(img, cfg.scan.rotation_max_deg)
             img = jpeg_artifacts(img, cfg.scan.jpeg_quality_min, cfg.scan.jpeg_quality_max)
 
         return img

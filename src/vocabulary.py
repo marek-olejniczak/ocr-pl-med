@@ -28,7 +28,96 @@ CATEGORIES = [
     "patient_name",
     "date",
     "pesel",
+    "address",
+    "phone",
+    "doctor_name",
+    "hospital_name",
+    "department",
+    "age",
+    "year",
+    "city",
+    "day_and_month",
+    "last_2_digits_year",
+    "approval",
 ]
+
+
+# Possible texts for "przyczyna ewentualnej odmowy/zalecenia" field
+_APPROVAL_TEXTS = [
+    "Skierowanie ważne 30 dni",
+    "Pilne badanie",
+    "Zalecana hospitalizacja",
+    "Wymagane konsultacje przed przyjęciem",
+    "Termin do uzgodnienia",
+    "Kontrola po 4 tygodniach",
+    "Brak miejsc w oddziale",
+    "Pacjent nie zgłosił się w terminie",
+    "Skierowanie do realizacji w trybie planowym",
+    "Zalecane wykonanie badań laboratoryjnych",
+    "Wymagane EKG przed przyjęciem",
+    "Pacjent w stanie stabilnym",
+    "Zalecana konsultacja kardiologiczna",
+    "Hospitalizacja w trybie pilnym",
+    "Kontynuacja leczenia szpitalnego",
+    "Skierowanie zaakceptowane",
+    "Termin przyjęcia do uzgodnienia telefonicznego",
+    "Wymagana konsultacja anestezjologiczna",
+    "Pacjent zgłasza się z opiekunem",
+    "Diagnostyka w warunkach szpitalnych",
+]
+
+
+# Procedural data sources for form-filling categories
+_STREETS = [
+    "Marszałkowska", "Piotrkowska", "Krakowska", "Warszawska", "Słowackiego",
+    "Mickiewicza", "Sienkiewicza", "Reymonta", "Kościuszki", "Piłsudskiego",
+    "3 Maja", "11 Listopada", "Niepodległości", "Wolności", "Pokoju",
+    "Zielona", "Krótka", "Długa", "Polna", "Leśna", "Łąkowa", "Słoneczna",
+    "Akacjowa", "Lipowa", "Brzozowa", "Sosnowa", "Kwiatowa", "Ogrodowa",
+    "Szkolna", "Kościelna", "Rynkowa", "Główna", "Boczna", "Nowa",
+    "Jana Pawła II", "Stefana Batorego", "Bolesława Chrobrego", "Władysława Jagiełły",
+]
+
+_CITIES = [
+    "Warszawa", "Kraków", "Łódź", "Wrocław", "Poznań", "Gdańsk", "Szczecin",
+    "Bydgoszcz", "Lublin", "Białystok", "Katowice", "Gdynia", "Częstochowa",
+    "Radom", "Sosnowiec", "Toruń", "Kielce", "Rzeszów", "Gliwice", "Zabrze",
+    "Olsztyn", "Bielsko-Biała", "Bytom", "Zielona Góra", "Rybnik", "Ruda Śląska",
+    "Tychy", "Opole", "Gorzów Wielkopolski", "Dąbrowa Górnicza", "Płock",
+    "Elbląg", "Wałbrzych", "Włocławek", "Tarnów", "Chorzów", "Koszalin",
+    "Kalisz", "Legnica", "Grudziądz", "Słupsk", "Jaworzno", "Jastrzębie-Zdrój",
+    "Skierniewice",
+]
+
+_HOSPITAL_TEMPLATES = [
+    "Szpital Wojewódzki im. {patron} w {city}",
+    "Szpital Miejski w {city}",
+    "Szpital Specjalistyczny w {city}",
+    "Wojewódzki Szpital Zespolony w {city}",
+    "Szpital Kliniczny im. {patron} w {city}",
+    "Centrum Medyczne {patron} w {city}",
+    "SP ZOZ w {city}",
+    "Szpital Powiatowy w {city}",
+]
+
+_HOSPITAL_PATRONS = [
+    "Jana Pawła II", "Mikołaja Kopernika", "św. Łukasza", "św. Anny",
+    "M. Kopernika", "L. Rydygiera", "T. Marcinkowskiego",
+    "ks. A. Markwarta", "T. Chałubińskiego", "J. Korczaka",
+]
+
+_DEPARTMENTS = [
+    "Kardiologii", "Neurologii", "Ortopedii", "Chirurgii Ogólnej",
+    "Chirurgii Naczyniowej", "Onkologii", "Pulmonologii", "Gastroenterologii",
+    "Endokrynologii", "Reumatologii", "Nefrologii", "Urologii",
+    "Ginekologii i Położnictwa", "Pediatrii", "Neonatologii",
+    "Anestezjologii i Intensywnej Terapii", "Rehabilitacji",
+    "Psychiatrii", "Dermatologii", "Okulistyki", "Otolaryngologii",
+    "Chorób Wewnętrznych", "Chorób Zakaźnych", "Hematologii",
+    "Chirurgii Urazowo-Ortopedycznej", "Neurochirurgii",
+]
+
+_DOCTOR_TITLES = ["dr", "lek.", "lek. med.", "dr n. med.", "dr hab.", "prof. dr hab."]
 
 
 class Vocabulary:
@@ -289,8 +378,126 @@ class Vocabulary:
         elif category == "pesel":
             return (self._generate_pesel(), "pesel")
 
+        elif category == "address":
+            return (self._random_address(), "address")
+
+        elif category == "phone":
+            return (self._random_phone(), "phone")
+
+        elif category == "doctor_name":
+            return (self._random_doctor_name(), "doctor_name")
+
+        elif category == "hospital_name":
+            return (self._random_hospital_name(), "hospital_name")
+
+        elif category == "department":
+            return (self._random_department(), "department")
+
+        elif category == "age":
+            return (str(random.randint(1, 99)), "age")
+
+        elif category == "year":
+            return (str(random.randint(2020, 2025)), "year")
+
+        elif category == "city":
+            return (random.choice(_CITIES), "city")
+
+        elif category == "day_and_month":
+            d = self._random_day_and_month()
+            return (d, "day_and_month")
+
+        elif category == "last_2_digits_year":
+            return (f"{random.randint(20, 25):02d}", "last_2_digits_year")
+
+        elif category == "approval":
+            return (random.choice(_APPROVAL_TEXTS), "approval")
+
+        elif category == "text":
+            # Generic alphabetic content: random pick from any text-like category
+            text_categories = [
+                "patient_name", "patient_name",  # name appears more often
+                "diagnosis", "icd_description",
+                "address", "city",
+                "hospital_name", "doctor_name", "department",
+                "approval", "drug",
+            ]
+            sub = random.choice(text_categories)
+            content, _ = self.get_random_text(sub)
+            return (content, "text")
+
+        elif category == "number":
+            # Generic numeric content: random pick from any number-like category
+            number_categories = [
+                "pesel", "date", "date",  # date appears more often
+                "phone", "icd_code",
+                "year", "age",
+                "day_and_month", "last_2_digits_year",
+            ]
+            sub = random.choice(number_categories)
+            content, _ = self.get_random_text(sub)
+            return (content, "number")
+
         else:
             return self.get_random_text(None)
+
+    @staticmethod
+    def _random_day_and_month() -> str:
+        """Generate a random DD.MM string."""
+        start = date(2020, 1, 1)
+        end = date(2025, 12, 31)
+        d = start + timedelta(days=random.randint(0, (end - start).days))
+        return d.strftime("%d.%m")
+
+    @staticmethod
+    def _random_address() -> str:
+        """Generate a random Polish address: street + number, postal code + city."""
+        street = random.choice(_STREETS)
+        number = random.randint(1, 250)
+        if random.random() < 0.3:
+            number = f"{number}/{random.randint(1, 50)}"
+        postal = f"{random.randint(10, 99)}-{random.randint(100, 999)}"
+        city = random.choice(_CITIES)
+        if random.random() < 0.5:
+            return f"ul. {street} {number}, {postal} {city}"
+        return f"{street} {number}, {city}"
+
+    @staticmethod
+    def _random_phone() -> str:
+        """Generate a random Polish phone number."""
+        formats = [
+            lambda: f"+48 {random.randint(500, 799)} {random.randint(100, 999)} {random.randint(100, 999)}",
+            lambda: f"{random.randint(500, 799)}-{random.randint(100, 999)}-{random.randint(100, 999)}",
+            lambda: f"{random.randint(500, 799)} {random.randint(100, 999)} {random.randint(100, 999)}",
+            lambda: f"({random.randint(12, 99)}) {random.randint(100, 999)}-{random.randint(10, 99)}-{random.randint(10, 99)}",
+        ]
+        return random.choice(formats)()
+
+    def _random_doctor_name(self) -> str:
+        """Generate a random doctor name with title."""
+        title = random.choice(_DOCTOR_TITLES)
+        is_female = random.choice([True, False])
+        if is_female:
+            first = random.choice(self.first_names_female) if self.first_names_female else "Anna"
+            last = random.choice(self.last_names) if self.last_names else "Kowalska"
+            last = self._feminize_last_name(last)
+        else:
+            first = random.choice(self.first_names_male) if self.first_names_male else "Jan"
+            last = random.choice(self.last_names) if self.last_names else "Kowalski"
+        return f"{title} {first} {last}"
+
+    @staticmethod
+    def _random_hospital_name() -> str:
+        """Generate a random Polish hospital name."""
+        template = random.choice(_HOSPITAL_TEMPLATES)
+        return template.format(
+            patron=random.choice(_HOSPITAL_PATRONS),
+            city=random.choice(_CITIES),
+        )
+
+    @staticmethod
+    def _random_department() -> str:
+        """Generate a random hospital department name."""
+        return f"Oddział {random.choice(_DEPARTMENTS)}"
 
     def get_random_phrase(self) -> tuple[str, str]:
         """Generate a realistic short medical phrase combining elements.
