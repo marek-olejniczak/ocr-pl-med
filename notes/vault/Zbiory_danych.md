@@ -1,5 +1,14 @@
 # Najbardziej adekwatne
 
+#### RxHandBD: A Handwritten Prescription Word Image Dataset
+https://data.mendeley.com/datasets/dsb5r6vskg/3
+Islam, Md Masudul (2026), “RxHandBD: A Handwritten Prescription Word Image Dataset”, Mendeley Data, V3, doi: 10.17632/dsb5r6vskg.3
+#### Description
+
+This dataset provides a standardized, ready-to-use collection of 5,578 cropped, handwritten words extracted from physical medical prescriptions. It is explicitly designed to accelerate research and development in Optical Character Recognition (OCR) and Handwritten Text Recognition (HTR) systems within the healthcare domain. Two Version of Dataset: 1. Original Raw Data (RxHandBD-Raw.zip) 2. AI Compatible Data (RxHandBD-ML.zip) Dataset Structure & Characteristics To facilitate immediate machine learning application, the dataset has been pre-organized into standard Training and Testing splits (an 80/20 ratio). All images are standardized to a 512x512 pixel resolution to ensure uniformity across neural network input layers. #Total Images: 5,578 (.jpg format) Vocabulary: 1,559 unique text entries (including generic medicines, pharmaceutical brands, dosage forms, and clinical instructions). Training Set: 4,463 images (80% of the dataset) accompanied by train_labels.csv. Testing Set: 1,115 images (20% of the dataset) accompanied by test_labels.csv. Use Cases Digitizing handwritten prescriptions is a critical step in modernizing healthcare systems, reducing medication dispensing errors, and automating pharmacy workflows. By providing a clean, pre-split, and challenging benchmark of natural physician handwriting, this dataset enables researchers to directly train, validate, and compare deep learning architectures (such as CRNNs or Vision Transformers) for medical text extraction.
+
+Licence CC BY 4.0
+
 ### Polish Handwritten Characters Database (PHCD)
 https://www.kaggle.com/datasets/westedcrean/phcd-polish-handwritten-characters-database
 https://yadda.icm.edu.pl/baztech/element/bwmeta1.element.baztech-b97bdeca-28ef-4915-a601-b36a819d9ab3 (to chyba do tego)

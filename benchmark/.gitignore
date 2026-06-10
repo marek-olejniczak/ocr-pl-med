@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+.venv-1/
+venv/
+env/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# Local outputs
+wyniki/
+
+# Large local datasets
+dane/
+
+# Model weights
+modele/cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+wandb/

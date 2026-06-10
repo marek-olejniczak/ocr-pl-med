@@ -1,11 +1,14 @@
 Do testów:
-- RysOCR (Hugging Face)
-- Tesseract OCR (pol.traineddata)
-- TrOCR (Transformer-based Optical Character Recognition)
-- Modele MLLM: GOT-OCR 2.0 i Qwen2.5-VL
-- PaddleOCR (Multilingual)
-- EasyOCR
-- PARSeq (docTR)
-- Donut (Document Understanding Transformer)
-- Surya
-- Calamari OCR
+- RysOCR (Hugging Face) PL
+- Tesseract OCR (pol.traineddata) - lekki ale z potencjałem PL - działa tylko na wycinkach
+- TrOCR (Transformer-based Optical Character Recognition) - słaby bo poprawia wszystko na anglieski. Testowałem small i base. (są wersje finetuned medical ale obstawiam że też angielski)
+- Modele MLLM: GOT-OCR 2.0 i Qwen2.5-VL - dużo VRAMu potrzebują - u mnie OOM
+- PaddleOCR (Multilingual)  - działa tylko na wycinkach
+- EasyOCR - działa na wycinkach i na całym dokumencie
+- PARSeq (docTR) - bardzo słaby
+- Surya (najlepszy na pierwszy rzut + potencjał do segmentacji dokumentów) PL - działa na wycinkach i na całym dokumencie
+- Calamari OCR - źle działa (niepoprawnie)
+- GLM OCR (do całych dokumentów bo działa na PP-DocLayout-V3)
+- DeepSeek-VL2-Tiny (głownie do pełnej analizy dokumentów)
+- Kraken (McCATMuS) - głównie francuski - działa źle (wariant pod francusji htr, poza tym bardzo słaby)
+- LightOnOCR-1B - nie mogłem doprowadzić do działania

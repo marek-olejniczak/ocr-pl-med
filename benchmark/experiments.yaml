@@ -1,0 +1,227 @@
+experiment:
+  name: "ocr-benchmark-autorun-test-handlabeled-01"
+  project_name: "ocr-benchmark"
+  wandb_entity: "ocr-pl-med"
+  tags: ["autorun", "http", "sequential", "smoke", "laptop"]
+  hardware_note: "Nvidia GTX 1650, 4GB VRAM"
+
+settings:
+  output_dir: "wyniki"
+  export_overleaf_table: false
+  auto_start_services: true
+  stop_service_after_run: true
+  sequential: true
+  warmup_samples: 1
+  cooldown_seconds: 5
+  restart_docker_per_dataset: false
+  http_timeout_default: 120
+  wandb_log: false
+
+datasets:
+  - id: "lexicography_smoke"
+    enabled: false
+    labels_csv: "dane/htr_lexicography-main/data/PL-20k-hand-labelled.csv"
+    images_dir: "dane/htr_lexicography-main/data/PL-20k-hand-labelled"
+    limit: 3
+    single_words: true
+  
+  - id: "testset_800"
+    enabled: false
+    labels_csv: "dane/testset/labels.csv"
+    images_dir: "dane/testset/images"
+    limit: null
+    single_words: false
+  
+  - id: "testset_800_preprocessed"
+    enabled: false
+    labels_csv: "dane/testset/labels.csv"
+    images_dir: "dane/testset/images_processed_lines"
+    limit: null
+    single_words: false
+
+  - id: "testset_800_preprocessed_soft"
+    enabled: false
+    labels_csv: "dane/testset/labels.csv"
+    images_dir: "dane/testset/images_processed_lines"
+    limit: null
+    single_words: false
+
+  - id: "prescriptions"
+    enabled: false
+    labels_csv: "dane/RxHandBD-Raw/Prescription_Labels.csv"
+    images_dir: "dane/RxHandBD-Raw/Images"
+    limit: 32
+    single_words: true
+
+  - id: "noisy_synthetic_medical_smoke"
+    enabled: true
+    labels_csv: "dane/noisy_synthetic_medical/labels.csv"
+    images_dir: "dane/noisy_synthetic_medical/Data/discharge_summaries"
+    limit: 5
+    single_words: false
+
+  - id: "licence_plates_smoke"
+    enabled: true
+    labels_csv: "dane/licence_plates/labels.csv"
+    images_dir: "dane/licence_plates/LP-characters/images"
+    limit: 10
+    single_words: false
+
+
+models:
+  - id: "tesseract_pol"
+    service_name: "tesseract-pol"
+    base_url: "http://localhost:8007"
+    enabled: true
+    timeout: 120
+    options:
+      language: "pol"
+      psm: 7
+      oem: 1
+      tesseract_cmd: "tesseract"
+
+  - id: "easyocr"
+    service_name: "easyocr"
+    base_url: "http://localhost:8001"
+    enabled: true
+    timeout: 120
+    options:
+      langs: ["pl", "en"]
+      device: "cuda"
+      batch_size: 8
+
+  - id: "rysocr"
+    service_name: "rysocr"
+    base_url: "http://localhost:8006"
+    enabled: true
+    timeout: 36000
+    options:
+      adapter_model_id: "kacperwikiel/RysOCR"
+      base_model_id: "PaddlePaddle/PaddleOCR-VL"
+      prompt: "Transcribe the text."
+      max_new_tokens: 128
+      device: "cuda"
+      local_files_only: false
+      batch_size: 8
+      use_amp: true
+      cache_dir: "modele/cache/rysocr"
+
+  - id: "trocr" # nie ma sensu uzywac - tylko angielski
+    service_name: "trocr"
+    base_url: "http://localhost:8002"
+    enabled: false
+    timeout: 3600
+    options:
+      model_id: "microsoft/trocr-base-handwritten"
+      max_new_tokens: 256
+      device: "cuda"
+      local_files_only: false
+      batch_size: 4
+      use_amp: true
+      cache_dir: "modele/cache/trocr"
+
+  - id: "paddleocr"
+    service_name: "paddleocr"
+    base_url: "http://localhost:8003"
+    enabled: true
+    timeout: 240
+    options:
+      rec_model_name: "PP-OCRv4_mobile_rec"
+      lang: "pl"
+      device: "cuda"
+      use_angle_cls: false
+      rec_batch_size: 8
+      cache_dir: "modele/cache/paddlex"
+
+  - id: "parseq" # nie ma sensu uzywac - slaby
+    service_name: "parseq"
+    base_url: "http://localhost:8004"
+    enabled: true
+    timeout: 240
+    options:
+      device: "cuda"
+      batch_size: 8
+      cache_dir: "modele/cache/parseq"
+      input_size: "32x128"
+      use_amp: true
+      language: "pl"
+      model_id: null
+      local_files_only: false
+
+  - id: "calamari" # nie dziala poprawnie
+    service_name: "calamari"
+    base_url: "http://localhost:8005"
+    enabled: true
+    timeout: 240
+    options:
+      model: "idiotikon"
+      batch_size: 8
+      cache_dir: "modele/cache/calamari"
+      local_files_only: false
+      checkpoints: null
+      device: "auto"
+
+  - id: "surya" # najlepszy
+    service_name: "surya"
+    base_url: "http://localhost:8008"
+    enabled: true
+    timeout: 600
+    options:
+      device: "cuda"
+      batch_size: 8
+      task_name: "ocr_without_boxes"
+      disable_math: false
+      cache_dir: "modele/cache/surya"
+
+  - id: "got_ocr"
+    service_name: "got-ocr"
+    base_url: "http://localhost:8009"
+    enabled: true
+    timeout: 900
+    options:
+      model_id: "ucaslcl/GOT-OCR2_0"
+      device: "cuda"
+      dtype: "bfloat16"
+      cache_dir: "modele/cache/got_ocr"
+      trust_remote_code: true
+
+  - id: "qwen2_5_vl"
+    service_name: "qwen2_5_vl"
+    base_url: "http://localhost:8010"
+    enabled: false
+    timeout: 7200
+    options:
+      model_id: "Qwen/Qwen2.5-VL-3B-Instruct" # 7B przy wiekszym VRAM
+      device: "cuda"
+      dtype: "bfloat16"
+      max_new_tokens: 512
+      cache_dir: "modele/cache/qwen2_5_vl"
+      prompt: "Transcribe the text."
+
+  - id: "kraken" # nie ma sensu uzywac - slaby i tylko francuski odreczny
+    service_name: "kraken"
+    base_url: "http://localhost:8011"
+    enabled: true
+    timeout: 600
+    options:
+      model_path: "modele/cache/kraken/199fb0ec-cf40-50aa-b99a-69ba1f42f0bc/lectaurep_base.mlmodel"
+      device: "cuda:0"
+      precision: "32-true"
+      batch_size: 8
+      num_line_workers: 2
+      text_direction: "horizontal-tb"
+      no_legacy_polygons: false
+
+  - id: "glm_4v"
+    service_name: "glm_4v"
+    base_url: "http://localhost:8012"
+    enabled: false
+    timeout: 1800
+    options:
+      model_id: "zai-org/glm-4v-9b"
+      device: "cuda"
+      dtype: "bfloat16"
+      max_new_tokens: 512
+      cache_dir: "modele/cache/glm_4v"
+      prompt: "Transcribe the text."
+      local_files_only: false

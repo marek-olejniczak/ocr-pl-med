@@ -1,0 +1,7 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+# paddlepaddle-gpu (jest teraz w obrazie bazowym)
+paddleocr>=2.8.0  
+paddlex>=3.0.0b2 
+pillow>=10.0.0
+numpy>=1.26.0

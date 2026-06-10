@@ -1,0 +1,25 @@
+pandas>=2.1.0
+pillow>=10.0.0
+pytesseract>=0.3.10
+requests>=2.32.0
+pyyaml>=6.0
+numpy>=1.26.0
+wandb>=0.16.0
+torch>=2.2.0
+torchvision>=0.17.0
+transformers>=4.44.0,<5.0.0
+peft>=0.11.0
+accelerate>=0.30.0
+einops
+sentencepiece>=0.2.0
+protobuf>=5.0.0
+easyocr>=1.7.1
+python-doctr>=0.11.0
+# Calamari 2.x currently requires TensorFlow stack that is practical on Python <=3.11.
+calamari-ocr>=2.3.1; python_version < "3.12"
+# Paddle stack for this repo is currently maintained in CPU profile on Python 3.12.
+paddleocr>=3.4.0,<3.5.0; python_version >= "3.11"
+paddlex>=3.4.3,<3.5.0; python_version >= "3.11"
+# Legacy fallback (preferably Python <=3.10), e.g. when using old GPU wheels.
+paddleocr==2.10.0; python_version < "3.11"
+paddlex==2.1.0; python_version < "3.11"
