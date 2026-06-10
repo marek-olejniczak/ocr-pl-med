@@ -9,11 +9,17 @@ import io
 import os
 import threading
 import webbrowser
+from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
 from flask import Flask, render_template, jsonify, request, send_file, abort
 from PIL import Image
+
+try:
+    import fitz  # PyMuPDF
+except ImportError:
+    fitz = None
 
 APP_DIR = Path(__file__).parent.resolve()
 DATASET_DIR = APP_DIR / "dataset"
@@ -45,10 +51,26 @@ def upload():
     for f in files:
         if not f.filename:
             continue
-        fid = uuid4().hex[:12]
+        fname = f.filename
         data = f.read()
-        image_store[fid] = {"name": f.filename, "data": data}
-        new_ids.append(fid)
+        if fname.lower().endswith(".pdf"):
+            if fitz is None:
+                return jsonify({"ok": False, "error": "PyMuPDF not installed — run: pip install PyMuPDF"})
+            try:
+                pages = _pdf_to_pngs(data)
+            except Exception as e:
+                return jsonify({"ok": False, "error": f"Failed to read {fname}: {e}"})
+            base = Path(fname).stem
+            pad = max(2, len(str(len(pages))))
+            for i, page_png in enumerate(pages, 1):
+                fid = uuid4().hex[:12]
+                page_name = f"{base}_p{str(i).zfill(pad)}.png"
+                image_store[fid] = {"name": page_name, "data": page_png}
+                new_ids.append(fid)
+        else:
+            fid = uuid4().hex[:12]
+            image_store[fid] = {"name": fname, "data": data}
+            new_ids.append(fid)
 
     if not new_ids:
         return jsonify({"ok": False, "error": "No valid images"})
@@ -117,7 +139,49 @@ def save():
     # Append/update single annotations.csv at dataset root
     _save_csv(base, name, annotations)
 
+    # Persist timing for this image, if provided
+    time_seconds = data.get("time_seconds")
+    started_at = data.get("started_at")
+    if time_seconds is not None:
+        _save_timing(name, time_seconds, started_at)
+
     return jsonify({"ok": True, "csv": str(DATASET_DIR / "annotations.csv"), "crops": len(annotations)})
+
+
+def _pdf_to_pngs(pdf_bytes, dpi=200):
+    """Render each PDF page to PNG bytes."""
+    out = []
+    zoom_factor = dpi / 72.0
+    matrix = fitz.Matrix(zoom_factor, zoom_factor)
+    with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
+        for page in doc:
+            pix = page.get_pixmap(matrix=matrix, alpha=False)
+            out.append(pix.tobytes("png"))
+    return out
+
+
+def _save_timing(filename, time_seconds, started_at):
+    """Append/update a row in dataset/timings.csv (one row per image)."""
+    timings_path = DATASET_DIR / "timings.csv"
+    rows = []
+    if timings_path.exists():
+        with open(timings_path, "r", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                if row["filename"] != filename:
+                    rows.append(row)
+
+    saved_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    rows.append({
+        "filename": filename,
+        "time_seconds": f"{float(time_seconds):.2f}",
+        "started_at": started_at or "",
+        "saved_at": saved_at,
+    })
+
+    with open(timings_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["filename", "time_seconds", "started_at", "saved_at"])
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 def _save_csv(base, filename, annotations):
