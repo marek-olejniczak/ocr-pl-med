@@ -19,7 +19,7 @@ settings:
 
 datasets:
   - id: "lexicography_smoke"
-    enabled: true
+    enabled: false
     labels_csv: "dane/htr_lexicography-main/data/PL-20k-hand-labelled.csv"
     images_dir: "dane/htr_lexicography-main/data/PL-20k-hand-labelled"
     limit: 3
@@ -52,6 +52,20 @@ datasets:
     images_dir: "dane/RxHandBD-Raw/Images"
     limit: 32
     single_words: true
+
+  - id: "noisy_synthetic_medical_smoke"
+    enabled: true
+    labels_csv: "dane/noisy_synthetic_medical/labels.csv"
+    images_dir: "dane/noisy_synthetic_medical/Data/discharge_summaries"
+    limit: 5
+    single_words: false
+
+  - id: "licence_plates_smoke"
+    enabled: true
+    labels_csv: "dane/licence_plates/labels.csv"
+    images_dir: "dane/licence_plates/LP-characters/images"
+    limit: 10
+    single_words: false
 
 
 models:
@@ -92,7 +106,7 @@ models:
       use_amp: true
       cache_dir: "modele/cache/rysocr"
 
-  - id: "trocr"
+  - id: "trocr" # nie ma sensu uzywac - tylko angielski
     service_name: "trocr"
     base_url: "http://localhost:8002"
     enabled: false
@@ -119,7 +133,7 @@ models:
       rec_batch_size: 8
       cache_dir: "modele/cache/paddlex"
 
-  - id: "parseq"
+  - id: "parseq" # nie ma sensu uzywac - slaby
     service_name: "parseq"
     base_url: "http://localhost:8004"
     enabled: true
@@ -134,7 +148,7 @@ models:
       model_id: null
       local_files_only: false
 
-  - id: "calamari"
+  - id: "calamari" # nie dziala poprawnie
     service_name: "calamari"
     base_url: "http://localhost:8005"
     enabled: true
@@ -147,7 +161,7 @@ models:
       checkpoints: null
       device: "auto"
 
-  - id: "surya"
+  - id: "surya" # najlepszy
     service_name: "surya"
     base_url: "http://localhost:8008"
     enabled: true
@@ -184,10 +198,10 @@ models:
       cache_dir: "modele/cache/qwen2_5_vl"
       prompt: "Transcribe the text."
 
-  - id: "kraken"
+  - id: "kraken" # nie ma sensu uzywac - slaby i tylko francuski odreczny
     service_name: "kraken"
     base_url: "http://localhost:8011"
-    enabled: false
+    enabled: true
     timeout: 600
     options:
       model_path: "modele/cache/kraken/199fb0ec-cf40-50aa-b99a-69ba1f42f0bc/lectaurep_base.mlmodel"

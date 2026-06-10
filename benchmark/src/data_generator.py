@@ -28,15 +28,16 @@ def _extract_ids(file_name: str) -> tuple[str, str]:
 
 def _build_image_index(images_dir: Path) -> dict[str, Path]:
 	index: dict[str, Path] = {}
-	for path in images_dir.glob("*.jpg"):
-		name = path.name
-		keys = {
-			name,
-			unicodedata.normalize("NFC", name),
-			unicodedata.normalize("NFD", name),
-		}
-		for key in keys:
-			index.setdefault(key, path)
+	for pattern in ("*.jpg", "*.jpeg", "*.png"):
+		for path in images_dir.glob(f"**/{pattern}"):
+			name = path.name
+			keys = {
+				name,
+				unicodedata.normalize("NFC", name),
+				unicodedata.normalize("NFD", name),
+			}
+			for key in keys:
+				index.setdefault(key, path)
 	return index
 
 
