@@ -1,2 +1,557 @@
 filename,label,x_min,y_min,x_max,y_max,crop
 anatomia_zmysly_1.png,JĄDRA,497,100,569,136,line1.jpg
+2271_17 ERRZ_p1.png,printed,298,86,403,124,line1.jpg
+2271_17 ERRZ_p1.png,printed,298,114,463,149,line2.jpg
+2271_17 ERRZ_p1.png,printed,298,137,477,179,line3.jpg
+2271_17 ERRZ_p1.png,printed,1347,93,1530,166,line4.jpg
+2271_17 ERRZ_p1.png,printed,724,256,928,306,line5.jpg
+2271_17 ERRZ_p1.png,printed,220,306,1438,362,line6.jpg
+2271_17 ERRZ_p1.png,printed,213,355,1442,413,line7.jpg
+2271_17 ERRZ_p1.png,printed,108,524,423,564,line8.jpg
+2271_17 ERRZ_p1.png,printed,111,577,541,621,line9.jpg
+2271_17 ERRZ_p1.png,printed,116,608,562,652,line10.jpg
+2271_17 ERRZ_p1.png,printed,113,647,857,691,line11.jpg
+2271_17 ERRZ_p1.png,printed,113,749,396,790,line12.jpg
+2271_17 ERRZ_p1.png,printed,579,816,636,863,line13.jpg
+2271_17 ERRZ_p1.png,printed,520,892,636,936,line14.jpg
+2271_17 ERRZ_p1.png,printed,456,967,636,1011,line15.jpg
+2271_17 ERRZ_p1.png,printed,481,1064,639,1103,line16.jpg
+2271_17 ERRZ_p1.png,printed,655,1106,1266,1145,line17.jpg
+2271_17 ERRZ_p1.png,printed,237,1149,1286,1200,line18.jpg
+2271_17 ERRZ_p1.png,printed,143,1186,245,1244,line19.jpg
+2271_17 ERRZ_p1.png,printed,223,1255,633,1293,line20.jpg
+2271_17 ERRZ_p1.png,printed,370,1289,634,1323,line21.jpg
+2271_17 ERRZ_p1.png,printed,393,1331,636,1367,line22.jpg
+2271_17 ERRZ_p1.png,printed,219,1498,633,1536,line23.jpg
+2271_17 ERRZ_p1.png,printed,115,1572,537,1617,line24.jpg
+2271_17 ERRZ_p1.png,printed,614,1643,671,1682,line25.jpg
+2271_17 ERRZ_p1.png,printed,556,1717,671,1754,line26.jpg
+2271_17 ERRZ_p1.png,printed,112,1790,551,1827,line27.jpg
+2271_17 ERRZ_p1.png,printed,115,1840,248,1876,line28.jpg
+2271_17 ERRZ_p1.png,printed,116,1913,245,1952,line29.jpg
+2271_17 ERRZ_p1.png,printed,115,1988,249,2024,line30.jpg
+2271_17 ERRZ_p1.png,printed,113,2062,246,2098,line31.jpg
+2271_17 ERRZ_p1.png,printed,115,2133,249,2173,line32.jpg
+2271_17 ERRZ_p1.png,printed,717,1838,1122,1875,line33.jpg
+2271_17 ERRZ_p1.png,printed,715,1912,1122,1952,line34.jpg
+2271_17 ERRZ_p1.png,printed,721,1987,1120,2025,line35.jpg
+2271_17 ERRZ_p1.png,printed,717,2060,1123,2101,line36.jpg
+2271_17 ERRZ_p1.png,printed,719,2136,1123,2172,line37.jpg
+2271_17 ERRZ_p1.png,printed,521,2220,1132,2255,line38.jpg
+2271_17 ERRZ_p1.png,printed,1389,2217,1541,2252,line39.jpg
+2271_17 ERRZ_p1.png,printed,696,1014,733,1039,line40.jpg
+2271_17 ERRZ_p1.png,printed,791,1016,837,1038,line41.jpg
+2271_17 ERRZ_p1.png,printed,940,1016,983,1039,line42.jpg
+2271_17 ERRZ_p1.png,text,664,813,1537,866,line43.jpg
+2271_17 ERRZ_p1.png,text,663,887,1537,939,line44.jpg
+2271_17 ERRZ_p1.png,number,663,961,1061,1012,line45.jpg
+2271_17 ERRZ_p1.png,text,664,1057,1538,1109,line46.jpg
+2271_17 ERRZ_p1.png,number,242,1190,1538,1243,line47.jpg
+2271_17 ERRZ_p1.png,text,663,1264,1535,1318,line48.jpg
+2271_17 ERRZ_p1.png,text,663,1338,1535,1465,line49.jpg
+2271_17 ERRZ_p1.png,text,664,1489,1535,1540,line50.jpg
+2271_17 ERRZ_p1.png,text,701,1638,1540,1688,line51.jpg
+2271_17 ERRZ_p1.png,text,701,1710,1537,1761,line52.jpg
+2271_17 ERRZ_p1.png,text,278,1831,701,1884,line53.jpg
+2271_17 ERRZ_p1.png,text,278,1905,701,1956,line54.jpg
+2271_17 ERRZ_p1.png,text,278,1979,700,2029,line55.jpg
+2271_17 ERRZ_p1.png,text,277,2052,701,2102,line56.jpg
+2271_17 ERRZ_p1.png,text,279,2126,701,2176,line57.jpg
+2271_17 ERRZ_p1.png,text,1150,1831,1540,1885,line58.jpg
+2271_17 ERRZ_p1.png,text,1148,1904,1541,1957,line59.jpg
+2271_17 ERRZ_p1.png,text,1151,1977,1540,2032,line60.jpg
+2271_17 ERRZ_p1.png,text,1150,2051,1537,2106,line61.jpg
+2271_17 ERRZ_p1.png,text,1150,2125,1538,2177,line62.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,193,255,1463,305,line1.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,191,295,345,333,line2.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,text,737,404,1459,448,line3.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,text,731,539,1456,581,line4.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,1126,449,1459,491,line5.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,963,581,1461,628,line6.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,189,1243,385,1285,line7.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,192,1277,513,1321,line8.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,191,1312,957,1357,line9.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,290,1350,605,1395,line10.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,290,1386,637,1427,line11.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,288,1417,601,1465,line12.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,286,1454,1177,1499,line13.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,192,1528,1172,1568,line14.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,195,1560,1460,1600,line15.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,196,1598,1459,1639,line16.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,193,1638,967,1674,line17.jpg
+2020_150_GPF_-Załącznik_nr_6_p2.png,printed,1438,2162,1463,2203,line18.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,1276,191,1462,233,line1.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,708,277,1057,318,line2.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,1082,289,1148,327,line3.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,1151,284,1317,318,line4.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,number,1354,283,1388,318,line5.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,1319,283,1355,329,line6.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,1395,293,1465,327,line7.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,187,369,820,416,line8.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,385,422,573,460,line9.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,number,194,474,829,517,line10.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,432,520,523,552,line11.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,197,596,826,636,line12.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,193,662,824,701,line13.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,432,703,530,738,line14.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,885,792,1401,839,line15.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,934,870,1409,910,line16.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,1080,940,1187,984,line17.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,758,1064,894,1107,line18.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,401,1127,1253,1181,line19.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,194,1252,1459,1292,line20.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,191,1289,1463,1332,line21.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,191,1323,1463,1371,line22.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,192,1362,1013,1402,line23.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,194,1419,685,1468,line24.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,194,1469,1453,1515,line25.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,196,1527,1455,1577,line26.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,196,1598,1455,1641,line27.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,196,1657,1453,1708,line28.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,193,1725,1456,1770,line29.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,194,1782,1459,1832,line30.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,199,1841,1456,1893,line31.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,text,194,1909,1459,1958,line32.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,192,2050,1463,2099,line33.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,190,2091,964,2133,line34.jpg
+2020_150_GPF_-Załącznik_nr_6_p1.png,printed,1436,2170,1464,2199,line35.jpg
+88.png,printed,586,106,1066,157,line1.jpg
+88.png,printed,190,191,546,223,line2.jpg
+88.png,printed,192,215,489,248,line3.jpg
+88.png,printed,193,242,533,275,line4.jpg
+88.png,printed,398,481,445,511,line5.jpg
+88.png,printed,552,484,582,509,line6.jpg
+88.png,printed,609,488,624,509,line7.jpg
+88.png,printed,589,537,1064,580,line8.jpg
+88.png,printed,192,596,449,638,line9.jpg
+88.png,printed,1175,599,1210,633,line10.jpg
+88.png,printed,193,668,269,697,line11.jpg
+88.png,printed,1098,736,1188,772,line12.jpg
+88.png,printed,194,808,712,849,line13.jpg
+88.png,printed,191,728,767,778,line14.jpg
+88.png,printed,824,841,958,865,line15.jpg
+88.png,printed,194,880,223,903,line16.jpg
+88.png,printed,666,903,717,928,line17.jpg
+88.png,printed,196,937,286,969,line18.jpg
+88.png,printed,667,970,794,989,line19.jpg
+88.png,printed,194,1002,357,1033,line20.jpg
+88.png,printed,665,1029,807,1056,line21.jpg
+88.png,printed,1061,1061,1215,1099,line22.jpg
+88.png,printed,193,1125,582,1162,line23.jpg
+88.png,printed,918,1298,1131,1323,line24.jpg
+88.png,printed,194,1447,546,1480,line25.jpg
+88.png,printed,193,1476,357,1506,line26.jpg
+88.png,printed,1167,1502,1395,1538,line27.jpg
+88.png,printed,193,1605,386,1645,line28.jpg
+88.png,printed,193,1639,650,1671,line29.jpg
+88.png,printed,194,1669,552,1708,line30.jpg
+88.png,printed,552,1732,1102,1781,line31.jpg
+88.png,printed,195,1811,290,1847,line32.jpg
+88.png,printed,587,1841,708,1867,line33.jpg
+88.png,printed,192,1869,295,1905,line34.jpg
+88.png,printed,195,1938,734,1979,line35.jpg
+88.png,printed,981,2077,1264,2097,line36.jpg
+88.png,text,193,473,394,505,line37.jpg
+88.png,number,448,480,552,505,line38.jpg
+88.png,number,583,481,607,504,line39.jpg
+88.png,text,449,595,1170,626,line40.jpg
+88.png,number,1214,596,1406,628,line41.jpg
+88.png,text,270,657,1393,693,line42.jpg
+88.png,number,779,729,1091,765,line43.jpg
+88.png,number,1195,731,1389,763,line44.jpg
+88.png,text,716,802,1389,834,line45.jpg
+88.png,text,226,859,1388,896,line46.jpg
+88.png,text,287,926,1395,964,line47.jpg
+88.png,text,357,989,1399,1025,line48.jpg
+88.png,text,194,1055,1061,1086,line49.jpg
+88.png,text,1218,1054,1421,1087,line50.jpg
+88.png,text,581,1114,1391,1154,line51.jpg
+88.png,text,744,1247,1308,1292,line52.jpg
+88.png,number,199,1503,555,1533,line53.jpg
+88.png,text,1104,1456,1442,1496,line54.jpg
+88.png,text,649,1628,1001,1665,line55.jpg
+88.png,text,549,1666,1005,1700,line56.jpg
+88.png,text,291,1803,1003,1838,line57.jpg
+88.png,number,295,1861,577,1895,line58.jpg
+88.png,text,742,1928,1454,1964,line59.jpg
+88.png,text,195,1968,1452,1996,line60.jpg
+88.png,text,198,1996,1453,2028,line61.jpg
+88.png,text,903,2032,1353,2065,line62.jpg
+Załącznik8(1)_p2.png,text,345,196,750,253,line1.jpg
+Załącznik8(1)_p2.png,text,1091,202,1500,257,line2.jpg
+Załącznik8(1)_p2.png,printed,1127,263,1466,305,line3.jpg
+Załącznik8(1)_p2.png,printed,1166,300,1429,341,line4.jpg
+Załącznik8(1)_p2.png,printed,171,350,457,395,line5.jpg
+Załącznik8(1)_p1.png,printed,763,206,1389,255,line1.jpg
+Załącznik8(1)_p1.png,printed,762,258,1277,307,line2.jpg
+Załącznik8(1)_p1.png,printed,765,313,1065,361,line3.jpg
+Załącznik8(1)_p1.png,printed,247,384,1409,426,line4.jpg
+Załącznik8(1)_p1.png,printed,500,421,1150,464,line5.jpg
+Załącznik8(1)_p1.png,text,169,502,607,549,line6.jpg
+Załącznik8(1)_p1.png,text,174,554,610,603,line7.jpg
+Załącznik8(1)_p1.png,printed,171,627,492,668,line8.jpg
+Załącznik8(1)_p1.png,printed,171,681,621,719,line9.jpg
+Załącznik8(1)_p1.png,text,1018,714,1516,756,line10.jpg
+Załącznik8(1)_p1.png,text,1027,765,1509,807,line11.jpg
+Załącznik8(1)_p1.png,printed,865,831,1521,878,line12.jpg
+Załącznik8(1)_p1.png,printed,169,888,1287,924,line13.jpg
+Załącznik8(1)_p1.png,text,138,914,865,949,line14.jpg
+Załącznik8(1)_p1.png,printed,872,920,1358,959,line15.jpg
+Załącznik8(1)_p1.png,printed,135,960,360,995,line16.jpg
+Załącznik8(1)_p1.png,text,367,955,1465,990,line17.jpg
+Załącznik8(1)_p1.png,printed,169,1013,1160,1049,line18.jpg
+Załącznik8(1)_p1.png,text,174,1048,1339,1089,line19.jpg
+Załącznik8(1)_p1.png,printed,169,1114,483,1156,line20.jpg
+Załącznik8(1)_p1.png,printed,168,1163,467,1206,line21.jpg
+Załącznik8(1)_p1.png,text,169,1201,1415,1247,line22.jpg
+Załącznik8(1)_p1.png,printed,166,1260,1176,1312,line23.jpg
+Załącznik8(1)_p1.png,printed,675,1319,981,1359,line24.jpg
+Załącznik8(1)_p1.png,text,170,1360,1427,1402,line25.jpg
+Załącznik8(1)_p1.png,text,169,1406,1427,1451,line26.jpg
+Załącznik8(1)_p1.png,text,166,1497,568,1542,line27.jpg
+Załącznik8(1)_p1.png,printed,252,1550,484,1582,line28.jpg
+Załącznik8(1)_p1.png,printed,1064,1550,1511,1583,line29.jpg
+Załącznik8(1)_p1.png,text,1082,1501,1488,1538,line30.jpg
+Załącznik8(1)_p1.png,printed,168,1620,314,1659,line31.jpg
+Załącznik8(1)_p1.png,printed,173,1672,1100,1713,line32.jpg
+Załącznik8(1)_p1.png,printed,170,1722,1425,1766,line33.jpg
+Załącznik8(1)_p1.png,printed,173,1778,1411,1817,line34.jpg
+Załącznik8(1)_p1.png,printed,137,1814,804,1851,line35.jpg
+Załącznik8(1)_p1.png,text,171,1847,1417,1894,line36.jpg
+Załącznik8(1)_p1.png,printed,170,1917,1069,1957,line37.jpg
+Załącznik8(1)_p1.png,printed,243,2080,477,2115,line38.jpg
+Załącznik8(1)_p1.png,printed,957,2083,1264,2115,line39.jpg
+Załącznik8(1)_p1.png,text,156,1992,558,2030,line40.jpg
+Załącznik8(1)_p1.png,text,906,1985,1308,2029,line41.jpg
+Załącznik8(1)_p1.png,printed,140,2153,627,2191,line42.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,136,126,326,164,line1.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,792,134,865,160,line2.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,1399,123,1516,163,line3.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,216,216,496,258,line4.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,263,261,417,297,line5.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,263,298,523,335,line6.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,261,335,568,369,line7.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,211,372,622,409,line8.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,211,411,890,448,line9.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,214,446,330,488,line10.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,169,485,939,525,line11.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,166,744,383,773,line12.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,658,736,1483,773,line13.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,658,773,1243,810,line14.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,573,956,1078,1003,line15.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,168,1149,1482,1192,line16.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,166,1188,1027,1230,line17.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,169,1413,383,1455,line18.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,666,1417,1482,1454,line19.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,659,1452,1128,1484,line20.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,168,1716,477,1748,line21.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,164,1747,1482,1785,line22.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,219,1785,1487,1817,line23.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,219,1813,1483,1849,line24.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,218,1839,845,1882,line25.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,printed,166,1871,1125,1912,line26.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,text,170,1360,503,1411,line27.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,text,668,1362,1466,1409,line28.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,text,170,694,503,734,line29.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,text,666,684,1462,728,line30.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,text,944,480,1471,514,line31.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,text,424,253,1475,287,line32.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,text,576,327,1471,359,line33.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,text,629,364,1469,402,line34.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,text,898,404,1473,441,line35.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p2.png,text,333,443,1482,477,line36.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,139,129,328,165,line1.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,793,126,864,161,line2.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,1400,125,1513,163,line3.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,1342,196,1515,230,line4.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,787,262,868,296,line5.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,349,333,1308,372,line6.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,176,406,608,448,line7.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,175,487,570,531,line8.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,171,595,353,635,line9.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,174,705,402,736,line10.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,172,806,1211,836,line11.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,174,908,1367,951,line12.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,218,947,428,986,line13.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,268,987,867,1024,line14.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,299,1024,898,1059,line15.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,300,1065,945,1097,line16.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,299,1106,610,1135,line17.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,300,1142,604,1178,line18.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,218,1177,450,1215,line19.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,266,1220,867,1253,line20.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,299,1255,1485,1295,line21.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,330,1290,1124,1332,line22.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,297,1328,602,1368,line23.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,218,1368,527,1413,line24.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,267,1410,865,1446,line25.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,299,1447,428,1483,line26.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,299,1489,604,1522,line27.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,218,1523,518,1563,line28.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,267,1568,867,1596,line29.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,301,1601,575,1636,line30.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,300,1641,768,1678,line31.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,301,1681,606,1711,line32.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,216,1716,636,1755,line33.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,263,1752,866,1792,line34.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,299,1794,726,1832,line35.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,302,1834,1056,1866,line36.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,299,1873,605,1903,line37.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,187,2118,1516,2153,line38.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,184,2148,1517,2180,line39.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,printed,183,2174,606,2207,line40.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,170,555,1479,592,line41.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,174,662,1478,700,line42.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,176,764,1477,797,line43.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,905,1014,1485,1050,line44.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,952,1056,1480,1092,line45.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,619,1095,1480,1130,line46.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,611,1134,1476,1171,line47.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,606,1332,1479,1362,line48.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,1132,1293,1482,1325,line49.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,608,1473,1478,1511,line50.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,579,1591,1478,1627,line51.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,773,1631,1474,1665,line52.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,609,1669,1474,1703,line53.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,733,1788,1480,1822,line54.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,1064,1822,1483,1860,line55.jpg
+Wywiad_pielęgniarski_i_zaświadczenie_lekarskie_p1.png,text,608,1864,1478,1900,line56.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,text,178,596,1483,644,line1.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,text,178,784,1483,837,line2.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,text,179,1002,1483,1062,line3.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,text,174,1274,512,1324,line4.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,text,666,1271,1470,1317,line5.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,198,1320,422,1363,line6.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,866,1320,1166,1362,line7.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,174,1062,1209,1098,line8.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,175,833,411,874,line9.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,175,647,364,689,line10.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,175,533,676,584,line11.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,273,420,1393,470,line12.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,318,459,1348,503,line13.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,787,344,869,381,line14.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,1355,280,1514,314,line15.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,1029,195,1517,225,line16.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,1032,222,1461,251,line17.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,800,132,860,160,line18.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,1400,124,1514,162,line19.jpg
+Wniosek_o_wydanie_skierowania_do_ZOL.png,printed,134,129,328,162,line20.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,150,269,496,314,line1.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,1077,276,1380,316,line2.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,339,547,1315,591,line3.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,742,793,1445,826,line4.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,436,902,1458,939,line5.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,198,952,1453,993,line6.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,571,1137,1294,1175,line7.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,797,1254,1436,1293,line8.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,673,1349,1458,1387,line9.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,382,1432,1450,1469,line10.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,222,1472,1479,1510,line11.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,193,1513,1453,1553,line12.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,193,1560,1455,1600,line13.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,637,1674,1479,1709,line14.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,191,1715,1450,1751,line15.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,193,1753,1454,1794,line16.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,193,1796,1453,1836,line17.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,191,1841,1450,1879,line18.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,text,994,1886,1456,1921,line19.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,132,2038,421,2071,line20.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,939,1985,1463,2016,line21.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,1156,1954,1461,1987,line22.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,197,1674,638,1714,line23.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,193,1633,1429,1670,line24.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,193,1441,377,1475,line25.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,218,1390,461,1421,line26.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,190,1356,669,1393,line27.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,192,1261,794,1302,line28.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,961,1298,1205,1330,line29.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,189,1211,1162,1249,line30.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,213,1144,569,1177,line31.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,190,1105,1511,1144,line32.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,718,999,936,1031,line33.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,193,913,433,951,line34.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,744,849,911,886,line35.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,191,800,744,835,line36.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,192,749,784,782,line37.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,187,693,466,731,line38.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,190,637,466,679,line39.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,633,591,1054,627,line40.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,512,452,1144,486,line41.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,212,320,804,348,line42.jpg
+skierowanie-do-szpitala-psychiatrycznego_ZOL.png,printed,1130,320,1333,348,line43.jpg
+Skierowanie_do_ZOL.png,printed,139,125,329,165,line1.jpg
+Skierowanie_do_ZOL.png,printed,798,128,862,161,line2.jpg
+Skierowanie_do_ZOL.png,printed,1395,123,1515,164,line3.jpg
+Skierowanie_do_ZOL.png,printed,1340,192,1521,230,line4.jpg
+Skierowanie_do_ZOL.png,printed,786,257,870,295,line5.jpg
+Skierowanie_do_ZOL.png,printed,332,326,1331,368,line6.jpg
+Skierowanie_do_ZOL.png,printed,444,368,1223,409,line7.jpg
+Skierowanie_do_ZOL.png,printed,173,445,461,490,line8.jpg
+Skierowanie_do_ZOL.png,text,172,499,1481,543,line9.jpg
+Skierowanie_do_ZOL.png,printed,172,547,574,586,line10.jpg
+Skierowanie_do_ZOL.png,text,169,593,1482,638,line11.jpg
+Skierowanie_do_ZOL.png,printed,174,643,617,681,line12.jpg
+Skierowanie_do_ZOL.png,text,174,691,1480,733,line13.jpg
+Skierowanie_do_ZOL.png,printed,176,735,909,775,line14.jpg
+Skierowanie_do_ZOL.png,text,174,787,1480,829,line15.jpg
+Skierowanie_do_ZOL.png,printed,173,834,448,869,line16.jpg
+Skierowanie_do_ZOL.png,text,175,883,1487,925,line17.jpg
+Skierowanie_do_ZOL.png,printed,173,929,1487,965,line18.jpg
+Skierowanie_do_ZOL.png,printed,173,965,388,1000,line19.jpg
+Skierowanie_do_ZOL.png,text,175,1011,1482,1052,line20.jpg
+Skierowanie_do_ZOL.png,printed,174,1056,1256,1093,line21.jpg
+Skierowanie_do_ZOL.png,text,175,1109,1481,1149,line22.jpg
+Skierowanie_do_ZOL.png,printed,174,1155,456,1195,line23.jpg
+Skierowanie_do_ZOL.png,printed,176,1220,833,1259,line24.jpg
+Skierowanie_do_ZOL.png,printed,176,1281,936,1315,line25.jpg
+Skierowanie_do_ZOL.png,text,941,1277,1481,1308,line26.jpg
+Skierowanie_do_ZOL.png,printed,174,1346,1205,1381,line27.jpg
+Skierowanie_do_ZOL.png,text,176,1398,1483,1432,line28.jpg
+Skierowanie_do_ZOL.png,printed,176,1444,1340,1478,line29.jpg
+Skierowanie_do_ZOL.png,text,175,1491,1484,1532,line30.jpg
+Skierowanie_do_ZOL.png,printed,173,1538,1404,1575,line31.jpg
+Skierowanie_do_ZOL.png,printed,173,1606,1256,1645,line32.jpg
+Skierowanie_do_ZOL.png,text,174,1691,425,1731,line33.jpg
+Skierowanie_do_ZOL.png,printed,173,1730,346,1763,line34.jpg
+Skierowanie_do_ZOL.png,text,628,1682,1497,1730,line35.jpg
+Skierowanie_do_ZOL.png,printed,648,1734,1488,1760,line36.jpg
+Skierowanie_do_ZOL.png,printed,646,1760,1493,1789,line37.jpg
+Skierowanie_do_ZOL.png,printed,646,1783,1484,1816,line38.jpg
+Skierowanie_do_ZOL.png,printed,646,1809,967,1838,line39.jpg
+Skierowanie_do_ZOL.png,printed,171,1873,446,1904,line40.jpg
+Skierowanie_do_ZOL.png,printed,173,1900,442,1933,line41.jpg
+Skierowanie_do_ZOL.png,printed,174,1927,688,1964,line42.jpg
+Skierowanie_do_ZOL.png,printed,185,2177,1090,2213,line43.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,75,52,454,81,line1.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,77,75,395,101,line2.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,75,92,537,124,line3.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,596,223,790,257,line4.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,number,861,222,978,254,line5.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,number,1026,220,1068,255,line6.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,802,231,854,263,line7.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,988,231,1022,261,line8.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,1072,234,1088,257,line9.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,358,288,838,325,line10.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,69,344,311,377,line11.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,920,340,958,369,line12.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,312,335,915,367,line13.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,number,964,335,1088,366,line14.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,160,380,1090,408,line15.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,70,395,154,424,line16.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,77,446,162,483,line17.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,number,188,438,657,487,line18.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,700,444,789,476,line19.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,number,799,437,1097,471,line20.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,76,505,551,529,line21.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,560,493,1094,522,line22.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,788,520,939,545,line23.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,73,555,98,578,line24.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,104,540,1087,568,line25.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,547,571,606,595,line26.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,73,602,162,631,line27.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,162,592,1095,618,line28.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,527,620,666,647,line29.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,508,672,669,694,line30.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,74,649,227,680,line31.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,227,633,1087,665,line32.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,74,681,825,718,line33.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,831,687,969,720,line34.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,970,679,1093,713,line35.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,430,725,1093,766,line36.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,75,741,427,775,line37.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,618,777,1086,819,line38.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,690,823,1031,851,line39.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,88,875,555,902,line40.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,599,1025,800,1059,line41.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,807,1030,858,1063,line42.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,number,860,1019,984,1056,line43.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,987,1030,1023,1061,line44.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,number,1025,1027,1070,1058,line45.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,1073,1033,1092,1061,line46.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,76,1074,251,1105,line47.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,82,1113,493,1144,line48.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,78,1151,399,1188,line49.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,499,1097,1096,1134,line50.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,403,1135,1085,1174,line51.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,326,1200,877,1242,line52.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,77,1263,171,1294,line53.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,176,1251,762,1285,line54.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,772,1262,860,1290,line55.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,864,1247,1093,1283,line56.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,417,1289,567,1315,line57.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,78,1317,562,1352,line58.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,564,1305,1098,1338,line59.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,76,1355,1089,1394,line60.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,text,622,1420,1088,1462,line61.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,695,1467,1035,1496,line62.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,1003,1505,1103,1525,line63.jpg
+SKIEROWANIE_DO_SZPITALA_p01.png,printed,82,1508,444,1532,line64.jpg
+2271_17 ERRZ_p2.png,printed,1350,101,1533,165,line1.jpg
+2271_17 ERRZ_p2.png,printed,491,254,639,293,line2.jpg
+2271_17 ERRZ_p2.png,text,668,246,1540,301,line3.jpg
+2271_17 ERRZ_p2.png,printed,666,296,1399,326,line4.jpg
+2271_17 ERRZ_p2.png,printed,666,325,1261,352,line5.jpg
+2271_17 ERRZ_p2.png,printed,429,374,638,411,line6.jpg
+2271_17 ERRZ_p2.png,printed,477,449,637,485,line7.jpg
+2271_17 ERRZ_p2.png,printed,407,521,637,558,line8.jpg
+2271_17 ERRZ_p2.png,printed,301,596,639,632,line9.jpg
+2271_17 ERRZ_p2.png,printed,119,671,621,703,line10.jpg
+2271_17 ERRZ_p2.png,printed,568,743,631,772,line11.jpg
+2271_17 ERRZ_p2.png,printed,478,809,631,843,line12.jpg
+2271_17 ERRZ_p2.png,printed,927,813,1076,843,line13.jpg
+2271_17 ERRZ_p2.png,printed,932,880,1078,914,line14.jpg
+2271_17 ERRZ_p2.png,printed,469,879,631,912,line15.jpg
+2271_17 ERRZ_p2.png,text,667,366,1536,416,line16.jpg
+2271_17 ERRZ_p2.png,text,668,440,1535,492,line17.jpg
+2271_17 ERRZ_p2.png,text,668,513,1537,563,line18.jpg
+2271_17 ERRZ_p2.png,text,667,585,1537,640,line19.jpg
+2271_17 ERRZ_p2.png,text,660,732,1535,785,line20.jpg
+2271_17 ERRZ_p2.png,number,660,801,860,851,line21.jpg
+2271_17 ERRZ_p2.png,number,662,871,862,924,line22.jpg
+2271_17 ERRZ_p2.png,number,1108,801,1309,854,line23.jpg
+2271_17 ERRZ_p2.png,text,1109,869,1533,922,line24.jpg
+2271_17 ERRZ_p2.png,text,658,941,1536,994,line25.jpg
+2271_17 ERRZ_p2.png,text,660,1003,1535,1054,line26.jpg
+2271_17 ERRZ_p2.png,printed,437,951,629,980,line27.jpg
+2271_17 ERRZ_p2.png,printed,449,1016,630,1049,line28.jpg
+2271_17 ERRZ_p2.png,printed,662,1056,1296,1086,line29.jpg
+2271_17 ERRZ_p2.png,printed,646,1112,831,1143,line30.jpg
+2271_17 ERRZ_p2.png,printed,644,1189,930,1219,line31.jpg
+2271_17 ERRZ_p2.png,printed,644,1229,1515,1254,line32.jpg
+2271_17 ERRZ_p2.png,printed,181,1118,530,1148,line33.jpg
+2271_17 ERRZ_p2.png,printed,116,1291,510,1322,line34.jpg
+2271_17 ERRZ_p2.png,printed,251,1362,532,1391,line35.jpg
+2271_17 ERRZ_p2.png,printed,648,1357,837,1388,line36.jpg
+2271_17 ERRZ_p2.png,printed,643,1433,864,1461,line37.jpg
+2271_17 ERRZ_p2.png,printed,647,1505,695,1536,line38.jpg
+2271_17 ERRZ_p2.png,printed,758,1548,1515,1573,line39.jpg
+2271_17 ERRZ_p2.png,text,761,1494,1532,1544,line40.jpg
+2271_17 ERRZ_p2.png,text,667,1592,1535,1642,line41.jpg
+2271_17 ERRZ_p2.png,text,667,1667,1535,1715,line42.jpg
+2271_17 ERRZ_p2.png,printed,478,1602,634,1634,line43.jpg
+2271_17 ERRZ_p2.png,printed,430,1674,637,1708,line44.jpg
+2271_17 ERRZ_p2.png,printed,215,1746,638,1782,line45.jpg
+2271_17 ERRZ_p2.png,printed,296,1843,641,1879,line46.jpg
+2271_17 ERRZ_p2.png,printed,302,1942,637,1975,line47.jpg
+2271_17 ERRZ_p2.png,printed,116,2023,634,2057,line48.jpg
+2271_17 ERRZ_p2.png,printed,449,2056,637,2085,line49.jpg
+2271_17 ERRZ_p2.png,printed,166,2140,638,2167,line50.jpg
+2271_17 ERRZ_p2.png,text,671,2127,1532,2173,line51.jpg
+2271_17 ERRZ_p2.png,printed,523,2222,1131,2251,line52.jpg
+2271_17 ERRZ_p2.png,printed,1395,2219,1536,2250,line53.jpg
+2271_17 ERRZ_p2.png,number,667,2026,1066,2079,line54.jpg
+2271_17 ERRZ_p2.png,number,668,1929,1067,1983,line55.jpg
+2271_17 ERRZ_p2.png,number,667,1834,1067,1886,line56.jpg
+2271_17 ERRZ_p2.png,number,666,1737,1065,1789,line57.jpg
+2271_17 ERRZ_p2.png,printed,701,1791,734,1810,line58.jpg
+2271_17 ERRZ_p2.png,printed,798,1793,840,1812,line59.jpg
+2271_17 ERRZ_p2.png,printed,947,1791,985,1812,line60.jpg
+2271_17 ERRZ_p2.png,printed,946,1890,985,1910,line61.jpg
+2271_17 ERRZ_p2.png,printed,946,1982,988,2008,line62.jpg
+2271_17 ERRZ_p2.png,printed,946,2085,987,2104,line63.jpg
+2271_17 ERRZ_p2.png,printed,795,2082,840,2104,line64.jpg
+2271_17 ERRZ_p2.png,printed,703,2078,734,2104,line65.jpg
+2271_17 ERRZ_p2.png,printed,703,1983,734,2004,line66.jpg
+2271_17 ERRZ_p2.png,printed,798,1986,840,2005,line67.jpg
+2271_17 ERRZ_p2.png,printed,796,1889,841,1913,line68.jpg
+2271_17 ERRZ_p2.png,printed,703,1884,733,1908,line69.jpg
