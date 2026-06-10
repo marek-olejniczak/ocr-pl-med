@@ -1,0 +1,1227 @@
+filename,label,x_min,y_min,x_max,y_max,crop
+data11.png,DROGA DZWIĘKU,6,48,318,128,line1.jpg
+data11.png,1) małżowina uszna zbiera fale -> przewód słuchowy zewnętrzny,14,170,870,236,line2.jpg
+data11.png,2) fale dźwiękowe uderzają w błonę bębenkową powodując jej drgania,10,218,1033,278,line3.jpg
+data11.png,"3) błona bębenkowa młoteczek, kowadełko, strzemiączko",8,273,808,322,line4.jpg
+data11.png,4) strzemiączko uderza w okienko owalne,12,315,618,377,line5.jpg
+data11.png,5) drgania z okienka ruch płynu w ślimaku poruszanie błony podstounej pobudzone kom.,12,371,1401,425,line6.jpg
+data11.png,impulsy n. ślimakowy,53,477,412,548,line7.jpg
+data11.png,6) komórki słuchowe,9,425,357,474,line8.jpg
+data11.png,pień mózgu,592,480,772,537,line9.jpg
+data11.png,impuls elektryczny,470,425,748,489,line10.jpg
+data11.png,kora słuchowa mózgu,582,570,945,632,line11.jpg
+data11.png,(interpretacja,948,568,1162,640,line12.jpg
+data11.png,Cortiego,1324,468,1465,550,line13.jpg
+data9.png,układ oddechowy - nabłonek,26,74,927,149,line1.jpg
+data9.png,- jamy nosowe,24,316,373,370,line2.jpg
+data9.png,- gardło,29,426,268,487,line3.jpg
+data9.png,- krtań,32,472,259,528,line4.jpg
+data9.png,- tchawica,32,522,324,583,line5.jpg
+data9.png,cz. oddechowa,489,239,875,303,line6.jpg
+data9.png,oskrzeliki,468,297,798,354,line7.jpg
+data9.png,- przewody pęcherzykowe,485,342,1092,406,line8.jpg
+data9.png,- pęcherzyki płucne,495,388,1072,470,line9.jpg
+data9.png,jama nosowa,113,733,557,817,line10.jpg
+data9.png,a) okolica oddechowa,49,1004,687,1062,line11.jpg
+data9.png,gardło,117,1165,382,1264,line12.jpg
+data9.png,tchawica,115,1263,414,1332,line13.jpg
+data9.png,tk. chrzęstna szklista w pierścieniach,491,1244,1510,1316,line14.jpg
+data9.png,- brak błony podśluzowej,729,967,1422,1048,line15.jpg
+data9.png,- jama nosowa właściwa,51,896,843,971,line16.jpg
+data9.png,płotowe,727,1387,945,1504,line17.jpg
+data9.png,zapobieganie,1150,493,1493,621,line18.jpg
+data9.png,segmentalne,992,1391,1323,1483,line19.jpg
+data8.png,dwunastnica,203,75,657,197,line1.jpg
+data8.png,gruczoły Brunnera,707,87,1312,210,line2.jpg
+data8.png,NIE MA W JELICIE,1358,43,1728,175,line3.jpg
+data8.png,jelito grube,169,375,575,515,line4.jpg
+data8.png,wątroba,151,487,491,599,line5.jpg
+data8.png,jelito cienkie,172,201,627,299,line6.jpg
+data8.png,"nie ma wyrostków, ma krypty",619,344,1541,499,line7.jpg
+data8.png,otoczona torebką,845,487,1492,574,line8.jpg
+data8.png,sinusoidy - naczynia zatokowe,47,715,1056,857,line9.jpg
+data8.png,przewód żółciowy + tętnice + żyła,38,845,1231,950,line10.jpg
+data8.png,wtórny,276,956,532,1101,line11.jpg
+data8.png,"żyła wątrobowa - Krew czynnościowa, tętnica",47,1235,1426,1383,line12.jpg
+data8.png,trzustka,130,1486,406,1595,line13.jpg
+data8.png,Komórki,47,1607,353,1700,line14.jpg
+data8.png,bakterie,1293,1391,1622,1533,line15.jpg
+data8.png,między biegunami,676,1075,1277,1240,line16.jpg
+data8.png,żółć,1170,611,1367,702,line17.jpg
+data8.png,Kupffera,532,1360,815,1500,line18.jpg
+data8.png,centrum wyspy,286,1789,803,1936,line19.jpg
+data8.png,obreża,823,1614,1021,1731,line20.jpg
+data7.png,UKŁAD POKARMOWY,102,42,665,122,line1.jpg
+data7.png,jama ustna,145,189,456,283,line2.jpg
+data7.png,wysłana błoną śluzową,128,285,773,353,line3.jpg
+data7.png,- dominuje nabłonek wielowarstwowy płaski,92,339,1188,401,line4.jpg
+data7.png,podniebienie miękkie + wew. strona,96,507,922,587,line5.jpg
+data7.png,policzków,949,513,1189,611,line6.jpg
+data7.png,jest,1256,513,1385,624,line7.jpg
+data7.png,czyli dziąsła,1097,387,1459,456,line8.jpg
+data7.png,podniebienie twarde,89,435,596,504,line9.jpg
+data7.png,brodawki,615,420,892,497,line10.jpg
+data7.png,warga,117,708,339,801,line11.jpg
+data7.png,język,117,989,282,1085,line12.jpg
+data7.png,z tkanki m. szkieletowej,57,1067,724,1168,line13.jpg
+data7.png,pokryty błoną śluzową,757,1079,1449,1174,line14.jpg
+data7.png,jest m. okrężny ust,626,903,1196,991,line15.jpg
+data7.png,czerwień wargi i,65,897,607,989,line16.jpg
+data7.png,mięśniowo - skórny,291,797,819,893,line17.jpg
+data7.png,", od zewnątrz skóra",848,804,1354,881,line18.jpg
+data7.png,po środku,1159,864,1469,937,line19.jpg
+data7.png,śluzowa,833,862,1110,918,line20.jpg
+data7.png,brodawki: nitkowate,31,1266,579,1353,line21.jpg
+data7.png,gardło,106,1415,377,1524,line22.jpg
+data7.png,nosowa,130,1529,331,1606,line23.jpg
+data7.png,ustna,370,1524,572,1614,line24.jpg
+data7.png,krtaniowa,608,1529,920,1630,line25.jpg
+data7.png,nabłonek,19,1682,239,1751,line26.jpg
+data7.png,wielorzędowy,258,1682,569,1782,line27.jpg
+data7.png,", mięsniowa",1129,1615,1360,1715,line28.jpg
+data7.png,zew.,1377,1624,1471,1687,line29.jpg
+data7.png,boczne,1159,1412,1398,1500,line30.jpg
+data7.png,(tylno-boczna pow.),237,1327,832,1446,line31.jpg
+data7.png,błona podśluzowa,240,565,743,650,line32.jpg
+data7.png,"grzybowate,",1027,1298,1349,1412,line33.jpg
+data7.png,podśluzowa,776,1616,1114,1698,line34.jpg
+data7.png,warstwy: błona śluzowa,94,1583,755,1680,line35.jpg
+data7.png,strefie,853,1708,1044,1790,line36.jpg
+data7.png,nabłonek,774,1777,1012,1841,line37.jpg
+data6.png,SKÓRA,91,24,327,112,line1.jpg
+data6.png,"warstwy: naskórek, skóra właściwa",93,129,936,225,line2.jpg
+data6.png,", tk. podskórna +",933,125,1335,224,line3.jpg
+data6.png,podeszwa stóp i dłonie,423,222,1068,317,line4.jpg
+data6.png,naskórek: warstwa podstowna,122,304,898,402,line5.jpg
+data6.png,Komórki:,505,417,702,474,line6.jpg
+data6.png,prezentuje antygen,571,612,1083,707,line7.jpg
+data6.png,receptor dotyku,448,697,890,797,line8.jpg
+data6.png,meloncyty,65,800,350,913,line9.jpg
+data6.png,w błonie podstawnej,386,808,965,924,line10.jpg
+data6.png,warstwa pośrednia,62,906,584,982,line11.jpg
+data6.png,tylko w skóre nieowłosione,630,910,1409,983,line12.jpg
+data6.png,kolczystą,824,970,1104,1075,line13.jpg
+data6.png,ziemista,1156,330,1353,390,line14.jpg
+data6.png,spłaszcone kom.,71,517,441,593,line15.jpg
+data6.png,naskórek jest,65,1102,400,1176,line16.jpg
+data6.png,warstwy,23,1160,225,1242,line17.jpg
+data6.png,substancji z,1140,1116,1464,1225,line18.jpg
+data6.png,skóra właściwa,93,1246,622,1346,line19.jpg
+data6.png,tkanka podskórna,80,1482,682,1590,line20.jpg
+data6.png,brodawkowa,807,1255,1176,1374,line21.jpg
+data6.png,cz.,732,1274,808,1330,line22.jpg
+data6.png,gruczoły,32,1644,260,1720,line23.jpg
+data6.png,holokrynowe,287,1643,590,1722,line24.jpg
+data6.png,gr. łojowy,1111,1687,1373,1769,line25.jpg
+data6.png,tłuszczu,433,1594,660,1676,line26.jpg
+data6.png,potowe,299,1745,461,1819,line27.jpg
+data6.png,fragmenty,20,1785,288,1890,line28.jpg
+data6.png,brodawkowej,256,1162,603,1257,line29.jpg
+data6.png,naczyń włosowatych,652,1171,1179,1266,line30.jpg
+anatomia_zmysly_1.png,JĄDRA,491,104,584,136,line1.jpg
+anatomia_zmysly_1.png,WZGÓRZE - impulsy z,544,9,801,38,line2.jpg
+anatomia_zmysly_1.png,"receptorów ciała, integracja",481,29,822,59,line3.jpg
+anatomia_zmysly_1.png,wzgórzomózgowie,49,46,259,80,line4.jpg
+anatomia_zmysly_1.png,MIĘDZYMÓZGOWIE,14,2,257,42,line5.jpg
+anatomia_zmysly_1.png,zawzgórze,194,131,321,165,line6.jpg
+anatomia_zmysly_1.png,niskowzgórne,229,286,364,334,line7.jpg
+anatomia_zmysly_1.png,podwzgórne,24,288,165,320,line8.jpg
+anatomia_zmysly_1.png,bocznie: torebka wewn. + pasmo wzrokowe,17,341,456,392,line9.jpg
+anatomia_zmysly_1.png,PODWZGÓRZE,502,323,671,355,line10.jpg
+anatomia_zmysly_1.png,boczne,526,163,616,198,line11.jpg
+anatomia_zmysly_1.png,pośrodkowe,511,228,660,261,line12.jpg
+anatomia_zmysly_1.png,siatkowate,491,274,628,302,line13.jpg
+anatomia_zmysly_1.png,prednie,545,134,636,160,line14.jpg
+anatomia_zmysly_1.png,świadomości,580,70,717,101,line15.jpg
+anatomia_zmysly_1.png,wzgórze,4,130,84,160,line16.jpg
+anatomia_zmysly_1.png,KOMORA,6,408,119,442,line17.jpg
+anatomia_zmysly_1.png,LEJKA,9,538,75,562,line18.jpg
+anatomia_zmysly_1.png,Ś. TYLNA,170,491,289,528,line19.jpg
+anatomia_zmysly_1.png,ŚRÓDMÓZGOWIE,22,848,216,889,line20.jpg
+anatomia_zmysly_1.png,odnogi,245,876,326,907,line21.jpg
+anatomia_zmysly_1.png,nakrywka,124,901,238,942,line22.jpg
+anatomia_zmysly_1.png,pokrywka,1,902,107,940,line23.jpg
+anatomia_zmysly_1.png,WODOCIĄG,494,856,628,889,line24.jpg
+anatomia_zmysly_1.png,(15-20mm),632,856,775,895,line25.jpg
+anatomia_zmysly_1.png,GR. TYLNA,477,676,595,707,line26.jpg
+anatomia_zmysly_1.png,boczne,557,716,643,748,line27.jpg
+anatomia_zmysly_1.png,pole tylne,501,760,632,797,line28.jpg
+anatomia_zmysly_1.png,lejka / łukowate,502,554,710,582,line29.jpg
+anatomia_zmysly_1.png,GR. ŚRODKOWA,475,535,641,562,line30.jpg
+anatomia_zmysly_1.png,gr. PRZEDNIA,485,433,615,458,line31.jpg
+anatomia_zmysly_1.png,JĄDRA,488,412,572,442,line32.jpg
+anatomia_zmysly_1.png,ośrodki,489,351,579,380,line33.jpg
+anatomia_zmysly_1.png,nadwzrokowe,503,456,658,482,line34.jpg
+anatomia_zmysly_1.png,(z k. bocznymi),295,445,474,496,line35.jpg
+anatomia_zmysly_1.png,spoidło,15,637,86,665,line36.jpg
+anatomia_zmysly_1.png,spoidło,73,193,156,214,line37.jpg
+anatomia_zmysly_1.png,grzbietowe,681,152,800,188,line38.jpg
+anatomia_zmysly_1.png,agresji,747,354,822,386,line39.jpg
+anatomia_zmysly_1.png,przyjemności,484,379,613,408,line40.jpg
+anatomia_zmysly_1.png,(z k. IV),178,429,278,462,line41.jpg
+anatomia_zmysly_1.png,Ś. DOLNA,3,492,98,519,line42.jpg
+anatomia_zmysly_1.png,wodociąg,19,432,133,464,line43.jpg
+anatomia_zmysly_1.png,KOMORA,198,653,279,685,line44.jpg
+anatomia_zmysly_1.png,szyszynka,6,656,125,694,line45.jpg
+anatomia_zmysly_1.png,blaszka,331,629,407,659,line46.jpg
+anatomia_zmysly_1.png,istota,137,717,201,744,line47.jpg
+anatomia_zmysly_1.png,lejek i przysadka,121,760,307,790,line48.jpg
+anatomia_zmysly_1.png,pasna,127,781,206,810,line49.jpg
+anatomia_zmysly_1.png,wzrok,248,781,298,805,line50.jpg
+anatomia_zmysly_1.png,bruzda,325,746,425,787,line51.jpg
+anatomia_zmysly_1.png,podwzgórkowa,310,781,453,810,line52.jpg
+anatomia_zmysly_1.png,sciany bocznej,383,822,507,854,line53.jpg
+anatomia_zmysly_1.png,OŚRODKI,30,980,122,1008,line54.jpg
+anatomia_zmysly_1.png,wzgórki,23,1004,108,1031,line55.jpg
+anatomia_zmysly_1.png,napięcie,201,1026,280,1053,line56.jpg
+anatomia_zmysly_1.png,uwaga),357,1084,451,1119,line57.jpg
+anatomia_zmysly_1.png,wcięcie,491,1081,575,1113,line58.jpg
+anatomia_zmysly_1.png,przepływ,484,1144,587,1174,line59.jpg
+anatomia_zmysly_1.png,wodociąg,556,1043,653,1084,line60.jpg
+anatomia_zmysly_1.png,spoidło tylne,690,1036,827,1085,line61.jpg
+anatomia_zmysly_1.png,wcięcie,492,982,576,1013,line62.jpg
+anatomia_zmysly_1.png,wcięciu,165,940,249,972,line63.jpg
+anatomia_zmysly_1.png,mózgu,157,965,239,993,line64.jpg
+anatomia_zmysly_1.png,guza,597,641,681,673,line65.jpg
+anatomia_zmysly_1.png,szyszynka,76,233,179,268,line66.jpg
+anatomia_zmysly_1.png,siatkowaty,87,1084,236,1128,line67.jpg
+anatomia_zmysly_1.png,słupy sklepienia,331,654,470,672,line68.jpg
+anatomia_zmysly_1.png,- przyśrodkowe,592,577,766,609,line69.jpg
+anatomia_zmysly_1.png,(pragnienie,666,450,767,482,line70.jpg
+anatomia_zmysly_1.png,(rytm dobowy),668,494,810,532,line71.jpg
+anatomia_zmysly_1.png,słuch,739,250,785,274,line72.jpg
+anatomia_zmysly_1.png,nadwzgórze,68,149,200,178,line73.jpg
+anatomia_zmysly_2.png,TYŁOMÓZGOWIE WTÓRNE,28,0,337,29,line1.jpg
+anatomia_zmysly_2.png,MÓŻDZEK,81,34,203,71,line2.jpg
+anatomia_zmysly_2.png,napięcie mięśniowe,217,45,412,72,line3.jpg
+anatomia_zmysly_2.png,precyzja,354,24,443,55,line4.jpg
+anatomia_zmysly_2.png,dół tylny czaszki,46,65,238,94,line5.jpg
+anatomia_zmysly_2.png,3 cz.,47,106,109,134,line6.jpg
+anatomia_zmysly_2.png,9 PŁACIKÓW x2,15,144,149,170,line7.jpg
+anatomia_zmysly_2.png,( 5,153,144,183,174,line8.jpg
+anatomia_zmysly_2.png,języciek,35,170,122,195,line9.jpg
+anatomia_zmysly_2.png,pł. środkowy,40,191,184,216,line10.jpg
+anatomia_zmysly_2.png,liść robaka,37,249,177,277,line11.jpg
+anatomia_zmysly_2.png,6. guz,6,282,96,317,line12.jpg
+anatomia_zmysly_2.png,7. piramida,3,313,155,335,line13.jpg
+anatomia_zmysly_2.png,8. czopek,7,331,117,357,line14.jpg
+anatomia_zmysly_2.png,9. grudka,6,351,128,385,line15.jpg
+anatomia_zmysly_2.png,od,61,392,97,416,line16.jpg
+anatomia_zmysly_2.png,2. skrzydło pł. śr.,269,186,443,212,line17.jpg
+anatomia_zmysly_2.png,4. prosty,272,228,377,258,line18.jpg
+anatomia_zmysly_2.png,5. pół,268,245,337,278,line19.jpg
+anatomia_zmysly_2.png,MOST,587,39,673,74,line20.jpg
+anatomia_zmysly_2.png,bruzda,535,102,640,134,line21.jpg
+anatomia_zmysly_2.png,pęczki,529,186,598,216,line22.jpg
+anatomia_zmysly_2.png,podłużne,600,179,717,218,line23.jpg
+anatomia_zmysly_2.png,skośnie,558,228,655,257,line24.jpg
+anatomia_zmysly_2.png,8. migdałek,274,333,401,358,line25.jpg
+anatomia_zmysly_2.png,9. kłaciek,273,350,395,382,line26.jpg
+anatomia_zmysly_2.png,płoty,58,415,130,446,line27.jpg
+anatomia_zmysly_2.png,kora = istota szara,24,467,265,501,line28.jpg
+anatomia_zmysly_2.png,ciało,21,494,89,524,line29.jpg
+anatomia_zmysly_2.png,istota biała,209,498,357,520,line30.jpg
+anatomia_zmysly_2.png,spoidłowe,183,556,297,583,line31.jpg
+anatomia_zmysly_2.png,zębate,34,596,122,620,line32.jpg
+anatomia_zmysly_2.png,3. kuklowate,12,634,181,659,line33.jpg
+anatomia_zmysly_2.png,konar dolny,37,689,181,725,line34.jpg
+anatomia_zmysly_2.png,środkowy,113,717,217,744,line35.jpg
+anatomia_zmysly_2.png,górny,111,736,196,777,line36.jpg
+anatomia_zmysly_2.png,(zasłona rdzeniowa,415,731,676,769,line37.jpg
+anatomia_zmysly_2.png,TWÓR SIATKOWATY TYŁOMÓZGOWIA,10,789,475,823,line38.jpg
+anatomia_zmysly_2.png,podłużnie,134,843,247,867,line39.jpg
+anatomia_zmysly_2.png,osłabienie bólu,206,857,387,896,line40.jpg
+anatomia_zmysly_2.png,JĄDRA,46,879,117,914,line41.jpg
+anatomia_zmysly_2.png,most,48,945,104,968,line42.jpg
+anatomia_zmysly_2.png,boczne,251,918,323,948,line43.jpg
+anatomia_zmysly_2.png,siatkowate wzgórza,285,983,511,1020,line44.jpg
+anatomia_zmysly_2.png,śródblaszkowe,558,983,723,1012,line45.jpg
+anatomia_zmysly_2.png,bodźców czuciowych,521,838,763,884,line46.jpg
+anatomia_zmysly_2.png,(równowaga),347,650,528,687,line47.jpg
+anatomia_zmysly_2.png,mięśni),450,620,539,657,line48.jpg
+anatomia_zmysly_2.png,ciało,205,693,274,724,line49.jpg
+anatomia_zmysly_2.png,mostu,308,716,390,742,line50.jpg
+anatomia_zmysly_2.png,kom.,41,816,92,843,line51.jpg
+anatomia_zmysly_2.png,pod,354,468,383,490,line52.jpg
+anatomia_zmysly_2.png,przedni,148,415,226,443,line53.jpg
+anatomia_zmysly_2.png,ciało,497,451,561,483,line54.jpg
+anatomia_zmysly_2.png,boczne,657,454,733,481,line55.jpg
+anatomia_zmysly_2.png,wstęga,563,331,665,361,line56.jpg
+anatomia_zmysly_2.png,bok,594,356,639,375,line57.jpg
+anatomia_zmysly_2.png,rdzeniowa,502,376,631,400,line58.jpg
+anatomia_zmysly_2.png,część,694,231,753,254,line59.jpg
+anatomia_zmysly_2.png,mózgu,680,0,758,34,line60.jpg
+anatomia_zmysly_2.png,skośny,698,268,783,300,line61.jpg
+anatomia_zmysly_2.png,bok,746,352,795,372,line62.jpg
+anatomia_zmysly_2.png,impulsy,676,395,762,424,line63.jpg
+anatomia_zmysly_2.png,(konar),402,354,496,377,line64.jpg
+anatomia_zmysly_2.png,robak,129,106,202,131,line65.jpg
+anatomia_zmysly_2.png,4,212,143,234,168,line66.jpg
+anatomia_zmysly_2.png,wyroski:,527,288,635,318,line67.jpg
+anatomia_zmysly_2.png,śródmózgowie,47,963,212,990,line68.jpg
+anatomia_zmysly_3.png,KORA MÓZGU,26,14,221,51,line1.jpg
+anatomia_zmysly_3.png,ciała kom. nerwowych,35,60,323,95,line2.jpg
+anatomia_zmysly_3.png,pokrywa półkule,35,84,255,110,line3.jpg
+anatomia_zmysly_3.png,nowa,35,106,110,134,line4.jpg
+anatomia_zmysly_3.png,stara,129,107,207,134,line5.jpg
+anatomia_zmysly_3.png,układ,135,141,204,164,line6.jpg
+anatomia_zmysly_3.png,i funkcje,127,162,253,195,line7.jpg
+anatomia_zmysly_3.png,płaty,39,162,125,195,line8.jpg
+anatomia_zmysly_3.png,warstwy,46,185,157,215,line9.jpg
+anatomia_zmysly_3.png,kom. wielokształtnych,40,287,322,329,line10.jpg
+anatomia_zmysly_3.png,KOMORA BOCZNA L/P,28,333,325,379,line11.jpg
+anatomia_zmysly_3.png,powst. w,33,369,151,393,line12.jpg
+anatomia_zmysly_3.png,3 rogi i cz. środkowa,27,388,341,415,line13.jpg
+anatomia_zmysly_3.png,(msc. rozszerzenia),182,430,417,460,line14.jpg
+anatomia_zmysly_3.png,łuk,31,406,86,429,line15.jpg
+anatomia_zmysly_3.png,od,101,470,143,498,line16.jpg
+anatomia_zmysly_3.png,tnon,137,591,193,616,line17.jpg
+anatomia_zmysly_3.png,ogoniastego,222,595,362,622,line18.jpg
+anatomia_zmysly_3.png,( od,268,630,314,654,line19.jpg
+anatomia_zmysly_3.png,2,98,687,123,717,line20.jpg
+anatomia_zmysly_3.png,R.D,10,690,74,727,line21.jpg
+anatomia_zmysly_3.png,CZ. Ś,7,568,84,605,line22.jpg
+anatomia_zmysly_3.png,R.P,6,461,59,501,line23.jpg
+anatomia_zmysly_3.png,ogon,143,737,206,767,line24.jpg
+anatomia_zmysly_3.png,gładka,146,881,239,911,line25.jpg
+anatomia_zmysly_3.png,bruzda,378,895,473,923,line26.jpg
+anatomia_zmysly_3.png,stopa,221,998,292,1034,line27.jpg
+anatomia_zmysly_3.png,HIPOKAMP,25,974,162,1006,line28.jpg
+anatomia_zmysly_3.png,(Alzheimer,142,1159,268,1188,line29.jpg
+anatomia_zmysly_3.png,hipokompa,301,1001,443,1026,line30.jpg
+anatomia_zmysly_3.png,słów,486,312,551,332,line31.jpg
+anatomia_zmysly_3.png,wtórna,551,144,645,170,line32.jpg
+anatomia_zmysly_3.png,wzrokowa,574,105,733,136,line33.jpg
+anatomia_zmysly_3.png,słuchowa,661,144,806,177,line34.jpg
+anatomia_zmysly_3.png,LOKALIZACJA OŚRODKÓW,497,19,820,57,line35.jpg
+anatomia_zmysly_3.png,czuciowa,666,66,819,100,line36.jpg
+anatomia_zmysly_3.png,mówienie bez sensu,486,205,749,236,line37.jpg
+anatomia_zmysly_3.png,ruchowy mowy,544,242,750,281,line38.jpg
+anatomia_zmysly_3.png,WĘCHOMÓZGOWIE,494,344,723,383,line39.jpg
+anatomia_zmysly_3.png,opuszka węchowa,492,386,734,419,line40.jpg
+anatomia_zmysly_3.png,pasmo węchowe,493,490,698,523,line41.jpg
+anatomia_zmysly_3.png,zadań,566,311,648,332,line42.jpg
+anatomia_zmysly_3.png,boczny,488,595,573,626,line43.jpg
+anatomia_zmysly_3.png,istota,475,818,548,842,line44.jpg
+anatomia_zmysly_3.png,poboczna,275,797,386,825,line45.jpg
+anatomia_zmysly_3.png,kształt,251,1102,340,1127,line46.jpg
+anatomia_zmysly_3.png,zakręt zębaty,39,1023,216,1061,line47.jpg
+anatomia_zmysly_3.png,bruzda hip.,450,1019,587,1050,line48.jpg
+anatomia_zmysly_3.png,zakręt,604,1019,695,1053,line49.jpg
+anatomia_zmysly_3.png,płat,525,898,584,924,line50.jpg
+anatomia_zmysly_3.png,ptasia,253,899,334,931,line51.jpg
+anatomia_zmysly_3.png,ośrodek,477,272,573,292,line52.jpg
+anatomia_zmysly_3.png,ośrodek,474,167,574,189,line53.jpg
+anatomia_zmysly_3.png,6 warstw,485,431,609,458,line54.jpg
+anatomia_zmysly_3.png,przednie,677,537,774,571,line55.jpg
+anatomia_zmysly_3.png,istota,488,670,568,702,line56.jpg
+anatomia_zmysly_3.png,zakręt,494,774,581,805,line57.jpg
+anatomia_zmysly_3.png,pierwotna kora,490,798,678,825,line58.jpg
+anatomia_zmysly_3.png,przyśrodkowy,489,629,659,673,line59.jpg
+anatomia_zmysly_3.png,ciało,152,781,220,799,line60.jpg
+anatomia_zmysly_3.png,włókna ciała,113,489,282,519,line61.jpg
+anatomia_zmysly_3.png,drobinowa,37,204,155,233,line62.jpg
+anatomia_zmysly_3.png,limbiczny,214,143,327,177,line63.jpg
+anatomia_zmysly_3.png,limbiczny,589,895,699,930,line64.jpg
+anatomia_zmysly_3.png,hipokompa,261,837,390,865,line65.jpg
+anatomia_zmysly_3.png,limbiczna,121,1104,244,1130,line66.jpg
+anatomia_zmysly_3.png,strzępek,426,1123,514,1150,line67.jpg
+anatomia_zmysly_3.png,hip.,525,1118,566,1151,line68.jpg
+anatomia_zmysly_3.png,(włókna),575,1116,691,1151,line69.jpg
+anatomia_zmysly_3.png,(istota białka),189,1122,367,1148,line70.jpg
+anatomia_zmysly_3.png,pamięć,30,1165,120,1187,line71.jpg
+anatomia_zmysly_3.png,podkładka,339,1167,470,1188,line72.jpg
+anatomia_zmysly_3.png,pasma,676,453,748,478,line73.jpg
+anatomia_zmysly_4.png,JĄDRA PODSTAWNE (istota szara),23,10,482,52,line1.jpg
+anatomia_zmysly_4.png,SOCZEWKOWATE,551,57,741,84,line2.jpg
+anatomia_zmysly_4.png,gałka blado.,549,202,743,233,line3.jpg
+anatomia_zmysly_4.png,"głowa, trzon, ogon",144,179,450,218,line4.jpg
+anatomia_zmysly_4.png,boczna między,156,83,357,114,line5.jpg
+anatomia_zmysly_4.png,OGONIASTE,54,55,205,85,line6.jpg
+anatomia_zmysly_4.png,torebkowa,239,140,367,166,line7.jpg
+anatomia_zmysly_4.png,do R.P,17,220,110,247,line8.jpg
+anatomia_zmysly_4.png,MIGDAŁOWATE,59,486,248,511,line9.jpg
+anatomia_zmysly_4.png,krańcowy,349,360,460,409,line10.jpg
+anatomia_zmysly_4.png,ciało,151,406,223,435,line11.jpg
+anatomia_zmysly_4.png,wew.,266,390,341,414,line12.jpg
+anatomia_zmysly_4.png,z ciałem migd.,318,285,488,321,line13.jpg
+anatomia_zmysly_4.png,istotą białą,423,506,577,538,line14.jpg
+anatomia_zmysly_4.png,ISTOTA BIAŁA,14,698,189,732,line15.jpg
+anatomia_zmysly_4.png,wew. zew. ostatnia,254,723,486,753,line16.jpg
+anatomia_zmysly_4.png,skorupa,548,283,672,316,line17.jpg
+anatomia_zmysly_4.png,okolica,553,426,644,455,line18.jpg
+anatomia_zmysly_4.png,głowa,648,103,733,132,line19.jpg
+anatomia_zmysly_4.png,pętla,605,144,673,169,line20.jpg
+anatomia_zmysly_4.png,ciało migdałowate,580,160,837,194,line21.jpg
+anatomia_zmysly_4.png,torebka wew.,332,117,477,152,line22.jpg
+anatomia_zmysly_4.png,w tylno,14,244,111,268,line23.jpg
+anatomia_zmysly_4.png,torebka wew.,28,265,191,290,line24.jpg
+anatomia_zmysly_4.png,j. soczewkowatym,1,306,202,351,line25.jpg
+anatomia_zmysly_4.png,2 powierzchnie,44,136,218,172,line26.jpg
+anatomia_zmysly_4.png,3 cz.,53,178,121,215,line27.jpg
+anatomia_zmysly_4.png,podspoidłowy,241,429,426,477,line28.jpg
+anatomia_zmysly_4.png,torebki,133,726,232,752,line29.jpg
+anatomia_zmysly_5.png,OKO,342,0,422,38,line1.jpg
+anatomia_zmysly_5.png,BŁONA WŁÓKNISTA,60,38,274,78,line2.jpg
+anatomia_zmysly_5.png,ROGÓWKA,124,80,259,112,line3.jpg
+anatomia_zmysly_5.png,TWARDÓWKA,540,58,690,113,line4.jpg
+anatomia_zmysly_5.png,sitowa,706,101,802,128,line5.jpg
+anatomia_zmysly_5.png,zewn.,490,125,566,147,line6.jpg
+anatomia_zmysly_5.png,3 warstwy,507,143,638,175,line7.jpg
+anatomia_zmysly_5.png,istota wł.,481,168,601,186,line8.jpg
+anatomia_zmysly_5.png,żż. wirowate,489,207,659,229,line9.jpg
+anatomia_zmysly_5.png,"n. tt. rzęskowe,t",646,183,828,213,line10.jpg
+anatomia_zmysly_5.png,"spojówki, na nim obwódka starcia",18,145,426,173,line11.jpg
+anatomia_zmysly_5.png,6 warstw nabłonek,40,162,302,191,line12.jpg
+anatomia_zmysly_5.png,zatoka ż. twardówki,38,204,284,230,line13.jpg
+anatomia_zmysly_5.png,BŁONA NACZYNIOWA,45,239,294,272,line14.jpg
+anatomia_zmysly_5.png,NACZYNIÓWKA,125,279,276,304,line15.jpg
+anatomia_zmysly_5.png,tt./żż. rzęskowe tylne + nn. neskowe,17,321,383,350,line16.jpg
+anatomia_zmysly_5.png,heller,23,361,92,387,line17.jpg
+anatomia_zmysly_5.png,TĘCZÓWKA,115,434,247,470,line18.jpg
+anatomia_zmysly_5.png,oddziela,39,464,147,490,line19.jpg
+anatomia_zmysly_5.png,nabłonek,46,562,163,586,line20.jpg
+anatomia_zmysly_5.png,(zewn - barwnikowy),168,564,399,587,line21.jpg
+anatomia_zmysly_5.png,BŁONA WEWN.,57,600,214,622,line22.jpg
+anatomia_zmysly_5.png,SIATKÓWKA,243,600,374,628,line23.jpg
+anatomia_zmysly_5.png,10 warstw,27,639,170,665,line24.jpg
+anatomia_zmysly_5.png,1. barwnikowa,10,660,181,686,line25.jpg
+anatomia_zmysly_5.png,3. graniczna zewn,10,703,226,726,line26.jpg
+anatomia_zmysly_5.png,"4. jadrzasta zewn,",10,721,240,753,line27.jpg
+anatomia_zmysly_5.png,ZAWARTOŚĆ,57,758,210,792,line28.jpg
+anatomia_zmysly_5.png,KOMORY,102,801,222,830,line29.jpg
+anatomia_zmysly_5.png,ciecz wodnista,254,800,423,830,line30.jpg
+anatomia_zmysly_5.png,mniejszy,411,576,498,619,line31.jpg
+anatomia_zmysly_5.png,fałdy,514,572,591,616,line32.jpg
+anatomia_zmysly_5.png,CIAŁO RZĘSKOWE,512,284,713,305,line33.jpg
+anatomia_zmysly_5.png,m. rzęskowy,325,242,460,273,line34.jpg
+anatomia_zmysly_5.png,źrenicy,719,239,818,275,line35.jpg
+anatomia_zmysly_5.png,"brzeg źreniczny, rzęskowy",39,483,316,517,line36.jpg
+anatomia_zmysly_5.png,PRZEDNIA,86,852,175,893,line37.jpg
+anatomia_zmysly_5.png,SOCZEWKA,95,917,228,950,line38.jpg
+anatomia_zmysly_5.png,objęta,42,943,116,971,line39.jpg
+anatomia_zmysly_5.png,torebką soczewki,121,943,333,972,line40.jpg
+anatomia_zmysly_5.png,jądro,37,983,118,1015,line41.jpg
+anatomia_zmysly_5.png,cz. śr.,136,983,222,1009,line42.jpg
+anatomia_zmysly_5.png,zaćma,52,1060,146,1096,line43.jpg
+anatomia_zmysly_5.png,zmętnienie,168,1057,314,1099,line44.jpg
+anatomia_zmysly_5.png,torebka soczewki,428,899,618,937,line45.jpg
+anatomia_zmysly_5.png,TYLNA,474,858,541,887,line46.jpg
+anatomia_zmysly_5.png,nabł rzęskowy,428,824,572,852,line47.jpg
+anatomia_zmysly_5.png,CIAŁO SZKLISTE,513,800,716,827,line48.jpg
+anatomia_zmysly_5.png,5.. splotowata zewn.,418,657,655,687,line49.jpg
+anatomia_zmysly_5.png,"7. splotowata wewn,",419,701,673,725,line50.jpg
+anatomia_zmysly_5.png,9. włókien nerwowych,424,742,679,768,line51.jpg
+anatomia_zmysly_5.png,10. graniczna wewn.,426,761,679,790,line52.jpg
+anatomia_zmysly_5.png,zewn.,213,675,270,708,line53.jpg
+anatomia_zmysly_5.png,wewn.,133,680,203,708,line54.jpg
+anatomia_zmysly_5.png,z. cz. wzrokowa,233,616,415,651,line55.jpg
+anatomia_zmysly_5.png,ślepa,541,613,604,647,line56.jpg
+anatomia_zmysly_5.png,żółta,618,614,682,647,line57.jpg
+anatomia_zmysly_5.png,3. cz. ślepa,702,613,820,653,line58.jpg
+anatomia_zmysly_5.png,m. rzęskowy,478,358,633,390,line59.jpg
+anatomia_zmysly_5.png,bl.,479,401,513,423,line60.jpg
+anatomia_zmysly_5.png,ZRENICA,543,442,646,466,line61.jpg
+anatomia_zmysly_5.png,(zewn. - barwnikowy,597,418,816,450,line62.jpg
+anatomia_zmysly_6.png,NARZĄDY DODATKOWE,63,23,361,57,line1.jpg
+anatomia_zmysly_6.png,POWIEKI,133,57,236,94,line2.jpg
+anatomia_zmysly_6.png,skóra,31,84,101,109,line3.jpg
+anatomia_zmysly_6.png,m. okrężny,125,86,243,118,line4.jpg
+anatomia_zmysly_6.png,m. tarczkowy g/d,300,104,464,139,line5.jpg
+anatomia_zmysly_6.png,powieki,293,130,388,152,line6.jpg
+anatomia_zmysly_6.png,więzadła,27,146,144,172,line7.jpg
+anatomia_zmysly_6.png,GRUCZOŁ ŁZOWY,126,223,319,254,line8.jpg
+anatomia_zmysly_6.png,brodawka,283,163,404,191,line9.jpg
+anatomia_zmysly_6.png,spojówka,183,129,290,158,line10.jpg
+anatomia_zmysly_6.png,(z płacików),321,222,469,257,line11.jpg
+anatomia_zmysly_6.png,(2/3 płaciki),396,328,505,357,line12.jpg
+anatomia_zmysly_6.png,droga łez:,54,449,210,478,line13.jpg
+anatomia_zmysly_6.png,1. korytka łzowe,55,470,256,497,line14.jpg
+anatomia_zmysly_6.png,2. jeziorko łzowe,63,491,274,516,line15.jpg
+anatomia_zmysly_6.png,5. woreczek łzowy,65,549,279,579,line16.jpg
+anatomia_zmysly_6.png,ODRUCH ŹRENICY,64,655,292,694,line17.jpg
+anatomia_zmysly_6.png,spojówki,366,407,461,443,line18.jpg
+anatomia_zmysly_6.png,proste,539,268,623,307,line19.jpg
+anatomia_zmysly_6.png,skośne,532,301,640,344,line20.jpg
+anatomia_zmysly_6.png,ANTAGONISTYCZNE,556,405,760,439,line21.jpg
+anatomia_zmysly_6.png,MIĘŚNIE,540,225,661,259,line22.jpg
+anatomia_zmysly_6.png,worek,579,129,648,153,line23.jpg
+anatomia_zmysly_6.png,cz. oczodołowa,576,150,758,174,line24.jpg
+anatomia_zmysly_6.png,sklepienie,570,166,684,195,line25.jpg
+anatomia_zmysly_6.png,SPOJÓWKA,577,64,701,95,line26.jpg
+anatomia_zmysly_6.png,bł. śluz.,691,4,793,36,line27.jpg
+anatomia_zmysly_6.png,powieka,722,71,820,98,line28.jpg
+anatomia_zmysly_6.png,wew,506,90,566,115,line29.jpg
+anatomia_zmysly_6.png,(z pkt,290,185,363,213,line30.jpg
+anatomia_zmysly_6.png,jeziorka łzowe,33,169,219,192,line31.jpg
+anatomia_zmysly_6.png,woreczek,182,293,275,316,line32.jpg
+anatomia_zmysly_6.png,warstwa łzowa,52,392,254,415,line33.jpg
+anatomia_zmysly_6.png,tarczk.,389,372,459,397,line34.jpg
+anatomia_zmysly_6.png,gruczołów,253,374,379,402,line35.jpg
+anatomia_zmysly_6.png,i powiekowo,238,325,393,357,line36.jpg
+anatomia_zmysly_6.png,wydzielina gruczołów śluz.,52,411,362,441,line37.jpg
+anatomia_zmysly_6.png,p. p,491,438,559,465,line38.jpg
+anatomia_zmysly_6.png,p. g,493,475,559,522,line39.jpg
+anatomia_zmysly_6.png,s. g,655,475,719,517,line40.jpg
+anatomia_zmysly_6.png,m. dźwigacz powieki,532,350,780,383,line41.jpg
+anatomia_zmysly_6.png,m. oczodołowy,522,376,724,410,line42.jpg
+anatomia_zmysly_6.png,(gładki),722,370,835,407,line43.jpg
+anatomia_zmysly_6.png,gr. łzowego),621,189,756,218,line44.jpg
+anatomia_zmysly_6.png,bocz.,772,267,828,300,line45.jpg
+anatomia_zmysly_6.png,fałd,444,45,485,74,line46.jpg
+anatomia_zmysly_6.png,lz,406,165,434,189,line47.jpg
+anatomia_zmysly_6.png,przewód,354,268,453,293,line48.jpg
+anatomia_zmysly_6.png,nos,347,291,392,314,line49.jpg
+anatomia_zmysly_6.png,3 warstwy,53,348,181,381,line50.jpg
+anatomia_zmysly_6.png,łzowy,206,515,291,549,line51.jpg
+anatomia_zmysly_6.png,w przewodzie nosowym,215,588,468,624,line52.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,KOŚCI + STAWY,154,10,425,66,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,okolice kończyny dolnej -> obręcz miednicza + część wolna,8,83,490,125,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,OBRĘCZ MIEDNICZA pelciv girdle kości te zrastają się w,8,161,584,189,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,- zbudowana jest z kości miedniczej,15,195,374,224,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,kośc kulszowa,426,239,586,272,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,kość łonowa,195,284,325,324,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,kość biodrowa,11,271,125,297,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,KOŚCI CZĘŚCI WOLNEJ KOŃCZYNY DOLNEJ,31,417,514,457,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,kość udowa,16,494,131,524,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,Rzepka,129,538,194,569,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,piszczelowa,201,573,312,604,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,strzałkowa,380,561,482,587,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,kości goleni,256,500,373,531,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143707.png,stopy,533,480,591,518,line14.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143723.png,1. Opisz kość biodrową,6,15,195,42,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143723.png,2. Opisz kość kulszową,6,45,187,70,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143723.png,3. Opisz kość łonową,0,71,173,100,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143723.png,4. Opisz spojenie łonowe,6,104,182,135,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143723.png,5. Opisz staw krzyżowo biodrowy,6,124,249,178,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,Kość biodrowa,4,12,154,42,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,TALERZ,32,60,111,87,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,od dołu ograniczony kresą łukowatą kości biodrowej,51,91,459,123,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,- ma powierzchnię przednią i półslodkową,28,122,379,150,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,-> powierzchnia przednia talerza kosci biodrowej,10,166,428,200,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,- dół biodrowy,19,194,164,230,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,- guzowatość biodrowa,20,226,225,265,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,-> powierzchnia poslodlowa talerza kosci biodrowej,6,270,468,307,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,- kresa posladkowa tylna,21,299,251,332,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,- kresa poslodlowa przednia,19,328,261,363,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,- kresa poslodkowa dolna,26,363,235,394,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,TRZON,14,438,89,471,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,grzebień biodrowy,17,482,164,521,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,-> między holcem biodrowym przednim górnym a holcem biodrowym tylnym,28,517,568,543,line14.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,-> 2/3 części przednie to wargi zewn. grzebienia biodrowego,22,550,436,571,line15.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,warga wewn. grzebienia biodrowego,202,566,428,587,line16.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143733.png,guzek biodrowy,46,624,164,660,line17.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,Kość łonowa,7,19,118,47,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,gałąż dolna,142,8,252,44,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,trzon,131,50,171,78,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,gałąź górna,4,71,104,102,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,Gałąż górna kości łonowej,5,120,239,160,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,- od panewki do trzonu,12,160,204,185,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,- ogranicza otwór zasłoniony,4,187,247,214,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,- (brzeg przedni) guzek łonowy,8,216,221,246,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,- (brzeg tylny) grzebień kości łokieciowej,11,241,278,275,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,- (brzeg dolny) guzek zasłonowy przedni,12,275,307,309,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,- (pow. górna) wyniosłość biodrowo - łonowa),16,299,318,342,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,Trzon kości łonowej body of pubis,8,360,333,399,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,- powierzchnia spojeniowa symphysical surface,9,401,333,427,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,- spojenie łonowe pubic symphasis,6,425,277,461,line14.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,- guzek łonowy public tubercle,7,454,234,493,line15.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,- grzebień łonowy,9,489,146,522,line16.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,Gałąż dolna kosci łonowej inferior pubic ramus,13,537,408,582,line17.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143801.png,- otwór zasłoniony,7,578,150,609,line18.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143810.png,Kosć kulszowa ischium,4,14,214,54,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143810.png,Trzon kosci kulszowej body of ischium,10,56,362,95,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143810.png,- guzek zasłonowy tylny posterior obturator tubercle,10,87,429,126,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143810.png,- kolec kulszowy ischial spine,11,122,290,150,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143810.png,- guz kulszowy ischial tuberosity,8,152,310,187,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143810.png,- wcięcie kulszowe mniejsze greater sciatic hoth,8,181,402,211,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143810.png,- wcięcie kulszowe większe lesser sciatic noth,10,208,392,243,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143810.png,Gałąż kosci kulszowej ramus of ischium,6,263,389,308,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143810.png,- kresa łonowa pubic line przeczypai się t u odnoga prącia lub,9,304,567,330,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143810.png,łechtaczki i m. kulszowa jamistego,293,326,564,352,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143819.png,PANEWKA acetabulium,6,12,204,50,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143819.png,- brzeg panewki,6,49,118,77,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143819.png,- ma stawową powierzchnię księżycowatą,8,78,264,98,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143819.png,- wcięcie panewki,7,105,116,132,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143819.png,- dół panewki,5,138,94,167,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143819.png,- składowe panewki: trzon kości biodrowej,7,166,260,188,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143819.png,trzon kosci,127,183,196,205,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143819.png,- obrąbek panewkowy,8,225,161,263,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143819.png,podzielone chrząstką wzrostu o kształcie litery Y,289,162,584,187,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143819.png,gałąź górna kości łonowej,127,199,270,230,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143819.png,Otwór zasłoniony,6,346,150,381,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143819.png,- prawie zamknięty przez błonę zasłonową,10,378,315,411,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143819.png,- kanał zasłonowy,8,411,158,444,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,Więzozrosty obręczny miedniczej,6,2,250,33,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,1. Więzadło biodrowo-lędźwiowe,6,33,250,58,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,"- od L5, L4 pod stawem krzyżowo-biodrowym, część tylno dołu biodrowego",30,58,575,84,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,2. Więzadło krzyżowo-guzowe,5,105,223,142,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,- wyrostek sierpowaty,35,138,195,165,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,- wytwarza kanał sromu,35,155,234,204,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,3. Więzadło krzyżowo-kolcowe,8,212,225,248,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,4. Błona zasłonowa,5,246,173,273,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,- przyczepia się do ostrego brzegu otworu zasłonionego,26,275,368,304,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,- między guzkiem zasłonowym przednim (na k. łonowej) a tylnym,24,292,414,330,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,( na trzonie kosci,414,293,536,316,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,kulszowej),476,310,544,340,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,Chrząstkozrosty obręczy miedniczej,11,378,318,418,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,SPOJENIE ŁONOWE,8,423,205,458,line14.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,- chrząstkozrost zawarty między obustronnymi trzonami kości łonowych,12,453,568,482,line15.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,- składa się ono z: 2 powierzchnie stawowe ( + chrząstka szklista),11,484,519,510,line16.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,które są odseparowane przez krążek międzyłonowy,184,505,547,532,line17.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,1. Więzadło łonowe górne,17,543,245,574,line18.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,od górnego brzegu krążka do guzków łonowych,38,564,299,592,line19.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,2. Więzadło łonowe dolne,19,595,218,619,line20.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,"kształt łuku, brzeg dolny krążka, do",39,614,251,633,line21.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,3. Więzadło łonowe przednie,19,638,228,672,line22.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,4. Więzadło łonowe,19,671,159,692,line23.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,tylne,164,676,206,700,line24.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143828.png,dolne,266,629,300,643,line25.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143837.png,STAW KRZYŻOWO BIODROWY (2) socroiliac joints,8,13,399,47,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143837.png,jest w fiszkach,443,11,582,65,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143837.png,- jedyne połączenia stawowe kości miedniczej,13,49,338,77,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143837.png,- stawy,14,79,75,113,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143837.png,( chrząstka szklista ),405,82,531,111,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143837.png,- powierzchnie stawowe: powierzchnie uchowate kosci krzyżowej i biodrowej,18,112,529,143,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143837.png,1. Więzadło krzyżowo-biodrowe przednie,18,144,295,176,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143837.png,2. Więzadło krzyżowo-biodrowe międzykostne,13,178,317,214,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143837.png,3. Więzadło krzyżowo-biodrowe tylne,10,210,259,250,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143847.png,przednia,67,69,129,91,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143847.png,tylna,73,86,122,103,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143847.png,dolna,90,102,126,118,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143847.png,kolec biodrowy,20,137,118,163,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143847.png,tylny górny,23,159,108,185,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143847.png,kolec biodrowy,20,186,113,210,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143847.png,tylny dolny,26,203,94,233,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143847.png,gałąź górna k. łonowej,312,230,457,265,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143847.png,kolec biodrowy przedni dolny,321,141,512,170,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143847.png,talerz kosci biodrowej,326,92,461,113,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143847.png,gałąź,180,368,243,415,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,KOŚĆ UDOWA femur,5,14,231,56,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,- największa i najmniejsza,12,51,232,83,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,- głowa kosci udowej to główka stawu biodrowego,15,80,393,116,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,-jej dwa hłyhcie na końcu dalszym są główką,15,110,393,137,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,stawową w stawie kolanowym,51,133,295,155,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,Koniec bliższy kości udowej,7,183,286,227,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,"Koniec bliższy kości udowej składa się z głowy, szyjki oraz",17,230,541,255,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,dwóch krętarzy - mniejszego i większego + kresy i ostroga,22,249,499,276,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,Głowa - dowód przyśrodkowy - dół głowy kości udowej,12,276,454,310,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,więzadła głowy kości udowej,294,302,545,330,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,miejsce przyczepu,148,310,289,340,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,Szyjka - z 5 cm,10,365,163,402,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,kąt szyjkowo-trzonowy kości udowej,92,392,420,424,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,kąt przodochylenia szyjki kości udowej,103,428,387,464,line14.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,Krętarz większy,14,488,138,515,line15.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,- dół krętarzowy,170,478,321,527,line16.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,- brzeg górny krętarza większego + srodek kości udowej,165,513,564,545,line17.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,oś poprzeczna,373,555,477,583,line18.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,Krętarz mniejszy,15,592,153,624,line19.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,granica między szyjką,460,662,600,683,line20.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,grzebień międzykrętarzowy,49,700,270,730,line21.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,guzek czworoboczny,306,691,489,729,line22.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143859.png,ostroga udowa,38,747,185,781,line23.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,Trzon kości udowej body of femur,6,10,324,52,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,Kresa chropowata,7,61,169,86,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,"- składa się z dwóch warg, przyśrodkowej i bocznej",200,50,598,89,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,warga przyśrodkowa,3,142,175,167,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,warga boczna,313,142,445,169,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,przedłuża się w,74,191,177,213,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,przechodzi w,401,189,499,219,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,kresa grzebieniowa,4,228,175,259,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,gluteal,325,237,389,265,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,kresa nadkłykciowa boczna,273,288,519,319,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,staje się,80,287,152,308,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,przysrodkowa,156,325,248,349,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,kresa,1,321,43,346,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143909.png,medial,6,340,71,367,line14.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,Koniec dalszy kości udowej,5,6,239,50,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,Kłykieć przyśrodkowy,6,59,202,90,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,i kłykieć boczny kosci udowej,214,57,522,90,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,rozdzielone od siebie,162,137,342,160,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,przez dół międzykłykciowy,155,154,393,179,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,Powierzchnia rzepkowa kości udowej,6,405,327,438,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,Powierzchnia piszczelowa kości udowej,6,428,321,473,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,Dół międzykłykciowy,9,473,194,524,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,medical picondyle of femur,6,548,196,575,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,Bruzda mięśnia podkolanowego,11,586,292,625,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,nakłykieć boczny,245,515,398,552,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,surface of femur,389,400,525,440,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,surface of femur,376,435,501,464,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143918.png,- groore for popliteus muscle,296,589,516,621,line14.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143928.png,Rzepka patella,4,9,183,51,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143928.png,- największa trzeszczka ustroju,1,45,296,82,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143928.png,- wmontowana od przodu w staw kolanowy,6,74,397,101,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143928.png,"- kształt trójkąta (podstawa, wierzchołek)",11,102,376,136,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143928.png,- pow. przednia rzepki -> wypukła,6,140,282,163,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143928.png,- pow. stawowa rzepki ->,7,165,211,198,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,STAW BIODROWY hip joint,172,4,458,54,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,-> STAW KULISTY PANEWKOWY,4,48,319,89,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,-> łączy panwekę kości miedniczej z głową kości udowej,8,81,506,119,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,PANEWKA acetabielum -> powierzchnia księżycowata + obrębek panewki,4,140,595,171,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,- powierzchnia księżycowata lunale surface,17,178,350,207,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,- wcięcie panewki,14,208,149,237,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,- dół panewki,12,238,126,269,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,- obrąbek panewki,11,265,191,299,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,"GŁÓWKA - głowa kosci udowej, która stanowi około 3/4 kuli",6,320,470,369,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,Więzadła,5,395,100,431,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,Największy udział w budowie,364,180,585,210,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,TRZON KOŚCI KULSZOWEJ,364,215,555,236,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,- więzadło biodrowo - udowe,7,437,242,461,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,-> cz. poprzeczna,53,457,178,476,line14.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,-> cz. zstępująca,49,471,191,496,line15.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,(iliofemoral ligament),241,424,415,471,line16.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,najsilniejsze więzadło,430,399,592,437,line17.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,Bertiniego,440,439,517,469,line18.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,kształt Y,434,464,542,500,line19.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,- więzadło łonowo-udowe,7,509,215,542,line20.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,- więzadło kulszowo-udowe,3,545,203,568,line21.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,- warstwa okrężna,3,570,150,601,line22.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,- więzadło głowy kości udowej,4,605,252,640,line23.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,stanowi nieco więcej niż 2/5,364,229,568,250,line24.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,jej pow. księżycowatej oraz,364,242,573,269,line25.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,cały dół panewki,368,261,531,281,line26.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,-> niecałe 2/5 ->,355,274,467,293,line27.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,-> 1/5 panewki -> kość łonowa,353,286,565,311,line28.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,fossa,219,233,268,270,line29.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143938.png,notch,245,208,296,231,line30.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,KOŚCI GOLENI,167,9,381,52,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,Kość piszczelowa tibia,7,80,213,117,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,koniec bliższy: kłykieć przyśrodkowy medial condyle of tibia,4,124,530,177,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,kłykieć boczny,148,165,277,202,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,guzowatość piszczeli,151,196,322,235,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,tibial tuberosity,329,197,477,230,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,lateral condule of tibia,279,166,482,197,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,guzek pasma biodrowo-piszczelowego,160,229,445,266,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,powierzchnia stawowa strzałkowa,153,260,411,291,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,fibular facet,418,259,529,291,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,tubercle,446,231,498,254,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,powierzchnia górna -> dwie powierzchnie otawowe górne kosci piszczelowej,7,303,596,331,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,brzeg podpanewkowy,184,346,388,385,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,powierzchnia stawowa górna kłykcia bocznego,187,380,586,407,line14.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,powierzchnia stawowa kłykcia przysrodkowego,183,422,534,449,line15.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,pole międzykłykciowe,180,471,346,496,line16.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,przednie,176,501,231,516,line17.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,tylne,259,501,295,515,line18.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,guzek międzykłykciowy przyśrodkowy,259,510,568,539,line19.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,wyniosłośc międzykłykciowa,9,530,232,566,line20.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,guzek międzykłykciowy boczny,251,562,503,593,line21.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,intercondylar area,352,469,502,503,line22.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,articular surface of medial condyle,195,440,473,470,line23.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,border,506,346,578,375,line24.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143947.png,of,498,224,521,257,line25.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144005.png,Kość strzałkowa fibula,7,13,229,45,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144005.png,koniec bliższy: głowa head of fibula,7,55,337,90,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144005.png,wierzchołek głowy apex of head of fibula,151,91,484,123,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144005.png,szyjka neck of fibula,150,120,361,152,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144005.png,powierzchnia stawowa głowy kości strzałkowej,154,150,524,175,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144005.png,trzon,15,223,77,254,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144005.png,grzebień przyśrodkowy,146,226,337,261,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144005.png,medial urest,349,223,458,258,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144005.png,koniec dalszy,6,281,140,326,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144005.png,kostka boczna lateral melledus,155,279,479,322,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144005.png,powierzchnia stawowa kostki bocznej,155,315,492,342,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144005.png,bruzda kostkowa kości strzałkowej,152,360,460,389,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144005.png,dół kostki bocznej,148,404,329,434,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143955.png,trzon: kresa mięsnia płaszczkowatego soleal line,2,0,481,39,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143955.png,kresa pionowa,88,39,240,67,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143955.png,bruzda kostkowa kości piszczelowej,133,92,428,121,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143955.png,kostka tylna,125,140,256,172,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143955.png,kostka przyśrodkowa,130,169,311,203,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143955.png,tworzy,77,188,125,216,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143955.png,powierzchnia stawowa kostki przyśrodkowej,137,205,488,228,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143955.png,wcięcie strzałkowe,120,243,285,275,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143955.png,powierzchnia stawowa dolna kości piszczelowej,133,277,506,304,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143955.png,fibular notch,290,241,417,276,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143955.png,surface of tibia,288,293,441,323,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143955.png,medial malledus,317,165,449,192,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 143955.png,vertical line,247,35,372,66,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144013.png,STAW PISZCZELOWO-STRZAŁKOWY,7,9,335,44,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144013.png,staw płaski,23,47,109,70,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144013.png,"między stawową głowy kosci strzałkowej, a pow stawową strzałkową",21,75,540,102,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144013.png,Więzadła,11,119,81,144,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144013.png,więzadło przednie głowy strzałkowej,109,124,357,147,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144013.png,więzadło tylne głowy strzałkowej,108,139,367,169,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144013.png,Więzozrost piszczelowo-strzałkowy,5,207,286,248,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144013.png,- między wcięciem strzałkowym k. piszczelowej a koniec dalszy kości strzałkowej,9,242,585,272,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144013.png,więzadła: piszczelowo - strzałkowe przednie,5,274,338,300,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144013.png,piszczelowo - strzałkowe tylne,101,303,339,335,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,STAW KOLANOWY knee joint,8,6,333,51,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,"ZŁOŻONY, DWUOSIOWY",357,1,574,24,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,ZAWIASOWO - OBROTOWY,354,18,571,45,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,"staw dwukłykciowy, czyli taki gdzie kość udowa łączy się z koscią",23,65,563,89,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,-> Główka stawowa -> kłykcie: przyśrodkowy i boczny kosci udowej,8,139,584,171,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,-> Panewka stawowa -> powierzchnia stawowa kłykcia przyśrodkowego,4,181,586,211,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,powierzchnia stawowa kłykcia bocznego,209,201,539,228,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,powierzchnia stawowa rzepki,216,219,493,242,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,Łąkotka przyśrodkowa,3,268,203,297,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,Łąkotka boczna,5,292,162,312,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,Więzadła:,0,347,104,376,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,więzadło rzepki,119,352,264,374,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,"troczki rzepki: przyśrodkowy, boczny",130,366,426,391,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,poprzeczne kolana,133,383,285,405,line14.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,poboczne strzałkowe,134,403,304,417,line15.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,poboczne piszczelowe,135,418,300,430,line16.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,"krzyżowe kolana: przednie, tylne",130,431,398,451,line17.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,podkolanowe łukowate,134,457,281,475,line18.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,podkolanowe skośne,139,475,279,490,line19.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144024.png,podkolanowo - strzałkowe,137,489,304,509,line20.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144043.png,Kośc piętowa calcameal bone,11,12,284,53,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144043.png,pow. stawowa sześcienna,317,62,519,94,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144043.png,pow. stawowa skokowa,358,103,565,134,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144043.png,przednia,415,128,494,154,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144043.png,środkowa,409,156,530,194,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144043.png,podpórka kości,413,204,550,238,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144043.png,skokowej,448,233,535,255,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144043.png,guz piętowy,392,327,512,375,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144043.png,pow. stawowa skokowa tylna,218,396,518,428,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,KOŚCI STOPY,176,6,407,51,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,KOŚCI STĘPU tarsal bones,0,72,262,113,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,"szereg bliższy -> kość skokowa, kość piętowa",3,120,398,156,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,szereg dalszy -> klinowata przyśrodkowa,14,153,339,176,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,klinowata boczna,147,170,295,188,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,klinowata pośrednia,143,184,298,206,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,Kość skokowa talus,9,256,211,285,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,- głowa kości skokowej : powierzchnia stawowa łódkowa,11,303,441,335,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,pow. stawowa piętowa przednia,192,339,433,367,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,pow. stawowa piętowa środkowa,193,367,435,394,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,pow. stawowa więzadła piętowo-łódkowego,197,398,497,430,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,- szyjka,9,454,85,486,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,bruzda kosci skokowej,106,452,299,477,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,wyrostek boczny,110,492,247,510,line14.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,wyrostek tylny,111,506,235,525,line15.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,pow. stawowa piętowa tylna,105,519,332,545,line16.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144035.png,surface,545,276,599,300,line17.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144050.png,STAW SKOKOWO - GOLENIOWY ankle joint ZAWIASOWY,7,14,506,53,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144050.png,Główka -> powierzchnia górna bloczka kości skokowej,9,61,434,88,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144050.png,powierzchnia kostkowa przyśrodkowa,92,81,377,105,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144050.png,powierzchnia kostkowo boczna,112,98,345,118,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144050.png,Panewka,3,141,79,164,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144050.png,pow. dolna kości piszczelowej,104,142,321,165,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144050.png,pow. boczna kostki przyśrodkowej,104,158,358,181,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144050.png,pow. przyśr. kostki bocznej,97,173,354,209,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144050.png,Więzadła: więzadło poboczne przyśrodkowe stawu skokowego-goleniowego,3,227,588,260,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144050.png,więzadło poboczne boczne stawu skokowego goleniowego,116,252,585,288,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144105.png,Staw skokowo - piętowy - łódkowy (staw skokowy dolny),5,12,424,56,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144105.png,więzadło skokowo - piętowe międzykostne na dow skokowy przedni i tylny dzieli,3,65,554,96,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144105.png,staw skokowy przedni -> skokowo - piętowo - łodlony,5,94,415,125,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144105.png,staw skokowy tylny -> staw skokowo-piętowy,5,121,306,160,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,Kość skoowa,4,12,128,40,line1.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,głowa kości skokowej ma 5 powierzchni stawowych,11,46,350,80,line2.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,bruzda kości skokowej,14,75,196,111,line3.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,( przysrodkowo),189,71,321,113,line4.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,Zatoka stępu,349,87,459,123,line5.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,bruzda piętowa,19,105,142,132,line6.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,trzon -> bloczek,23,137,155,162,line7.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,wyrostek boczny,84,155,199,179,line8.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,wyrostek tylny,82,173,190,201,line9.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,większy guzek boczny,278,151,453,177,line10.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,mniejszy guzek przyśrodkowy,280,171,507,198,line11.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,łączy się z 4 koścmi,24,211,222,239,line12.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,piszczelowa,76,271,168,295,line13.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,strzałkowa,79,290,177,309,line14.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,piętowa,77,308,142,326,line15.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,oba guzki rozdziela bruzda scięgna,241,228,544,253,line16.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,Kość piętowa,11,373,135,407,line17.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,- ma 6 powierzchni,9,409,196,436,line18.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,wyrostek przysrodlowy,235,413,388,445,line19.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,większy,384,377,441,404,line20.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,- pow dolna -> guz piętowy,4,438,215,476,line21.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,wyrostek boczny,231,472,352,506,line22.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,mniejszy,365,455,430,486,line23.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,- pow przysr -> bruzda ścięgna zginacza długiego palucha,11,513,432,549,line24.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,- pow boczna -> dla otrzałek,6,545,259,572,line25.jpg
+KOŚCI/Zrzut ekranu 2026-05-07 144057.png,zginałka długiego kości skokowej,235,243,509,278,line26.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,MIĘŚNIE,263,6,549,95,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,mm. obręczy miednicy,3,163,276,215,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,mm. stopy,609,161,736,209,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,tylne,102,233,154,267,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,mm. uda,211,257,343,289,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,mm. goleni,446,253,602,307,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,zginacze,605,321,718,377,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,prostowniki,369,321,520,376,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,zginacze,347,422,478,477,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,przywodziciele,210,359,352,412,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,prostowniki,94,416,239,476,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,mm. okolicy,71,261,190,290,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,posladkowej,81,285,206,319,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,przednie,8,325,92,358,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185236.png,biodrowej,22,372,133,408,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,1) Jak dzielimy mięśnie obręczy miedniczej ?,9,1,387,36,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,2) Jakie mięsnie należą do mm. okolicy biodrowej?,5,31,416,64,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,3) jakie mięsnie należą do mm. okolicy posladkowej?,5,59,426,96,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,4) M. biodrowo - lędźwiowy,11,93,254,125,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,5) Jakie jest działanie m..biodrowo-lędźwiowego,4,119,424,157,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,6) M. posladkowy wielki,7,149,232,182,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,7) M. pośladkowy średni,4,181,198,207,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,8) M. posladkowy mały,12,207,197,245,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,9) M. naprężacz powięzi szerokiej,6,241,308,277,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,10) M. gruszkowaty,8,272,168,303,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,11) M. zasłonowy wewn,5,303,196,330,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,12) M. bliźniacze,5,330,143,365,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,13) M. zasłonowy zewn,8,363,196,396,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,14) M. czworoboczny,4,393,189,418,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,15) Jak mozna podzielić mięśnie udo?,4,420,301,454,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,16) Jakie mięśnie mozna zaliczyć do mięśni prostowników uda?,0,451,521,481,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,17) M. czworogłowy,6,483,195,522,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185252.png,18) M. krawiecki,4,513,163,554,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,MIĘŚNIE OBRĘCZY MIEDNICZEJ,116,18,401,53,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,PRZEDNIE,68,81,165,105,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,MM. OKOLICY BIODROWEJ,13,98,221,131,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,TYLNE,401,80,467,103,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,MM. OKOLICY POSLADKOWEJ,370,101,597,129,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,M. BIODROWO - LĘDŹWIOWY,24,185,263,220,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,POWIERZCHOWNE,155,246,323,274,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,pośladkowy wielki,167,280,312,309,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,pośladkowy sredni,159,305,310,340,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,posladkowy mały,163,343,315,371,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,naprężacz powięzi szerokiej,160,370,371,402,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,rotatory,421,229,489,247,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,boczne,418,241,470,260,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,GŁĘBOKIE,466,251,570,279,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,m. gruszkowaty,420,280,547,309,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,n. zasłaniacz wewnętrzny,411,307,601,339,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,mm. bliźniacze,419,341,518,360,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,górny,415,356,466,385,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,dolny,478,355,524,380,line19.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,m. czworoboczny uda,411,386,567,409,line20.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185301.png,n. zasłaniacz zewnętrzny,411,413,599,453,line21.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,Mięsień biodrowo - lędźwiowy,11,16,233,52,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,KRĘTACZ,403,2,530,39,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,MNIEJSZY,453,38,585,81,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,- składa się z 3 mięśni : m. biodrowego,7,50,355,75,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,m. lędźwiowego wiekszego,238,69,422,89,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,m. lędźwiowego mniejszego,238,83,424,112,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,M. biodrowy,2,120,108,159,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,Przyczep : 2/3 górnej części dołu biodrowego,6,171,271,196,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,początkowy na górze części bocznej kości krzyżowej,4,190,309,212,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,więzadło krzyżowo - biodrowe przednie,72,208,304,230,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,Przyczep : krętacz mniejszy,12,235,202,257,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,biodrowo - grzebieniowa,282,274,441,296,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,Mięsień lędźwiowy większy,5,306,222,339,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,- odchodzi od kręgosłupa dwuwarstwowo : pow i gł.,7,326,434,358,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,warstwa pow -> krążek międzykręgowy,204,356,501,388,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,- przyczep początkowy,8,371,178,413,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,warstwa głęboka -> wyrostki żebrowe kręgów L1-L5,192,392,565,422,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,- przyczep końcowy -> krętacz mniejszy,4,434,318,483,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,Mięsień lędźwiowy mniejszy,4,523,249,569,line19.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,od krązka piersiowo-lędźwiowego i brzegów przyległych trzonów kręgów,7,558,582,587,line20.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,"do grzebienia kosci łonowej, łuku biodrowego-łonowego i powięzi biodrowej",7,607,581,642,line21.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,DZIAŁANIE : dolny zginacz stawu biodrowego,0,646,392,679,line22.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,pochyla tułów i miednicę ku przodowi,135,673,438,694,line23.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185313.png,rotacja zewnętrzna,141,690,299,718,line24.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,POWIERZCHOWNE,10,12,210,50,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,Mięsień pośladkowy wielki gluteus maximus muscle,3,78,494,112,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,- najwiekszy tu,3,112,134,139,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,- najbardziej powierzchowny tu,1,140,236,171,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,Przyczep początkowy,4,182,183,222,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,1. blaszka tylna powięzi piersiowo-lędźwiowej,187,180,559,209,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,2. rozcięgno pośladkowe m. pośladkowego średniego,184,203,592,226,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,3. brzeg boczny kości krzyżowej i kości guzicznej,177,220,585,242,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,4. więzadło krzyżowo guziczne,172,234,419,268,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,przyczep końcowy:,8,276,162,315,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,włókna głębokie w częsci dolnej -> guzowatość posladkowa,163,318,598,358,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,"między nimi, a kresą chropowatą",298,363,571,390,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,kaletka międzymięsniowa,346,386,543,410,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,pośladkowa,497,402,593,428,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,kaletka kulszowa,433,440,578,475,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,pasmo biodrowo piszczelowe,261,275,491,298,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,kaletka,344,485,414,514,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,Działanie : najsilniejszy prostownik stawu biodrowego,9,543,475,574,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185323.png,rotator zewnętrzny,113,567,301,599,line19.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,Mięsień pośladkowy średni,5,2,264,36,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,gluteus medius muscle,286,8,467,39,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,"przyczep początkowy powierzchnia pośladkowa kości udowej, między",12,53,549,75,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,"kresą pośladkową przednią, a grzebieniem biodrowym",185,69,603,94,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,przyczep końcowy: brzeg górny krętacza większego,5,125,419,159,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,obecna kaletka,450,139,581,163,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,Sredniego,513,178,586,201,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,KRĘTARZ,393,245,551,288,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,WIEKSZY,397,288,569,339,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,Mięsień posladkowy mały gluteus minimus muscle,9,425,494,465,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,przyczep początkowy:,9,475,205,515,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,"powierzchnia pośladkowa kości biodrowej,",207,475,546,495,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,między kresą pośladkową przednią a dolną,205,492,562,513,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,oraz wcięcie kulszowe większe,206,508,482,537,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,przyczep końcowy :,12,558,194,608,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185332.png,część przednia krętarza większego,193,564,474,588,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185342.png,M. naprężacz powięzi szerokiej,7,27,266,57,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185342.png,początek : kolec biodrowy przedni górny,14,73,341,108,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185342.png,koniec: guzek Gerd'ego,5,98,207,145,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,GŁĘBOKIE,17,15,134,55,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,prostowniki stawu biodrowego,150,6,375,26,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,rotacja zewn.,148,23,255,45,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,przywodzenie oprócz m. gruszkowatego,150,40,463,69,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,Mięsień gruszkowaty,6,80,190,118,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,przyczep początkowy:,12,131,180,163,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,1. pow. miednicza kości krzyżowej,195,124,447,159,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,2. więzadło krzyżowo-biodrowe przednie,186,154,497,188,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,3. kolec biodrowy tylny dolny,182,183,428,225,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,przyczep końcowy : brzeg górny krętarza większego,6,233,451,271,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,+ odwodzi,22,304,119,343,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,M. zasłaniacz wewnętrzny,5,474,253,511,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,przyczep początkowy : pow. zewnętrzna błony zasłonowej,14,519,511,555,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185351.png,przyczep końcowy : dół krętarzowy,17,553,313,583,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185403.png,Mięśnie bliżniacze,9,17,213,45,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185403.png,1. M. bliźniaczy górny,11,58,212,97,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185403.png,p.p. -> holec kulszowy,56,97,268,128,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185403.png,2. M. bliźniaczy dolny,7,139,203,173,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185403.png,p.p -> część górna guza kulszowego,47,168,382,200,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185403.png,przyczep końcowy -> dół krętarzowy,55,241,436,291,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185403.png,mięśnie bliźniacze wraz z m. zasłaniaczem wewn. mogą,13,307,536,335,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185403.png,zrastać się w tzw. m. trójgłowy miednicy,11,325,423,357,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185403.png,M. czworoboczny uda,11,464,236,501,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185403.png,p.p. -> guz kulszowy,17,514,245,546,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185403.png,p.k. -> grzebień międzykrętarzowy (guzek czworoboczny),13,540,570,575,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185403.png,DÓŁ,432,82,515,127,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185403.png,KRETARZOWY,416,130,601,170,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,M. zasłaniach zewnętrzny,5,15,258,56,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,p.p -> powierzchnia zewn. błony zasłonowej,24,61,412,92,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,p.k -> dół krętarzowy,21,93,246,132,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,"+ podtrzymuje głowę i szyjkę kosci udowej, zwłaszcza przy",28,132,499,170,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,GŁĘBOKIE -> DÓŁ KRĘTARZOWY,11,225,594,299,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,OPRÓCZ GRUSZKI,240,293,485,332,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,BO MA FAJNE POŚLADKI,197,322,532,365,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,I OPRÓCZ CZWOROBOCZNEGO,208,367,553,402,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,BO NARCYZ (GUZEK,182,401,449,429,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,CZWOROBOCZNY ),374,426,575,457,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,POWIĘZIE,11,495,116,529,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,1) biodrowo - lędźwiowa,8,530,193,558,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,2) powięź posladkowa,7,556,176,586,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,najsilniejsza na pow. zewn. m. posladkowego średniego,156,615,588,655,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,gdzie tworzy,157,655,266,686,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,rozcięgno pośladkowe,270,651,463,678,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,uda,525,149,562,167,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185415.png,externus muscle,367,17,518,45,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185423.png,MIĘŚNIE UDA,120,7,405,67,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185423.png,"Prostowniki -> czworogłowy uda, miesień krawiecki",8,96,478,138,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185423.png,"Zginacze -> dwugłowy, półbłoniasty, półscięgnisty",11,143,492,185,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185423.png,"Przywodziciele -> grzebienowy, smukły,",11,193,368,231,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185423.png,przywodziciel,373,196,485,217,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185423.png,"długi,",487,193,542,222,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185423.png,krótki,375,211,423,234,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,Mięsnie prostowniki uda,7,14,226,51,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,czworoboczny uda,253,7,408,37,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,krawiecki,242,35,340,63,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,jedyny prostownik,216,72,408,98,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,Mięsień czworogłowy,5,91,193,129,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,- jedyny mięsień prostujący staw kolanowy,10,128,391,164,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,1. Mięsień prosty uda rectur femoris muscle,10,178,401,216,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,najsilniejszy zginacz,434,161,593,197,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,głowa prosta m. prostego uda,84,218,321,241,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,kolec biodrowy przedni doln,345,206,599,239,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,głowa zgięta m. prostego,81,260,274,288,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,górny brzeg panewki i torebka stawu biodr,303,264,596,288,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,głowa trzecia m. prostego uda,81,309,335,333,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,od kresy międzykrętarzowej do,357,304,582,326,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,scięgna m. pośladkowego małego,350,321,588,345,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,Przyczep końcowy,33,365,174,401,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,brzeg górny rzepki,203,363,378,397,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,2 Miesień obszerny przyśrodkowy rastus medialis muscle,12,439,502,469,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,p.p -> warga przyśrodkowa kresy chropowatej,34,486,403,513,line19.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,p.k -> kłykieć przyśrodkowy piszczeli,28,531,352,562,line20.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185433.png,przysrodkowej uda,323,506,467,536,line21.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,3. Mięsień obszerny boczny rastus lateralis muscle,7,15,437,51,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,pp -> warga boczna kresy chropowatej + guzowatość posladkowa,26,48,542,79,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,krętarz większy,100,71,213,92,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,kresa międzykrętarzowa,100,85,281,108,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,przegroda międzymięśniowa boczna uda,102,102,417,126,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,p.k -> rzepka,23,141,157,167,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,kłykieć boczny piszczeli,89,162,300,192,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,3. Mięsień obszerny pośredni rastus intermedius muscle,5,230,507,265,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,p.p -> trzon kości udowej,30,269,255,290,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,przegroda międzymięśniowa boczna uda,92,284,437,304,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,p.k -> rzepka,30,312,157,336,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,kłykieć boczny piszczeli,81,331,272,355,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,Mięsień krawiecki sartorius muscle,10,413,383,448,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,przyczep początkowy -> kolec biodrowy przedni górny,17,455,476,494,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,przyczep końcowy -> kłykieć przyśrodkowy piszczeli,12,493,467,523,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,Działanie : zginacz,4,671,185,700,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,kaletka gęsia?,409,548,559,586,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,krawiecki,408,592,491,611,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,prostownik,107,695,203,714,line19.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,smukły,413,606,477,630,line20.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185441.png,półścięgnisty,405,624,516,651,line21.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,Mięsnie zginacze uda,11,17,220,50,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,tylny uda,50,42,157,64,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,m. dwugłowy,260,2,365,29,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,m. półscięgnisty,261,21,383,47,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,m. półbłoniasty,251,40,368,65,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,Mięsień półścięgnisty semitendinosus muscle,7,106,442,143,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,przyczep początkowy -> guz kulszowy,16,156,343,187,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,przyczep końcowy -> kłykieć przyśrodkowy piszczeli,14,185,477,225,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,Mięsień półbłoniasty semimembranosus muscle,9,244,454,275,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,przyczep początkowy -> guz kulszowy,10,295,346,328,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,przyczep końcowy -> kłykieć przyśrodkowy piszczeli,7,327,472,362,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,Mięsień dwugłowy uda biceps femoris muscle,10,391,470,434,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,głowa długa -> guz kulszowy,127,445,391,481,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,głowa krótka -> warga boczna kresy chropowatej +,116,474,562,502,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,przegroda międzymięśniowa boczna uda,260,493,596,521,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,strzałkowej,304,546,402,573,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,przyczep końcowe :,12,555,175,584,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,głowa kosci,184,550,295,578,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,więzadło poboczne strzałkowe,178,570,418,590,line19.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,kłykieć boczny piszczeli,176,583,395,611,line20.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185453.png,"Działanie: zginanie, przywodzenie",13,668,340,704,line21.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,Mięśnie przywodziciele uda,143,0,418,37,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,powierzchowne,12,84,142,109,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,środkowe,200,124,296,143,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,głębokie,402,78,501,122,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,POWIERZCHOWNE,0,181,206,214,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,M. grzebieniowy,9,229,149,268,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,przyczep początkowy,16,272,199,315,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,"kosci łonowej, guzek łonowy,",312,268,572,301,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,gałąź biodrowo-łonowa,250,294,422,321,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,przyczep końcowy -> kresa grzebieniowa,19,329,386,377,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,Mięsień przywodziciel długi,14,404,271,448,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,przyczep początkowy -> między grzebieniem łonowym,12,460,461,489,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,a spojeniem,462,451,575,474,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,łonowym,524,464,599,495,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,przyczep końcowy -> warga przyśrodkowa kresy chropowatej,7,500,554,543,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,Mięsień smukły,15,576,187,618,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,przyczep początkowy -> gałąź dolna kosci łonowej,13,619,477,656,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,przyczep końcowy -> kłykieć przyśrodkowy piszczeli,16,650,503,687,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185501.png,gracilis muscle,203,577,358,619,line19.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,ŚRODKOWE,8,12,151,53,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,M. przywodziciel krótki,7,64,209,99,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,przyczep początkowy -> gałąź dolna kości łonowej,4,110,446,141,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,przyczep końcowy -> warga przyśrodkowa kresy chropowatej,7,139,524,183,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,GŁĘBOKA,10,259,136,299,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,Mięsień przywodziciel wielki adductor magnus,1,321,427,361,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,przyczep początkowy,6,362,193,410,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,"gałąź dolna kości łonowej,",215,362,451,407,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,przyczep końcowy,1,429,172,471,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,część przednia,208,428,339,467,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,guzowatość posladkowa,379,426,589,469,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,włókna tylne,194,460,316,499,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,guzek przywodzicieli,350,460,535,506,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,"pow: przywodziciel długi,",158,550,349,599,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,"smukły,",354,545,420,593,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,grzebieniowy,421,541,522,594,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,środkowa : przywodziciel krótki,167,601,402,639,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185510.png,głęboka: przywodziciel wielki,169,645,393,689,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,MIĘŚNIE GOLENI,94,2,352,52,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,Prostowniki,35,55,141,86,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,m. prostownik długi palucha,191,55,426,81,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,m. prostownik długi palców,189,74,414,98,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,m. piszczelowy przedni,184,93,381,121,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,-> zginacze powierzchowne goleni ->,1,159,344,201,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,brzuchowaty łydki,355,163,493,189,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,podeszwowy,351,200,449,229,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,Zginacze głębokie goleni,24,251,263,293,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,podkolanowy,296,255,413,280,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,zginacz długi palucha,296,274,489,294,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,zginacz długi palców,297,287,481,311,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,piszczelowy tylny,289,308,464,335,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,-> Mięśnie strzałkowe -> strzałkowy długi,2,359,391,386,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,strzałkowy krótki,234,378,379,404,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185518.png,( zgięcie,408,358,470,396,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,PROSTOWNIKI GOLENI,6,11,235,52,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,"(p, p, p)",264,13,361,53,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,M. piszczelowy przedni,6,79,187,112,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,Przyczep początkowy: kłykieć boczny,5,125,272,152,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,powierzchnia boczna kości piszczelowej,172,145,449,167,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,błona międzykostna goleni,171,159,355,182,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,powięź goleni,165,174,271,200,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,Przyczep końcowy:,9,204,150,238,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,kość klinowata przyśrodkowa,153,202,379,225,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,podstawa kości śródstopia,152,220,377,247,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,M. prostownik długi palucha,3,287,282,326,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,Przyczep początkowy:,15,336,188,374,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,powierzchnia,190,343,291,363,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,przyśrodkowa kosci strzałkowej,299,343,549,369,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,błona międzykostna goleni,199,355,415,389,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,Przyczep końcowy : podstawa policzka dalszego palucha,6,387,495,429,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,M. prostownik długi palców,9,466,289,507,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,Przyczep początkowy:,8,516,191,563,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,kłykieć boczny kości piszczelowej,194,519,467,549,line19.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,powięź goleni,194,588,318,610,line20.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185526.png,Przyczep końcowy : rozcięgno prostownicze stopy,8,634,407,685,line21.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,ZGINACZE -> POWIERZCHOWNE,8,10,333,56,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,brzuchaty łydki,369,5,486,31,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,płaszczkowaty,366,24,484,49,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,podeszwowy,356,41,462,73,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,M. brzuchaty łydki,7,70,163,114,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,przyczep początkowy:,11,116,183,144,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,-> głowa przyśrodkowa -> kłykieć przyśrodkowy,18,140,389,172,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,uda,396,129,437,157,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,-> głowa boczna ->,20,174,191,203,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,kłykieć boczny uda,194,166,359,203,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,oraz powierzchnia podkolanowa,395,163,566,182,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,kości udowej,437,175,558,203,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,przysrodkowa m. brzuchatego łydki,199,225,464,252,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,m. brzuchatego łydki,299,243,466,276,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,boczna,209,251,284,277,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,przyczep końcowy -> guz piętowy (kaletka podscięgnowa piętowa),11,308,487,340,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,BRZUCHATY ŁYDKI + PŁASZKOWATY =,203,354,475,384,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,TRÓJGŁOWY,477,342,578,370,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,ŁYDKI,477,364,535,382,line19.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,M. płaszczkowaty,9,368,165,401,line20.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,przyczep początkowy :,10,417,158,447,line21.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,głowa,159,417,200,442,line22.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,trzon kości strzałkowej,213,415,384,440,line23.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,przyczep końcowy : guz piętowy,6,494,248,526,line24.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,brzeg przysrodkowy kości piszczelowej,166,461,398,495,line25.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,M. podeszwowy,13,563,163,602,line26.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,przyczep początkowy:,9,609,196,649,line27.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,kresa nadkłykciowa boczna,197,609,437,634,line28.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,więzadło podkolanowe skosne,199,628,461,655,line29.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185535.png,przyczep końcowy: guz piętowy,16,669,310,708,line30.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,ZGINACZE GOLENI -> GŁĘBOKIE,17,22,301,59,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,podkolanowy,329,6,435,32,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,zginacz długi palców,337,25,486,44,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,zginacz długi palucha,335,40,489,63,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,piszczelowy tylny,326,58,478,83,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,Mięsień podkolanowy,8,84,185,121,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,przyczep początkowy:,10,135,168,166,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,bruzda,176,131,231,153,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,m. podkolanowego,236,128,376,152,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,łąkotka boczna,172,149,298,166,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,więzadło,168,162,246,185,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,przyczep końcowy,10,207,139,246,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,powierzchnia tylna kości piszczelowej,154,205,430,239,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,Mięsień zginacz długi palucha,12,265,278,300,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,M. zginacz długi palców,16,401,243,436,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,długi,254,452,317,492,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,Mięśnie strzałkowe,342,388,517,422,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,krótki,537,449,601,481,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185543.png,M. piszczelowy tylny,12,556,201,588,line19.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,MIĘŚNIE WEWNĘTRZNE STOPY,120,20,382,50,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,MIĘŚNIE GRZBIETU STOPY,22,78,244,107,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,MIĘŚNIE PODESZWY STOPY,306,76,560,105,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,Warstwa pierwsza,280,112,415,133,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,prostownik krótki palucha,32,109,215,135,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,prostownik krótki palców,33,131,206,154,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,odwodziciel palucha,294,129,423,148,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,zginacz krótki palców,290,143,430,166,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,odwodziciel palca małego stopy,286,161,491,184,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,Warstwa druga,276,189,397,209,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,m. czworoboczny podeszwy,278,204,449,230,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,Warstwa trzecia,267,252,384,269,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,m. zginacz krótki palucha,274,267,451,288,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,m. przywodziciel palucha,274,280,440,301,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,m. zginacz palca małego stopy,273,293,489,322,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,Warstwa czwarta,266,322,407,348,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,grzbietowe stopy,266,358,404,387,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185551.png,podeszwowe i,448,340,548,368,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,Mięsień przywodziciel długi,13,13,270,50,line1.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,przyczep początkowy,11,61,188,98,line2.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,między grzebieniem łonowym a,216,58,481,93,line3.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,spojeniem,487,55,569,81,line4.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,łonowym,524,73,593,102,line5.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,przyczep końcowy,3,107,168,142,line6.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,warga przyśrodkowa kresy chropowatej,207,105,547,139,line7.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,Przywodziciel,37,152,141,182,line8.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,M. przywodziciel krótki,25,283,222,314,line9.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,przyczep początkowy,14,326,199,369,line10.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,gałąź dolna kości łonowej,229,322,454,362,line11.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,przyczep końcowy,15,365,178,399,line12.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,warga przyśrodkowa kresy chropowatej,207,356,549,398,line13.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,Mięsień przywodziciel wielki,16,574,271,607,line14.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,przyczep początkowy,23,623,212,660,line15.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,"gałąź dolna kości łonowej,",235,613,472,652,line16.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,przyczep końcowy,25,673,190,715,line17.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,część przednia,222,674,357,712,line18.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,guzowatość posladkowa,396,676,604,715,line19.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,tylne,280,709,329,748,line20.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,guzek przywodzicieli,371,708,555,745,line21.jpg
+MIĘŚNIE/Zrzut ekranu 2026-05-12 185559.png,warga,29,192,73,212,line22.jpg
