@@ -1,5 +1,13 @@
+"""
+Deprecated — local wrapper for EasyOCR.
+
+The easyocr package is not installed by default in the host environment.
+Use the Docker HTTP service instead (autorunner.py).
+"""
+
 from __future__ import annotations
 
+import warnings
 import importlib
 from pathlib import Path
 from typing import Iterable
@@ -8,7 +16,10 @@ from modele.base_wrapper import HTRModelWrapper
 
 
 class EasyOCRWrapper(HTRModelWrapper):
-    """Wrapper dla EasyOCR z obsluga batchingu i lokalnego cache wag."""
+    """Wrapper dla EasyOCR z obsluga batchingu i lokalnego cache wag.
+
+    Deprecated — preferuj tryb HTTP przez Docker (autorunner.py).
+    """
 
     def __init__(
         self,
@@ -17,6 +28,12 @@ class EasyOCRWrapper(HTRModelWrapper):
         batch_size: int = 8,
         model_storage_dir: str = "modele/cache/easyocr",
     ) -> None:
+        warnings.warn(
+            "EasyOCRWrapper (local inference) is deprecated. "
+            "Use the Docker HTTP service instead (autorunner.py + experiments.yaml).",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         resolved_langs = langs or ["pl", "en"]
         model_slug = "_".join(resolved_langs)
         super().__init__(model_name=f"EasyOCR_{model_slug}")

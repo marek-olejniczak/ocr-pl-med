@@ -1,6 +1,16 @@
+"""
+Deprecated — use autorunner.py instead.
+
+This module was the original entry point for running benchmarks.
+The current/preferred approach is the AutoRunner (autorunner.py + experiments.yaml).
+Local inference mode (--inference-mode local) is a legacy feature; most models
+only work via Docker HTTP.
+"""
+
 from __future__ import annotations
 
 import argparse
+import warnings
 from pathlib import Path
 import sys
 
@@ -347,8 +357,8 @@ def parse_args() -> argparse.Namespace:
 		"--inference-mode",
 		type=str,
 		choices=["local", "http"],
-		default="local",
-		help="Tryb inferencji: lokalny wrapper lub zdalny serwis HTTP.",
+		default="http",
+		help="Tryb inferencji: zdalny serwis HTTP (preferowany) lub lokalny wrapper (legacy).",
 	)
 	parser.add_argument(
 		"--http-base-url",
@@ -878,6 +888,15 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
 	args = parse_args()
+
+	if args.inference_mode == "local":
+		warnings.warn(
+			"Local inference mode is deprecated. "
+			"Use --inference-mode http or prefer autorunner.py (python autorunner.py).",
+			DeprecationWarning,
+			stacklevel=2,
+		)
+
 	model = build_model(args)
 	runner = BenchmarkRunner(model=model)
 	runner.run(

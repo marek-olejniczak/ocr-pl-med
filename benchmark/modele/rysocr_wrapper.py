@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from contextlib import nullcontext
 from pathlib import Path
 import re
@@ -11,7 +12,10 @@ from modele.base_wrapper import HTRModelWrapper
 
 
 class RysOCRWrapper(HTRModelWrapper):
-    """Wrapper dla modelu RysOCR (LoRA na PaddleOCR-VL)."""
+    """Wrapper dla modelu RysOCR (LoRA na PaddleOCR-VL).
+
+    Deprecated — preferuj tryb HTTP przez Docker (autorunner.py).
+    """
 
     def __init__(
         self,
@@ -25,6 +29,12 @@ class RysOCRWrapper(HTRModelWrapper):
         use_amp: bool = False,
         cache_dir: str = "modele/cache/rysocr",
     ) -> None:
+        warnings.warn(
+            "RysOCRWrapper (local inference) is deprecated. "
+            "Use Docker HTTP mode instead (autorunner.py + experiments.yaml).",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         super().__init__(model_name="RysOCR")
         self.adapter_model_id = adapter_model_id
         self.base_model_id = base_model_id

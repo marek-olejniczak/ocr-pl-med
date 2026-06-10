@@ -1,5 +1,13 @@
+"""
+Deprecated — local wrapper for PaddleOCR.
+
+Most dependencies (paddlepaddle, paddleocr, paddlex) are not installed by
+default. Use the Docker HTTP service instead (autorunner.py).
+"""
+
 from __future__ import annotations
 
+import warnings
 import importlib
 import os
 from pathlib import Path
@@ -9,7 +17,10 @@ from modele.base_wrapper import HTRModelWrapper
 
 
 class PaddleOCRWrapper(HTRModelWrapper):
-    """Wrapper dla PaddleOCR (tryb recognition-only, bez detekcji dokumentu)."""
+    """Wrapper dla PaddleOCR (tryb recognition-only, bez detekcji dokumentu).
+
+    Deprecated — preferuj tryb HTTP przez Docker (autorunner.py).
+    """
 
     def __init__(
         self,
@@ -20,6 +31,13 @@ class PaddleOCRWrapper(HTRModelWrapper):
         rec_batch_size: int = 8,
         cache_dir: str = "modele/cache/paddlex",
     ) -> None:
+        warnings.warn(
+            "PaddleOCRWrapper (local inference) is deprecated and its "
+            "dependencies (paddlepaddle, paddleocr, paddlex) are not installed "
+            "by default. Use the Docker HTTP service instead (autorunner.py).",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         model_slug = rec_model_name.replace("-", "_")
         super().__init__(model_name=f"PaddleOCR_{model_slug}")
         self.rec_model_name = rec_model_name

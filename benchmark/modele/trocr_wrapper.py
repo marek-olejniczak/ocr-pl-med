@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from contextlib import nullcontext
 from pathlib import Path
 from typing import Iterable
@@ -10,7 +11,10 @@ from modele.base_wrapper import HTRModelWrapper
 
 
 class TrOCRWrapper(HTRModelWrapper):
-	"""Wrapper dla TrOCR handwritten (VisionEncoderDecoder)."""
+	"""Wrapper dla TrOCR handwritten (VisionEncoderDecoder).
+
+	Deprecated — preferuj tryb HTTP przez Docker (autorunner.py).
+	"""
 
 	def __init__(
 		self,
@@ -22,6 +26,12 @@ class TrOCRWrapper(HTRModelWrapper):
 		use_amp: bool = False,
 		cache_dir: str = "modele/cache/trocr",
 	) -> None:
+		warnings.warn(
+			"TrOCRWrapper (local inference) is deprecated. "
+			"Use Docker HTTP mode instead (autorunner.py + experiments.yaml).",
+			DeprecationWarning,
+			stacklevel=2,
+		)
 		model_slug = model_id.split("/")[-1].replace("-", "_")
 		super().__init__(model_name=f"TrOCR_{model_slug}")
 		self.model_id = model_id

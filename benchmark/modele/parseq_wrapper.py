@@ -1,5 +1,13 @@
+"""
+Deprecated — local wrapper for PARSeq/docTR.
+
+The python-doctr package is not installed by default in the host environment.
+Use the Docker HTTP service instead (autorunner.py).
+"""
+
 from __future__ import annotations
 
+import warnings
 import importlib
 import os
 from contextlib import nullcontext
@@ -13,7 +21,10 @@ from modele.base_wrapper import HTRModelWrapper
 
 
 class PARSeqWrapper(HTRModelWrapper):
-    """Wrapper dla PARSeq (docTR) w trybie recognition-only."""
+    """Wrapper dla PARSeq (docTR) w trybie recognition-only.
+
+    Deprecated — preferuj tryb HTTP przez Docker (autorunner.py).
+    """
 
     SUPPORTED_INPUT_SIZES = {
         "32x128": (32, 128),
@@ -31,6 +42,12 @@ class PARSeqWrapper(HTRModelWrapper):
         model_id: str | None = None,
         local_files_only: bool = False,
     ) -> None:
+        warnings.warn(
+            "PARSeqWrapper (local inference) is deprecated. "
+            "Use the Docker HTTP service instead (autorunner.py + experiments.yaml).",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         model_slug = (model_id or "parseq").split("/")[-1].replace("-", "_")
         super().__init__(model_name=f"PARSeq_{model_slug}")
 

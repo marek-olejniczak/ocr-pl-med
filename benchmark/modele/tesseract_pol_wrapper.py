@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 
 import pytesseract
@@ -9,7 +10,10 @@ from modele.base_wrapper import HTRModelWrapper
 
 
 class TesseractPolWrapper(HTRModelWrapper):
-    """Wrapper dla Tesseract OCR z jezykiem polskim."""
+    """Wrapper dla Tesseract OCR z jezykiem polskim.
+
+    Deprecated — preferuj tryb HTTP przez Docker (autorunner.py).
+    """
 
     def __init__(
         self,
@@ -18,6 +22,12 @@ class TesseractPolWrapper(HTRModelWrapper):
         oem: int = 1,
         tesseract_cmd: str | None = None,
     ) -> None:
+        warnings.warn(
+            "TesseractPolWrapper (local inference) is deprecated. "
+            "Use Docker HTTP mode instead (autorunner.py + experiments.yaml).",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         super().__init__(model_name="Tesseract_POL")
         self.language = language
         self.psm = psm

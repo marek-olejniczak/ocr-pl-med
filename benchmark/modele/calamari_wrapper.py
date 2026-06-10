@@ -1,5 +1,13 @@
+"""
+Deprecated — local wrapper for Calamari OCR.
+
+Calamari 2.x requires TensorFlow on Python <= 3.11. This environment
+(Python 3.12+) does not support it. Use the Docker HTTP service instead.
+"""
+
 from __future__ import annotations
 
+import warnings
 import importlib
 import importlib.metadata
 import os
@@ -15,7 +23,10 @@ from modele.base_wrapper import HTRModelWrapper
 
 
 class CalamariWrapper(HTRModelWrapper):
-    """Wrapper dla Calamari OCR (line recognition)."""
+    """Wrapper dla Calamari OCR (line recognition).
+
+    Deprecated — preferuj tryb HTTP przez Docker (autorunner.py).
+    """
 
     MODEL_RELEASE_BASE_URL = "https://github.com/Calamari-OCR/calamari_models/releases/download/2.1"
 
@@ -28,6 +39,13 @@ class CalamariWrapper(HTRModelWrapper):
         checkpoints: str | None = None,
         device: str = "auto",
     ) -> None:
+        warnings.warn(
+            "CalamariWrapper (local inference) is deprecated. "
+            "It requires TensorFlow on Python <= 3.11, which is unsupported "
+            "in this environment. Use the Docker HTTP service instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         model_slug = model.replace("-", "_")
         super().__init__(model_name=f"Calamari_{model_slug}")
 

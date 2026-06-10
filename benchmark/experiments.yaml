@@ -7,7 +7,7 @@ experiment:
 
 settings:
   output_dir: "wyniki"
-  export_overleaf_table: true
+  export_overleaf_table: false
   auto_start_services: true
   stop_service_after_run: true
   sequential: true
@@ -22,7 +22,7 @@ datasets:
     enabled: true
     labels_csv: "dane/htr_lexicography-main/data/PL-20k-hand-labelled.csv"
     images_dir: "dane/htr_lexicography-main/data/PL-20k-hand-labelled"
-    limit: 50
+    limit: 3
     single_words: true
   
   - id: "testset_800"
@@ -39,8 +39,15 @@ datasets:
     limit: null
     single_words: false
 
+  - id: "testset_800_preprocessed_soft"
+    enabled: false
+    labels_csv: "dane/testset/labels.csv"
+    images_dir: "dane/testset/images_processed_lines"
+    limit: null
+    single_words: false
+
   - id: "prescriptions"
-    enabled: true
+    enabled: false
     labels_csv: "dane/RxHandBD-Raw/Prescription_Labels.csv"
     images_dir: "dane/RxHandBD-Raw/Images"
     limit: 32
@@ -62,7 +69,7 @@ models:
   - id: "easyocr"
     service_name: "easyocr"
     base_url: "http://localhost:8001"
-    enabled: false
+    enabled: true
     timeout: 120
     options:
       langs: ["pl", "en"]
@@ -72,7 +79,7 @@ models:
   - id: "rysocr"
     service_name: "rysocr"
     base_url: "http://localhost:8006"
-    enabled: false
+    enabled: true
     timeout: 36000
     options:
       adapter_model_id: "kacperwikiel/RysOCR"
@@ -102,7 +109,7 @@ models:
   - id: "paddleocr"
     service_name: "paddleocr"
     base_url: "http://localhost:8003"
-    enabled: false
+    enabled: true
     timeout: 240
     options:
       rec_model_name: "PP-OCRv4_mobile_rec"
@@ -115,7 +122,7 @@ models:
   - id: "parseq"
     service_name: "parseq"
     base_url: "http://localhost:8004"
-    enabled: false
+    enabled: true
     timeout: 240
     options:
       device: "cuda"
@@ -130,7 +137,7 @@ models:
   - id: "calamari"
     service_name: "calamari"
     base_url: "http://localhost:8005"
-    enabled: false
+    enabled: true
     timeout: 240
     options:
       model: "idiotikon"
@@ -155,7 +162,7 @@ models:
   - id: "got_ocr"
     service_name: "got-ocr"
     base_url: "http://localhost:8009"
-    enabled: false
+    enabled: true
     timeout: 900
     options:
       model_id: "ucaslcl/GOT-OCR2_0"
