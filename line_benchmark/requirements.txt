@@ -1,0 +1,4 @@
+numpy
+pycocotools
+opencv-python
+noteshrink

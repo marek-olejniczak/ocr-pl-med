@@ -1,0 +1,3 @@
+# kraken's segmentation API shifted across majors; pin and VERIFY the
+# blla.segment call + ketos segtrain flags against this version at build time.
+kraken~=5.2

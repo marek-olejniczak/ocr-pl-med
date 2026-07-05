@@ -1,0 +1,60 @@
+defaults:
+  epochs: 60         # pilot yolov8n: f1 plateaus ~ep20, iou_median ~ep48; 60 + patience captures it
+  imgsz: 640
+  batch: 64
+  conf_thresh: 0.25
+  # default LR from yolov8n lr-find (usable band 3e-4..1e-3; ultralytics 0.002
+  # default already sits on the rising/unstable side). Per-model override below.
+  lr0: 0.0005
+  train_flags: [--line-val, --diagnostics]
+
+data:
+  raw:
+    yolo: dataset/yolo_raw/data.yaml
+    images_root: ../../dataset
+    pagexml: dataset/pagexml_raw      # kraken: generate via to_pagexml before training
+  prep:
+    yolo: dataset/yolo_prep/data.yaml
+    images_root: dataset/prep
+    pagexml: dataset/pagexml_prep
+
+# annotations are shared by raw and prep (preprocessing preserves geometry), so
+# train/val coco are global; only images_root differs per variant
+test_coco: dataset/annotations/instances_test.json
+train_coco: dataset/annotations/instances_train.json
+val_coco: dataset/annotations/instances_val.json
+
+models:
+  # lr0: set per-model after lr-find (yolov8n confirmed ~5e-4 = default;
+  # yolo11n + rtdetr-l TODO, fall back to defaults.lr0 for now)
+  yolov8:  {service: ultralytics, weights: yolov8n.pt,  finetune: true, zeroshot: false, lr0: 0.0005}
+  yolo11:  {service: ultralytics, weights: yolo11n.pt,  finetune: true, zeroshot: false}
+  rtdetr:  {service: ultralytics, weights: rtdetr-l.pt, finetune: true, zeroshot: false}
+  # Faster R-CNN R50-FPN (detection, COCO-native -> data_format: coco). Diagnostics/
+  # line-val are ultralytics-only, so train_flags empty; lr0 after lr-find.
+  frcnn:
+    service: detectron2
+    weights: COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml
+    finetune: true
+    zeroshot: false
+    data_format: coco
+    train_flags: []
+  # Surya: native line detection, predict-only (finetuning unavailable) ->
+  # zeroshot=true, finetune=false. Generates only predict+eval (raw and prep).
+  surya:
+    service: surya
+    weights: surya
+    finetune: false
+    zeroshot: true
+  # Kraken BLLA: HTR line segmentation. Zero-shot (blla model) + finetuning
+  # (ketos segtrain on PAGE XML from to_pagexml). data_format: pagexml; diagnostics
+  # ultralytics-only -> train_flags empty. NOTE: generate PAGE XML before training:
+  # python data_prep/converters/to_pagexml.py --coco ... --out-dir dataset/pagexml_raw
+  kraken:
+    service: kraken
+    weights: blla
+    finetune: true
+    zeroshot: true
+    data_format: pagexml
+    train_flags: []
+  # dbnet (docTR) - last from the design, optional

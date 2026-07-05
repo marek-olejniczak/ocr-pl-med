@@ -1,0 +1,26 @@
+# Constrained-VRAM variant (~4.7GB next to the company Qwen) for overnight
+# training via the orchestrator. Light ultralytics models only, raw only,
+# batch 16, --wandb in train_flags (check in the morning). Full matrix
+# (batch 64, detectron2/kraken/surya, prep, predict+eval) -> experiments.yaml
+# on a full GPU.
+defaults:
+  epochs: 60
+  imgsz: 640
+  batch: 16          # ~2.3GB for nano yolo; fits next to Qwen
+  conf_thresh: 0.25
+  lr0: 0.0005
+  train_flags: [--line-val, --diagnostics, --wandb]
+
+data:
+  raw:
+    yolo: dataset/yolo_raw/data.yaml
+    images_root: ../../dataset
+
+test_coco: dataset/annotations/instances_test.json
+train_coco: dataset/annotations/instances_train.json
+val_coco: dataset/annotations/instances_val.json
+
+models:
+  yolov8: {service: ultralytics, weights: yolov8n.pt, finetune: true, zeroshot: false, lr0: 0.0005}
+  yolo11: {service: ultralytics, weights: yolo11n.pt, finetune: true, zeroshot: false}
+  rtdetr: {service: ultralytics, weights: rtdetr-l.pt, finetune: true, zeroshot: false}

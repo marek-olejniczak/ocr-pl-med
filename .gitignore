@@ -1,4 +1,5 @@
 notes/vault/.obsidian
+.DS_Store
 
 # Virtual environments
 venv/
@@ -20,3 +21,12 @@ __pycache__/
 # Tool caches
 .pytest_cache/
 .mypy_cache/
+
+# Line segmentation benchmark artifacts
+line_benchmark/dataset/
+line_benchmark/results/
+line_benchmark/*.pt
+yolo_dataset/
+inference_compare/
+runs/
+wandb/

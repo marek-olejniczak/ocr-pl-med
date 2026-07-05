@@ -1,0 +1,4 @@
+# detectron2 has no PyPI wheel; it is installed from source in the Dockerfile
+# against the image's torch/CUDA. Pins to verify on the server (nvcc/torch).
+opencv-python-headless
+pycocotools
