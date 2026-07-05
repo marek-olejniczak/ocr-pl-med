@@ -9,7 +9,7 @@ Creates:
     out/labels/{split}/   one txt per image: "0 cx cy w h" (normalized)
     out/data.yaml
 
-Usage (from benchmark/):
+Usage (from line_benchmark/):
     python data_prep/converters/to_yolo.py --annotations-dir dataset/annotations \
         --images-root ../../dataset --out-dir dataset/yolo_raw
 """

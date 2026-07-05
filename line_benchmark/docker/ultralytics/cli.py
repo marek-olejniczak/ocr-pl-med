@@ -52,7 +52,7 @@ def _wandb_artifact_logger(path, name):
 
 def cmd_train(args):
     import sys
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # benchmark/
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
 
     # single source of truth for the training hyperparameters: the same dict
     # feeds model.train() and the wandb config, so the config can never drift
@@ -139,7 +139,7 @@ def cmd_train(args):
 def cmd_predict(args):
     import sys
 
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # benchmark/
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
     from common.resources import reset_gpu_peak, resource_meta
 
     reset_gpu_peak()
@@ -182,7 +182,7 @@ def cmd_predict(args):
 
 def cmd_lr_find(args):
     import sys
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # benchmark/
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
     from training_diagnostics.lr_finder import pick_lr_finder
 
     cls = pick_lr_finder(args.weights)

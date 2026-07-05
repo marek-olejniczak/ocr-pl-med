@@ -5,7 +5,7 @@ binarization). Geometry is untouched, so the same COCO annotations stay
 valid for both raw and prep variants. Output mirrors the input tree
 relative to --images-root.
 
-Usage (from benchmark/):
+Usage (from line_benchmark/):
     python data_prep/preprocess_dataset.py \
         --images-root ../../dataset --out-dir dataset/prep --workers 8
 """

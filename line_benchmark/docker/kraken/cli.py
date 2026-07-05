@@ -67,7 +67,7 @@ def cmd_predict(args):
     import importlib.resources as ir
     import sys
 
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # benchmark/
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
     from common.resources import reset_gpu_peak, resource_meta
     from PIL import Image
     from kraken import blla

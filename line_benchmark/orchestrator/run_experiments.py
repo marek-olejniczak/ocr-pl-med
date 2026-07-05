@@ -8,7 +8,7 @@ Each stage is idempotent - a job whose artifact already exists is skipped
 (--force re-runs). Failures are logged to results/run_log.csv and the runner
 moves on to the next job.
 
-Usage (from benchmark/):
+Usage (from line_benchmark/):
     python orchestrator/run_experiments.py --dry-run
     python orchestrator/run_experiments.py --only yolov8 --stage train
     python orchestrator/run_experiments.py --local        # no docker
@@ -191,7 +191,7 @@ def main(argv=None):
             print(f"would {job['kind']:8s} {job['exp_id']}: {' '.join(cmd)}")
             continue
         print(f"run   {job['kind']:8s} {job['exp_id']}")
-        # cwd pinned to benchmark/ so relative script paths resolve no matter
+        # cwd pinned to line_benchmark/ so relative script paths resolve no matter
         # where the runner itself was invoked from
         result = subprocess.run(cmd, cwd=BENCH_ROOT)
         if result.returncode == 0:

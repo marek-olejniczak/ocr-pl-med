@@ -23,7 +23,7 @@ honors the contract, and one entry in the config.
 ## Directory layout
 
 ```
-benchmark/
+line_benchmark/
   data_prep/             data preparation
     build_dataset.py     split into train / val / test
     preprocess_dataset.py  photometric image variant
@@ -73,7 +73,7 @@ metrics.
 
 ## How to run
 
-Run all commands from the `benchmark/` directory.
+Run all commands from the `line_benchmark/` directory.
 
 1. Split the data into train / val / test:
 

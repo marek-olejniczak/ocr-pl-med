@@ -6,7 +6,7 @@ the box height (text baselines sit below the glyphs) and use the bbox rectangle
 as the boundary. This is an approximation - document it as a limitation in the
 thesis.
 
-Usage (from benchmark/):
+Usage (from line_benchmark/):
     python data_prep/converters/to_pagexml.py --coco instances_train.json \
         --out-dir dataset/pagexml/train
 """

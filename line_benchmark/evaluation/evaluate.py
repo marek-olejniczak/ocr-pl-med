@@ -1,6 +1,6 @@
 """Evaluate predictions (COCO results format) against COCO GT.
 
-Usage (from benchmark/):
+Usage (from line_benchmark/):
     python evaluation/evaluate.py --gt instances_test.json \
         --pred results/predictions/<exp_id>/predictions.json \
         --exp-id <exp_id> --out-dir results/

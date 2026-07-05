@@ -5,9 +5,9 @@ yolo_dataset/
 inference_compare/
 runs/
 wandb/
-benchmark/dataset/
-benchmark/results/
-benchmark/*.pt
-benchmark/.venv/
-benchmark/.env
+line_benchmark/dataset/
+line_benchmark/results/
+line_benchmark/*.pt
+line_benchmark/.venv/
+line_benchmark/.env
 .env
