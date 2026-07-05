@@ -1,0 +1,5 @@
+gradio>=4.0
+ultralytics>=8.4,<8.5
+requests
+pillow
+pymupdf

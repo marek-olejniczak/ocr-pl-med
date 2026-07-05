@@ -51,9 +51,19 @@ class DocumentPreprocessor:
 
     def preprocess(self, image_path: str) -> np.ndarray:
         img_bgr = self._load_bgr(image_path)
+        return self.photometric(self.geometric(img_bgr))
+
+    def geometric(self, img_bgr: np.ndarray) -> np.ndarray:
+        """Geometry-changing stage: upscaling and deskew. Coordinates measured
+        on the output do NOT map back to the input."""
         img_bgr = self._rescale(img_bgr)
         if self.config["deskew"]:
             img_bgr = self._deskew(img_bgr)
+        return img_bgr
+
+    def photometric(self, img_bgr: np.ndarray) -> np.ndarray:
+        """Pixel-value stage: illumination, grid removal, ink separation,
+        binarization. Geometry is untouched unless border_px is set."""
         img_bgr = self._normalize_illumination(img_bgr)
         if self.config["denoise_ksize"]:
             img_bgr = self._remove_noise(img_bgr)
