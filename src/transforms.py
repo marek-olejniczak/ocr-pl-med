@@ -94,6 +94,8 @@ class WordStyle:
         scale_jitter: float,
         do_thicken: bool,
         thicken_kernel: int = 3,
+        x_stretch: float = 1.0,
+        tracking_ratio: float = 0.0,
     ) -> None:
         self.base_rotation = base_rotation
         self.base_scale = base_scale
@@ -101,6 +103,11 @@ class WordStyle:
         self.scale_jitter = scale_jitter
         self.do_thicken = do_thicken
         self.thicken_kernel = thicken_kernel
+        # Google handwriting fonts are very condensed; real pen writing is
+        # noticeably looser. x_stretch widens the glyphs themselves,
+        # tracking_ratio adds inter-letter spacing as a fraction of font size.
+        self.x_stretch = x_stretch
+        self.tracking_ratio = tracking_ratio
 
     @classmethod
     def random(cls, cfg: CharTransformConfig) -> "WordStyle":
@@ -118,7 +125,12 @@ class WordStyle:
         rotation_jitter = cfg.rotation_max_deg * 0.3
         scale_jitter = (cfg.scale_max - cfg.scale_min) * 0.15
         do_thicken = cfg.stroke_variation and random.random() < 0.3
-        return cls(base_rotation, base_scale, rotation_jitter, scale_jitter, do_thicken)
+        x_stretch = random.uniform(1.05, 1.25)
+        tracking_ratio = random.uniform(0.06, 0.20)
+        return cls(
+            base_rotation, base_scale, rotation_jitter, scale_jitter,
+            do_thicken, 3, x_stretch, tracking_ratio,
+        )
 
     def char_rotation(self) -> float:
         """Get a rotation angle for one character (base + small jitter)."""
@@ -486,6 +498,53 @@ def jpeg_artifacts(img: Image.Image, quality_min: int, quality_max: int) -> Imag
     img.save(buffer, format="JPEG", quality=quality)
     buffer.seek(0)
     return Image.open(buffer).convert("RGB")
+
+
+def to_grayscale(img: Image.Image) -> Image.Image:
+    """Convert to grayscale but keep RGB mode (network scanners default to mono)."""
+    return img.convert("L").convert("RGB")
+
+
+def photocopy_contrast(img: Image.Image, low: int = 100, high: int = 190) -> Image.Image:
+    """Photocopier tone response: shadows crush to black, highlights burn to white.
+
+    Grayscale values <= low become 0, >= high become 255, in-between values
+    ramp linearly. Repeatedly-copied documents look exactly like this — thin
+    pen strokes partially drop out, paper texture disappears.
+    """
+    gray = img.convert("L")
+    span = max(1, high - low)
+    lut = [
+        0 if v <= low else 255 if v >= high else int((v - low) * 255 / span)
+        for v in range(256)
+    ]
+    return gray.point(lut).convert("RGB")
+
+
+def salt_pepper_noise(img: Image.Image, amount: float = 0.005) -> Image.Image:
+    """Sparse black/white pixel dropout typical for photocopies (not smooth Gaussian)."""
+    arr = np.array(img.convert("RGB"))
+    h, w = arr.shape[:2]
+    n = int(h * w * amount)
+    if n == 0:
+        return img
+    ys = np.random.randint(0, h, n)
+    xs = np.random.randint(0, w, n)
+    half = n // 2
+    arr[ys[:half], xs[:half]] = 0
+    arr[ys[half:], xs[half:]] = 255
+    return Image.fromarray(arr)
+
+
+def toner_streak(img: Image.Image) -> Image.Image:
+    """One narrow vertical band of lightened/darkened toner (dirty copier drum)."""
+    arr = np.array(img.convert("RGB"), dtype=np.float32)
+    h, w = arr.shape[:2]
+    band_w = max(2, int(w * random.uniform(0.004, 0.015)))
+    x0 = random.randint(0, max(0, w - band_w))
+    delta = random.uniform(-40.0, 25.0)  # usually a darker streak
+    arr[:, x0:x0 + band_w] = np.clip(arr[:, x0:x0 + band_w] + delta, 0, 255)
+    return Image.fromarray(arr.astype(np.uint8))
 
 
 # ---------------------------------------------------------------------------
