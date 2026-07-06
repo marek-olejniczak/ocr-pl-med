@@ -24,6 +24,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+import numpy as np
 from PIL import Image
 
 from vocabulary import Vocabulary
@@ -131,6 +132,7 @@ def main() -> None:
     args = parse_args()
     if args.seed is not None:
         random.seed(args.seed)
+        np.random.seed(args.seed)
 
     templates_dir = Path(args.templates_dir)
     if not templates_dir.is_dir():

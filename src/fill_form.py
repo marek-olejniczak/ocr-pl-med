@@ -96,12 +96,12 @@ def plan_line_slots(bbox_h: int, font_px: int) -> list[int]:
     pitch = int(font_px * random.uniform(*LINE_PITCH_RANGE))
     if pitch <= 0:
         return []
-    usable = bbox_h - int(font_px * 0.4)  # bottom margin for descenders
+    top = int(bbox_h * 0.06)  # people start writing near the top
+    usable = bbox_h - top - int(font_px * 0.4)  # bottom margin for descenders
     max_lines = usable // pitch
     if max_lines < 2:
         return []
     n = random.randint(1, min(MULTILINE_MAX_LINES, max_lines))
-    top = int(bbox_h * 0.06)  # people start writing near the top
     return [top + i * pitch for i in range(n)]
 
 
@@ -293,7 +293,7 @@ def _make_ink_mask(text_img: Image.Image, white_threshold: int = 245) -> Image.I
     # This avoids artificially thickening strokes by forcing edge greys to solid.
     alpha = np.clip((240 - gray) * (255 / 90), 0, 255).astype(np.uint8)
     alpha[gray >= white_threshold] = 0
-    return Image.fromarray(alpha, mode="L")
+    return Image.fromarray(alpha)
 
 
 def paste_text_on_form(
