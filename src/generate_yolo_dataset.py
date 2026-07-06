@@ -41,12 +41,7 @@ from PIL import Image
 # Reuse helpers from fill_form.py and friends
 from vocabulary import Vocabulary
 from renderer import find_fonts
-from fill_form import (
-    EMPTY_FIELD_PROB,
-    EXCLUDED_FONTS,
-    fill_single_form,
-    load_annotations,
-)
+from fill_form import EXCLUDED_FONTS, fill_single_form
 from transforms import AugmentConfig, TransformPipeline
 
 

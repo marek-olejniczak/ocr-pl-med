@@ -1,32 +1,16 @@
-"""Fill a form image with synthetic handwritten text.
+"""Form-filling core: renders synthetic handwriting into labeled template
+fields. Used by generate_yolo_dataset.py; see
+docs/superpowers/specs/2026-07-06-medical-dataset-v2-design.md."""
 
-Reads a CSV with bounding-box annotations (from labeling_tool.py),
-generates appropriate text for each labeled region using vocabulary.py,
-renders it as handwritten text with augmentations, and pastes it into
-the form at the specified position.
-
-Special labels:
-    pesel_grid — one digit per cell, splits the bbox into 11 equal cells
-
-Usage:
-    python fill_form.py --form forms/skierowanie.png \\
-                        --annotations dataset/annotations.csv \\
-                        --output filled_form.jpg
-"""
-
-import argparse
-import csv
-import json
 import random
-import sys
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
 from PIL import Image, ImageFont
 
+from field_content import generate_field_content
 from vocabulary import Vocabulary
-from renderer import find_fonts
 from char_renderer import render_text_per_char
 from transforms import (
     AugmentConfig,
@@ -42,62 +26,6 @@ from transforms import (
     toner_streak,
 )
 
-
-# Maps labels in the CSV to vocabulary categories.
-#
-# New generic workflow uses just two labels — `text` (any letters) and `number`
-# (any digits) — because the YOLO line-detection model only learns WHERE text
-# is, not which specific field it represents. The old field-specific labels
-# (`patient_name`, `pesel`, ...) are kept for backward compatibility with
-# previously labeled forms.
-LABEL_TO_CATEGORY = {
-    # Generic (new workflow — preferred)
-    "printed": "printed",  # special: don't render anything, just keep the bbox as ground truth
-    "text": "text",
-    "number": "number",
-    # Backward-compat: specific field types from older labeling sessions
-    "patient_name": "patient_name",
-    "name": "patient_name",
-    "name_and_surname": "patient_name",
-    "full_signature": "patient_name",
-    "pesel": "pesel",
-    "pesel_grid": "pesel",
-    "date": "date",
-    "full_date": "date",
-    "date_of_birth": "date",
-    "day_and_month": "day_and_month",
-    "last_2_digits_year": "last_2_digits_year",
-    "year": "year",
-    "rok": "year",
-    "icd_code": "icd_code",
-    "icd": "icd_code",
-    "icd_10": "icd_code",
-    "icd10": "icd_code",
-    "diagnosis": "icd_description",
-    "rozpoznanie": "icd_description",
-    "address": "address",
-    "adres": "address",
-    "city": "city",
-    "miasto": "city",
-    "phone": "phone",
-    "phone_num": "phone",
-    "telefon": "phone",
-    "doctor_name": "doctor_name",
-    "doctor": "doctor_name",
-    "lekarz": "doctor_name",
-    "hospital_name": "hospital_name",
-    "hospital": "hospital_name",
-    "szpital": "hospital_name",
-    "department": "department",
-    "oddzial": "department",
-    "age": "age",
-    "lat": "age",
-    "approval": "approval",
-}
-
-
-# Aspect ratio threshold for auto-detecting PESEL grid (very wide bbox)
-PESEL_GRID_ASPECT_RATIO = 6.0
 
 # Fonts excluded from form filling (user-curated list, 2026-05):
 #   - bold/medium weights: too thick, look like a marker
@@ -127,60 +55,6 @@ EXCLUDED_FONTS = {
 FONTS_NEEDING_THICKENING: set[str] = set()
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Fill a form image with synthetic text.")
-    parser.add_argument("--form", type=str, required=True, help="Path to form image (PNG/JPG)")
-    parser.add_argument("--annotations", type=str, required=True, help="Path to annotations CSV")
-    parser.add_argument("--output", type=str, default="filled_form.jpg", help="Output image path")
-    parser.add_argument("--font-dir", type=str, default="resources/fonts", help="Font directory")
-    parser.add_argument("--resource-dir", type=str, default="resources", help="Resource directory")
-    parser.add_argument("--no-augment", action="store_true", help="Disable text-level augmentations")
-    parser.add_argument(
-        "--no-scan",
-        action="store_true",
-        help="Disable scan/photo simulation on the final filled form (clean output).",
-    )
-    parser.add_argument(
-        "--num-variants",
-        type=int,
-        default=1,
-        help="Generate N variants per form (different text, font, scan conditions). "
-             "Use this to build OCR training datasets (default: 1).",
-    )
-    parser.add_argument("--seed", type=int, default=None, help="Random seed for reproducibility")
-    parser.add_argument(
-        "--all-fonts",
-        action="store_true",
-        help="Cycle through every available font (skips uppercase-only and bold). "
-             "Combined with --num-variants gives N variants per font.",
-    )
-    return parser.parse_args()
-
-
-def load_annotations(csv_path: Path, form_filename: str) -> list[dict]:
-    """Load annotations for a specific form image from the CSV.
-
-    Args:
-        csv_path: Path to the annotations CSV.
-        form_filename: Original filename of the form image (e.g. "skierowanie.png").
-
-    Returns:
-        List of annotation dicts with keys: label, x_min, y_min, x_max, y_max.
-    """
-    annotations = []
-    with open(csv_path, "r", encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            if row["filename"] == form_filename:
-                annotations.append({
-                    "label": row["label"].strip().lower(),
-                    "x_min": int(row["x_min"]),
-                    "y_min": int(row["y_min"]),
-                    "x_max": int(row["x_max"]),
-                    "y_max": int(row["y_max"]),
-                })
-    return annotations
-
-
 # Minimum readable font size (px). Below this handwriting fonts become an
 # unreadable smudge — and a real hand wouldn't squeeze 11 digits into a
 # 2-character-wide box anyway.
@@ -195,9 +69,6 @@ FORM_FONT_SIZE_RANGE = (26, 40)
 MAX_CONTENT_TRIES = 10
 
 # --- Dataset-realism knobs (used by fill_single_form) ---
-# Probability that a fill-in field is left empty (real forms are never 100% filled;
-# the model must learn that an empty dotted line is NOT a text line)
-EMPTY_FIELD_PROB = 0.15
 # Probability that a field's text fades out at the end (pen running dry)
 PEN_FADE_PROB = 0.15
 # Vertical overflow: max fraction of bbox height the text may shift up/down,
@@ -207,94 +78,31 @@ V_OVERFLOW_FRAC = 0.18
 INK_BLACK = (20, 20, 28)
 INK_BLUE = (28, 42, 120)
 
-# Letter pools for pseudo-Polish filler words (frequency-weighted-ish)
-_FILLER_CONSONANTS = "bcdghjklmnprstwzzkmnrsw"
-_FILLER_CONS_RARE = "łżźćśńf"
-_FILLER_VOWELS = "aaeeiouy"
-_FILLER_VOWELS_RARE = "ąęó"
+# Digit grids: number field much wider than tall -> check for printed cells
+GRID_ASPECT_RATIO = 6.0
+
+# Multi-line filling of tall description fields
+MULTILINE_MAX_LINES = 3
+LINE_PITCH_RANGE = (1.2, 1.6)  # line spacing as multiple of handwriting size
 
 
-def _random_filler_word() -> str:
-    """Generate one pseudo-Polish word (letter shapes matter, meaning doesn't)."""
-    n_syllables = random.randint(1, 4)
-    word = ""
-    for _ in range(n_syllables):
-        c = random.choice(_FILLER_CONS_RARE) if random.random() < 0.12 else random.choice(_FILLER_CONSONANTS)
-        v = random.choice(_FILLER_VOWELS_RARE) if random.random() < 0.15 else random.choice(_FILLER_VOWELS)
-        word += c + v
-        if random.random() < 0.25:
-            word += random.choice(_FILLER_CONSONANTS)
-    if random.random() < 0.35:
-        word = word.capitalize()
-    return word
+def plan_line_slots(bbox_h: int, font_px: int) -> list[int]:
+    """Plan y-offsets (from the field top) for writing 1-3 lines in a tall box.
 
-
-def _random_filler_number_group() -> str:
-    """Generate one digit group like '472', '08', '1024'."""
-    return "".join(random.choice("0123456789") for _ in range(random.randint(1, 4)))
-
-
-def generate_filler_text(
-    font_path: str,
-    font_size: int,
-    bbox_w: int,
-    kind: str,
-    x_stretch: float = 1.0,
-    tracking_px: float = 0.0,
-) -> str:
-    """Build random filler content that fills 30-100% of the bbox width.
-
-    For YOLO line detection the content is irrelevant — what matters is that
-    the written line spans most of the field (like real handwriting does),
-    so the model sees realistically long text lines instead of short words
-    floating in mostly-empty fields.
-
-    Args:
-        font_path: Font used for rendering (needed to measure text width).
-        font_size: Font size the field will be rendered at.
-        bbox_w: Field width in pixels.
-        kind: "number" for digit groups, anything else for pseudo-words.
-        x_stretch: Glyph widening factor the renderer will apply — the
-            measured width is scaled by it so the final render still fits.
-        tracking_px: Extra per-letter spacing the renderer will add.
-
-    Returns:
-        Filler string whose rendered width is <= bbox_w and >= ~30% of it
-        (single unit may be shorter if the box fits only one short unit).
+    A field qualifies for multi-line filling when at least two line pitches
+    fit into its height. Returns [] for non-qualifying (single-line) fields —
+    the caller then uses the regular single-line placement.
     """
-    try:
-        font = ImageFont.truetype(font_path, font_size)
-    except (OSError, IOError):
-        font = ImageFont.load_default()
-
-    def rendered_width(t: str) -> float:
-        """Estimate final on-form width incl. glyph stretch and tracking."""
-        return font.getlength(t) * x_stretch + tracking_px * len(t)
-
-    target = bbox_w * random.uniform(0.30, 1.00)
-    # Hard cap so augmentation jitter doesn't push us past the field edge
-    hard_cap = bbox_w * 0.97
-
-    make_unit = _random_filler_number_group if kind == "number" else _random_filler_word
-    separators = [" ", ".", "-", "/", " "] if kind == "number" else [" "]
-
-    text = make_unit()
-    # Even the first unit may overflow a tiny box — trim it down
-    while text and rendered_width(text) > hard_cap:
-        text = text[:-1]
-    if not text:
-        return ""
-
-    while True:
-        sep = random.choice(separators)
-        candidate = text + sep + make_unit()
-        w = rendered_width(candidate)
-        if w > hard_cap:
-            break
-        text = candidate
-        if w >= target:
-            break
-    return text
+    pitch = int(font_px * random.uniform(*LINE_PITCH_RANGE))
+    if pitch <= 0:
+        return []
+    usable = bbox_h - int(font_px * 0.4)  # bottom margin for descenders
+    max_lines = usable // pitch
+    if max_lines < 2:
+        return []
+    n = random.randint(1, min(MULTILINE_MAX_LINES, max_lines))
+    top = int(bbox_h * 0.06)  # people start writing near the top
+    return [top + i * pitch for i in range(n)]
 
 
 def apply_pen_fade(text_img: Image.Image) -> Image.Image:
@@ -330,164 +138,6 @@ def apply_pen_fade(text_img: Image.Image) -> Image.Image:
 
     return Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
 
-# Typical maximum character length per subcategory.  Used to pre-filter which
-# subcategories the meta-categories `text` / `number` can draw from when the
-# annotated bbox is too narrow to fit longer content at MIN_FONT_SIZE.
-_NUMBER_SUBCAT_MAX_LEN = {
-    "age": 2,
-    "year": 4,
-    "last_2_digits_year": 2,
-    "day_and_month": 5,
-    "icd_code": 6,
-    "date": 10,
-    "phone": 14,
-    "pesel": 11,
-}
-
-_TEXT_SUBCAT_MAX_LEN = {
-    "city": 25,
-    "patient_name": 35,
-    "diagnosis": 70,
-    "icd_description": 90,
-    "address": 70,
-    "hospital_name": 70,
-    "doctor_name": 35,
-    "department": 50,
-    "approval": 60,
-    "drug": 30,
-}
-
-
-def estimate_char_capacity(font_path: str, bbox_w: int) -> int:
-    """Approximate how many average-width characters fit in `bbox_w` at MIN_FONT_SIZE.
-
-    Uses a representative mix of letters to estimate average glyph width;
-    keeps a safety margin so per-char rotation, scale jitter and inter-character
-    spacing don't push the rendered text past the bbox edge.
-    """
-    try:
-        font = ImageFont.truetype(font_path, MIN_FONT_SIZE)
-    except (OSError, IOError):
-        return max(1, bbox_w // 8)
-    sample = "aeionrtMS0"  # mix of narrow/wide glyphs typical for our vocab
-    avg_w = font.getlength(sample) / len(sample)
-    return max(1, int((bbox_w * 0.85) / max(1.0, avg_w)))
-
-
-def fit_font_size(
-    text: str,
-    font_path: str,
-    bbox_w: int,
-    bbox_h: int,
-    target_height_ratio: float = 0.7,
-    max_size: Optional[int] = None,
-) -> tuple[int, bool]:
-    """Find a font size where the text fits within the given bounding box.
-
-    Starts at target_height_ratio * bbox_h (capped at MAX_FONT_SIZE — a tall
-    box doesn't make a human write taller letters), then shrinks if too wide,
-    but never below MIN_FONT_SIZE — text at that size is no longer readable
-    and doesn't reflect how a human would fill the form (they'd shorten
-    the content, not microscope it).
-
-    Args:
-        text: The text to fit.
-        font_path: Path to the font file.
-        bbox_w: Bounding box width.
-        bbox_h: Bounding box height.
-        target_height_ratio: Fraction of bbox height the text should occupy.
-        max_size: Optional extra cap (e.g. the per-form handwriting size).
-
-    Returns:
-        Tuple of (font_size, fits) — `fits=False` means the text does NOT
-        fit at MIN_FONT_SIZE; the caller should pick shorter content or
-        truncate, not blindly render.
-    """
-    cap = min(MAX_FONT_SIZE, max_size) if max_size else MAX_FONT_SIZE
-    target_size = max(MIN_FONT_SIZE, min(int(bbox_h * target_height_ratio), cap))
-
-    font_size = target_size
-    while font_size >= MIN_FONT_SIZE:
-        try:
-            font = ImageFont.truetype(font_path, font_size)
-        except (OSError, IOError):
-            return font_size, True
-        bbox = font.getbbox(text)
-        text_w = bbox[2] - bbox[0]
-        if text_w <= bbox_w * 0.95:  # 5% safety margin
-            return font_size, True
-        font_size -= 2
-
-    return MIN_FONT_SIZE, False
-
-
-def _eligible_subcategories(meta_category: str, capacity: int) -> list[str]:
-    """Return subcategories whose typical max length fits within `capacity` chars.
-
-    For the meta categories `text` and `number`, this lets a narrow box draw
-    from short types (year, age, day_and_month) instead of always rolling
-    11-digit PESELs or 60-char diagnoses and then skipping when they don't fit.
-    """
-    if meta_category == "number":
-        table = _NUMBER_SUBCAT_MAX_LEN
-    elif meta_category == "text":
-        table = _TEXT_SUBCAT_MAX_LEN
-    else:
-        return [meta_category]
-    eligible = [k for k, max_len in table.items() if max_len <= capacity]
-    if not eligible:
-        # Box is tinier than the shortest subcategory — fall back to all so
-        # we at least try (and truncate later if truly impossible)
-        eligible = sorted(table.keys(), key=lambda k: table[k])[:2]
-    return eligible
-
-
-def pick_fitting_content(
-    vocab: Vocabulary,
-    category: str,
-    bbox_w: int,
-    bbox_h: int,
-    font_path: str,
-    max_size: Optional[int] = None,
-) -> str:
-    """Sample text from `category` that fits in the bbox at a readable size.
-
-    For meta categories (`text`, `number`), narrows down to subcategories whose
-    typical content length fits the available width — a narrow box for `number`
-    samples from year/age/day_month, a wide box samples from PESEL/phone/date.
-    Falls back to truncation if nothing fits naturally.
-    """
-    candidates: list[str] = []
-
-    if category in ("text", "number"):
-        capacity = estimate_char_capacity(font_path, bbox_w)
-        subcats = _eligible_subcategories(category, capacity)
-        for _ in range(MAX_CONTENT_TRIES):
-            sub = random.choice(subcats)
-            text, _ = vocab.get_random_text(sub)
-            _, fits = fit_font_size(text, font_path, bbox_w, bbox_h, max_size=max_size)
-            if fits:
-                return text
-            candidates.append(text)
-    else:
-        for _ in range(MAX_CONTENT_TRIES):
-            text, _ = vocab.get_random_text(category)
-            _, fits = fit_font_size(text, font_path, bbox_w, bbox_h, max_size=max_size)
-            if fits:
-                return text
-            candidates.append(text)
-
-    # Nothing fit on its own — pick the shortest candidate and truncate
-    if not candidates:
-        return ""
-    text = min(candidates, key=len)
-    while text:
-        _, fits = fit_font_size(text, font_path, bbox_w, bbox_h, max_size=max_size)
-        if fits:
-            return text
-        text = text[:-1]
-    return ""
-
 
 def render_field_to_bbox(
     text: str,
@@ -510,13 +160,18 @@ def render_field_to_bbox(
         pipeline: Post-render pipeline (None to skip).
         word_style: Shared word style for consistent look across the form.
         font_size: Explicit size to render at (e.g. when content was already
-            generated/measured at that size). None = auto-fit to the bbox.
+            generated/measured at that size). None = auto-fit to the bbox
+            height (callers that need width-aware sizing, like
+            fill_single_form, always pass an explicit font_size instead).
 
     Returns:
         RGBA image of rendered text, scaled to fit in bbox.
     """
     if font_size is None:
-        font_size, _ = fit_font_size(text, font_path, bbox_w, bbox_h)
+        # Simple height-based fallback (used by fill_digit_cells, where a
+        # single character never needs width-fitting logic) — the final
+        # size check below still downscales if this overshoots bbox_w.
+        font_size = max(MIN_FONT_SIZE, min(MAX_FONT_SIZE, int(bbox_h * 0.7)))
 
     if config is not None:
         img, _ = render_text_per_char(
@@ -650,6 +305,7 @@ def paste_text_on_form(
     y_min: int,
     ink_color: Optional[tuple[int, int, int]] = None,
     v_jitter_px: int = 0,
+    y_offset: Optional[int] = None,
 ) -> Optional[tuple[int, int, int, int]]:
     """Paste rendered text onto the form, centered vertically in the bbox.
 
@@ -666,6 +322,8 @@ def paste_text_on_form(
         v_jitter_px: Max random vertical shift — lets ascenders/descenders
             realistically cross the field's dotted line instead of always
             being perfectly centered.
+        y_offset: Explicit paste offset from the field top (used for
+            multi-line slots); overrides the centering/top-anchoring logic.
 
     Returns:
         Tight bbox of the actually-inked pixels in form coordinates
@@ -673,7 +331,9 @@ def paste_text_on_form(
     """
     mask = _make_ink_mask(text_img)
     paste_x = x_min
-    if bbox_h > text_img.height * 2.5:
+    if y_offset is not None:
+        paste_y = y_min + y_offset
+    elif bbox_h > text_img.height * 2.5:
         # Tall (multi-line-style) box: people start writing near the top,
         # they don't vertically center a single line in a big rectangle
         paste_y = y_min + int(bbox_h * 0.12)
@@ -836,94 +496,47 @@ def fill_digit_cells(
     return (union[0], union[1], union[2], union[3])
 
 
-def fill_pesel_grid(
-    form: Image.Image,
-    pesel: str,
-    x_min: int,
-    y_min: int,
-    bbox_w: int,
-    bbox_h: int,
-    font_path: str,
-    config: Optional[AugmentConfig],
-    pipeline: Optional[TransformPipeline],
-    word_style: Optional[WordStyle] = None,
-    ink_color: Optional[tuple[int, int, int]] = None,
-) -> Optional[tuple[int, int, int, int]]:
-    """Fill a digit grid assuming 11 equal cells (legacy PESEL fallback).
-
-    Used only when a field is explicitly labeled `pesel_grid` but no printed
-    cell separators could be detected in the region. Prefer detect_grid_cells
-    + fill_digit_cells, which adapt to the actual number of cells.
-    """
-    cell_w = bbox_w / 11.0
-    cells = [
-        (int(x_min + i * cell_w), int(x_min + (i + 1) * cell_w))
-        for i in range(11)
-    ]
-    return fill_digit_cells(
-        form, pesel, cells, y_min, bbox_h,
-        font_path, config, pipeline, word_style, ink_color,
-    )
-
-
-# Subcategories whose content is digit-based — used to decide filler kind
-# for legacy field-specific labels when running in filler mode
-_NUMBERISH_CATEGORIES = {
-    "number", "pesel", "date", "phone", "icd_code",
-    "year", "age", "day_and_month", "last_2_digits_year",
-}
-
-
 def fill_single_form(
     form_path: Path,
-    annotations: list[dict],
+    fields: list[dict],
     vocab: Vocabulary,
     font_path: str,
     config: Optional[AugmentConfig],
     pipeline: Optional[TransformPipeline],
     apply_scan: bool,
-    filler_mode: bool = False,
-    empty_field_prob: float = 0.0,
+    skip_f_fields: bool = False,
+    empty_field_range: tuple[float, float] = (0.0, 0.40),
 ) -> dict:
-    """Generate one filled-form variant and return image + ground-truth bboxes.
-
-    This is the core pipeline shared between the per-form CLI in this script
-    and the bulk YOLO-dataset generator. It fills every annotation, records
-    the tight bbox of the actual ink for each field, then optionally applies
-    scan/photo simulation. Scan simulation is photometric only, so bboxes
-    stay valid in the final image without remapping.
+    """Generate one filled-form variant and return image + ground-truth records.
 
     Args:
-        form_path: Path to the source form image (PNG/JPG).
-        annotations: List of annotation dicts (from labeling_tool CSV).
-        vocab: Loaded Vocabulary.
-        font_path: Font to use for this variant.
+        form_path: Path to the base image (the _blank or _partial variant).
+        fields: Field dicts from TemplatePage.fields
+            ({"label": "p|t|n|f|mix", "x_min", "y_min", "x_max", "y_max"}).
+        vocab: Loaded Vocabulary (source of all written content).
+        font_path: Font for this variant (one handwriting per form).
         config: Augmentation config for text rendering (None = no augment).
-        pipeline: TransformPipeline (currently unused inside renders, kept
-            for API stability; scan augmentation is applied below).
-        apply_scan: Whether to apply scan/photo simulation at the end.
-        filler_mode: If True, fields are filled with random pseudo-words /
-            digit groups sized to span 30-100% of the field width (content
-            is irrelevant for line detection; line LENGTH realism matters).
-            If False, content comes from the medical vocabulary (for OCR
-            datasets where the text itself is the label).
-        empty_field_prob: Probability of leaving a fill-in field empty.
-            Real forms are never 100% filled; the detector must learn that
-            an empty dotted line is not a text line.
+        pipeline: Kept for API stability (unused inside renders).
+        apply_scan: Whether to apply scan-profile simulation at the end.
+        skip_f_fields: True when form_path is the _partial base — f fields
+            already contain real handwriting; they are not filled, but their
+            labeled bbox is recorded as a "handwritten" text line.
+        empty_field_range: Per-FORM diligence: one empty-probability is drawn
+            from this range per variant and applied to every fill-in field
+            (real forms are correlated — one is fully filled, another half-empty).
 
     Returns:
         Dict with keys:
             image (PIL.Image) — final RGB image
-            tight_bboxes (list[dict]) — per-field {label, text, bbox} where
-                bbox is in the final image's coordinate space
-            font (str) — basename of the font used
-            text_style (dict|None) — WordStyle parameters used
-            ink_color (list[int]) — RGB pen color used for this form
-            scan_augmentation (dict|None) — scan params used
+            records (list[dict]) — {"label", "source", "text", "bbox"} where
+                source is printed|synthetic|handwritten; text is None unless
+                synthetic; bbox is [x_min, y_min, x_max, y_max]
+            font (str), text_style (dict|None), ink_color (list[int]),
+            scan_augmentation (dict|None), empty_field_prob (float),
+            multiline_fields (int) — how many fields got >= 2 lines
     """
     font_name = Path(font_path).name
 
-    # Build a fresh word style per variant for natural variation
     if config is not None and config.char.enabled:
         form_style = WordStyle.random(config.char)
         form_style.do_thicken = font_name in FONTS_NEEDING_THICKENING
@@ -937,139 +550,137 @@ def fill_single_form(
         max(0, min(255, c + random.randint(-8, 8))) for c in base_ink
     )
 
-    # One handwriting size per form: a person writes letters of consistent
-    # height regardless of how big the printed box is. Small fields can
-    # shrink it; tall fields must NOT enlarge it.
+    # One handwriting size per form; small fields shrink it, tall never enlarge
     form_font_px = random.randint(*FORM_FONT_SIZE_RANGE)
 
-    # Open a fresh copy of the form
+    # Per-form diligence: how likely each fill-in field stays empty
+    form_empty_prob = random.uniform(*empty_field_range)
+
     form = Image.open(form_path).convert("RGB")
 
-    # Two record streams:
-    #   - tight_records: tight bboxes of actually-rendered text (for text/number).
-    #     Useful as debug/inspection info but not the YOLO ground truth.
-    #   - printed_records: bboxes of printed/static text lines (for `printed` label).
-    #     These are the YOLO ground truth — they cover entire visible lines on
-    #     the form (printed labels plus any fill-in spots inside them), and stay
-    #     constant across variants of the same template.
-    tight_records: list[dict] = []
-    printed_records: list[dict] = []
+    records: list[dict] = []
+    multiline_fields = 0
 
-    for ann in annotations:
-        label = ann["label"]
-        x_min, y_min = ann["x_min"], ann["y_min"]
-        x_max, y_max = ann["x_max"], ann["y_max"]
+    def _measure_fn(font_size: int):
+        """Width estimator matching what the renderer will actually draw."""
+        try:
+            font = ImageFont.truetype(font_path, font_size)
+        except (OSError, IOError):
+            font = ImageFont.load_default()
+        stretch = form_style.x_stretch if form_style is not None else 1.0
+        tracking = (
+            form_style.tracking_ratio * font_size if form_style is not None else 0.0
+        )
+        return lambda t: font.getlength(t) * stretch + tracking * len(t)
+
+    def _render_and_paste(text: str, bbox_w: int, bbox_h: int, x_min: int,
+                          y_min: int, font_size: int,
+                          y_offset: Optional[int] = None):
+        """Render one line, optionally pen-fade it, paste, return tight bbox."""
+        text_img = render_field_to_bbox(
+            text, bbox_w, bbox_h, font_path, config, pipeline, form_style,
+            font_size=font_size,
+        )
+        if random.random() < PEN_FADE_PROB:
+            text_img = apply_pen_fade(text_img)
+        v_jitter = int(bbox_h * V_OVERFLOW_FRAC) if y_offset is None else 3
+        return paste_text_on_form(
+            form, text_img, bbox_w, bbox_h, x_min, y_min,
+            ink_color=ink_color, v_jitter_px=v_jitter, y_offset=y_offset,
+        )
+
+    for field in fields:
+        label = field["label"]
+        x_min, y_min = field["x_min"], field["y_min"]
+        x_max, y_max = field["x_max"], field["y_max"]
         bbox_w = x_max - x_min
         bbox_h = y_max - y_min
-
         if bbox_w <= 0 or bbox_h <= 0:
             continue
 
-        category = LABEL_TO_CATEGORY.get(label)
-        if category is None:
-            continue
-
-        # `printed` is a pass-through: don't render anything, just keep the
-        # bbox so it ends up in the YOLO ground truth.
-        if category == "printed":
-            printed_records.append({
-                "label": label,
-                "text": None,
-                "bbox": [x_min, y_min, x_max, y_max],
+        # Printed text: pass the labeled bbox straight through to GT
+        if label == "p":
+            records.append({
+                "label": label, "source": "printed",
+                "text": None, "bbox": [x_min, y_min, x_max, y_max],
             })
             continue
 
-        # Real forms are never fully filled — randomly leave some fields empty
-        # so the detector learns that a blank dotted line is not a text line
-        if empty_field_prob > 0 and random.random() < empty_field_prob:
+        # Real handwriting already on the _partial base: record, don't fill
+        if label == "f" and skip_f_fields:
+            records.append({
+                "label": label, "source": "handwritten",
+                "text": None, "bbox": [x_min, y_min, x_max, y_max],
+            })
             continue
 
-        # Digit grids (kratki): when a number-ish field is much wider than
-        # tall, check whether the form actually prints cell separators there.
-        # The cell count is DETECTED from the image (PESEL=11, IBAN=26, date
-        # boxes=8, ...) instead of assumed — one digit goes into each real cell.
-        grid_cells: list[tuple[int, int]] = []
-        if (
-            label in ("pesel", "pesel_grid", "number")
-            and bbox_h > 0
-            and (bbox_w / bbox_h) >= PESEL_GRID_ASPECT_RATIO
-        ):
+        # Per-form diligence: some fields stay empty
+        if random.random() < form_empty_prob:
+            continue
+
+        field_font_size = max(MIN_FONT_SIZE, min(form_font_px, int(bbox_h * 0.7)))
+        measure = _measure_fn(field_font_size)
+        content_kind = "t" if label == "f" else label  # f on blank behaves like t
+
+        # Digit grids (kratki): detected from the printed separators
+        if label == "n" and (bbox_w / bbox_h) >= GRID_ASPECT_RATIO:
             grid_cells = detect_grid_cells(form, x_min, y_min, x_max, y_max)
-            if not grid_cells and label == "pesel_grid":
-                # Explicit grid label but no detectable separators —
-                # legacy fallback: assume 11 equal PESEL cells
-                cell_w = bbox_w / 11.0
-                grid_cells = [
-                    (int(x_min + i * cell_w), int(x_min + (i + 1) * cell_w))
-                    for i in range(11)
-                ]
-
-        if grid_cells:
-            n_cells = len(grid_cells)
-            if not filler_mode and n_cells == 11:
-                # 11 cells = PESEL — use a checksum-valid one
-                text, _ = vocab.get_random_text("pesel")
-            else:
-                text = "".join(random.choice("0123456789") for _ in range(n_cells))
-            tight_bbox = fill_digit_cells(
-                form, text, grid_cells, y_min, bbox_h,
-                font_path, config, pipeline, form_style, ink_color,
-            )
-        else:
-            # Field font size: the person's handwriting size, shrunk only
-            # if the field is too short to fit it
-            field_font_size = max(
-                MIN_FONT_SIZE, min(form_font_px, int(bbox_h * 0.7))
-            )
-
-            if filler_mode:
-                # Random pseudo-words / digit groups spanning 30-100% of the
-                # field width — realistic line length, irrelevant content
-                kind = "number" if category in _NUMBERISH_CATEGORIES else "text"
-                stretch = form_style.x_stretch if form_style is not None else 1.0
-                tracking = (
-                    form_style.tracking_ratio * field_font_size
-                    if form_style is not None else 0.0
+            if grid_cells:
+                n_cells = len(grid_cells)
+                if n_cells == 11:
+                    text, _ = vocab.get_random_text("pesel")
+                else:
+                    text = "".join(
+                        random.choice("0123456789") for _ in range(n_cells)
+                    )
+                tight = fill_digit_cells(
+                    form, text, grid_cells, y_min, bbox_h,
+                    font_path, config, pipeline, form_style, ink_color,
                 )
-                text = generate_filler_text(
-                    font_path, field_font_size, bbox_w, kind,
-                    x_stretch=stretch, tracking_px=tracking,
-                )
-            else:
-                # Pick vocabulary content sized to fit at a readable font
-                text = pick_fitting_content(
-                    vocab, category, bbox_w, bbox_h, font_path, max_size=form_font_px
-                )
-            if not text:
-                # Box is too small even for a single character — skip
+                if tight is not None:
+                    records.append({
+                        "label": label, "source": "synthetic",
+                        "text": text, "bbox": list(tight),
+                    })
                 continue
-            if not filler_mode:
-                # Vocab content may still need width-shrinking below the form size
-                field_font_size, _ = fit_font_size(
-                    text, font_path, bbox_w, bbox_h, max_size=form_font_px
-                )
-            text_img = render_field_to_bbox(
-                text, bbox_w, bbox_h, font_path, config, pipeline, form_style,
-                font_size=field_font_size,
-            )
-            # Pen running dry toward the end of the line
-            if random.random() < PEN_FADE_PROB:
-                text_img = apply_pen_fade(text_img)
-            v_jitter = int(bbox_h * V_OVERFLOW_FRAC)
-            tight_bbox = paste_text_on_form(
-                form, text_img, bbox_w, bbox_h, x_min, y_min,
-                ink_color=ink_color, v_jitter_px=v_jitter,
-            )
 
-        if tight_bbox is None:
+        # Multi-line filling for tall text-ish boxes
+        slots: list[int] = []
+        if content_kind in ("t", "mix"):
+            slots = plan_line_slots(bbox_h, field_font_size)
+
+        if len(slots) >= 2:
+            multiline_fields += 1
+            line_h = int(field_font_size * 1.4)
+            for slot in slots:
+                line_text = generate_field_content(
+                    content_kind, vocab, measure, bbox_w
+                )
+                if not line_text:
+                    continue
+                tight = _render_and_paste(
+                    line_text, bbox_w, line_h, x_min, y_min,
+                    field_font_size, y_offset=slot,
+                )
+                if tight is not None:
+                    records.append({
+                        "label": label, "source": "synthetic",
+                        "text": line_text, "bbox": list(tight),
+                    })
             continue
 
-        tight_records.append({
-            "label": label,
-            "text": text,
-            "bbox": list(tight_bbox),  # tight ink bbox in current form coords
-            "field_bbox": [x_min, y_min, x_max, y_max],  # original field bbox for reference
-        })
+        # Single-line fill
+        text = generate_field_content(content_kind, vocab, measure, bbox_w)
+        if not text:
+            continue
+        tight = _render_and_paste(
+            text, bbox_w, bbox_h, x_min, y_min, field_font_size
+        )
+        if tight is not None:
+            records.append({
+                "label": label, "source": "synthetic",
+                "text": text, "bbox": list(tight),
+            })
 
     # Scan simulation is photometric only — bboxes stay valid as-is.
     scan_meta = None
@@ -1088,144 +699,11 @@ def fill_single_form(
 
     return {
         "image": form,
-        "tight_bboxes": tight_records,
-        "printed_bboxes": printed_records,
+        "records": records,
         "font": font_name,
         "text_style": text_style_meta,
         "ink_color": list(ink_color),
         "scan_augmentation": scan_meta,
+        "empty_field_prob": round(form_empty_prob, 3),
+        "multiline_fields": multiline_fields,
     }
-
-
-def main() -> None:
-    args = parse_args()
-
-    if args.seed is not None:
-        random.seed(args.seed)
-
-    form_path = Path(args.form)
-    if not form_path.exists():
-        print(f"ERROR: Form image not found: {form_path}", file=sys.stderr)
-        sys.exit(1)
-
-    csv_path = Path(args.annotations)
-    if not csv_path.exists():
-        print(f"ERROR: Annotations CSV not found: {csv_path}", file=sys.stderr)
-        sys.exit(1)
-
-    # Load resources
-    print("Loading vocabulary...")
-    vocab = Vocabulary(args.resource_dir)
-    all_fonts = find_fonts(args.font_dir)
-    # Exclude uppercase-only fonts and bold weights
-    fonts = [f for f in all_fonts if Path(f).name not in EXCLUDED_FONTS]
-    if not fonts:
-        print(f"ERROR: No usable fonts found in {args.font_dir}", file=sys.stderr)
-        sys.exit(1)
-    skipped = len(all_fonts) - len(fonts)
-    print(f"  Using {len(fonts)} fonts ({skipped} excluded: caps-only and bold weights)")
-
-    # Set up augmentation — toned down for form filling, where text
-    # should look like neat real handwriting, not exaggerated stylization.
-    if not args.no_augment:
-        config = AugmentConfig()
-
-        # Subtler character variation
-        config.char.rotation_max_deg = 2.5      # was 5.0
-        config.char.scale_min = 0.95            # was 0.92
-        config.char.scale_max = 1.05            # was 1.08
-
-        # Subtler line-level effects
-        config.line.baseline_wander_amplitude = 1.5  # was 3.0
-        config.line.spacing_jitter_px = 0.8          # was 2.0
-        config.line.slant_max_deg = 4.0              # was 12.0
-        config.line.baseline_drift_max_px = 4.0      # line gradually climbs/falls
-
-        # We paste onto an existing form — paper texture and scan effects
-        # would double up with the original form's appearance
-        config.paper.enabled = False
-        config.scan.enabled = False
-        pipeline = TransformPipeline(config)
-    else:
-        config = None
-        pipeline = None
-
-    # Load annotations
-    annotations = load_annotations(csv_path, form_path.name)
-    if not annotations:
-        print(f"ERROR: No annotations found for '{form_path.name}' in {csv_path}", file=sys.stderr)
-        print("  (annotations are matched by filename)", file=sys.stderr)
-        sys.exit(1)
-    print(f"  Loaded {len(annotations)} annotations")
-
-    # Decide which fonts to render with
-    if args.all_fonts:
-        font_loop = fonts
-        print(f"  --all-fonts: cycling through {len(font_loop)} fonts")
-    else:
-        font_loop = [None]  # None means random font per variant
-
-    n_variants = max(1, args.num_variants)
-    apply_scan = not args.no_scan and not args.no_augment
-    print(f"  Variants per font: {n_variants}")
-    print(f"  Scan augmentation: {'ON' if apply_scan else 'OFF'}")
-
-    output_arg = Path(args.output)
-    output_arg.parent.mkdir(parents=True, exist_ok=True)
-    total_count = 0
-
-    for font_choice in font_loop:
-        for v in range(1, n_variants + 1):
-            # Resolve font for this variant
-            font_path = font_choice if font_choice is not None else random.choice(fonts)
-            font_name = Path(font_path).name
-            font_stem = Path(font_path).stem
-
-            # Build output path encoding variant number and/or font
-            stem = output_arg.stem
-            suffix = output_arg.suffix
-            parts = [stem]
-            if n_variants > 1:
-                parts.append(f"{v:03d}")
-            if args.all_fonts:
-                parts.append(font_stem)
-            out_image = output_arg.with_name("_".join(parts) + suffix)
-
-            result = fill_single_form(
-                form_path=form_path,
-                annotations=annotations,
-                vocab=vocab,
-                font_path=font_path,
-                config=config,
-                pipeline=pipeline,
-                apply_scan=apply_scan,
-            )
-
-            # Save filled form as JPG
-            result["image"].save(out_image, quality=92)
-
-            # Save metadata JSON next to the image
-            meta_path = out_image.with_suffix(".json")
-            metadata = {
-                "form_image": form_path.name,
-                "output_image": out_image.name,
-                "image_size": [result["image"].width, result["image"].height],
-                "font": result["font"],
-                "fields": result["tight_bboxes"],
-                "printed_lines": result["printed_bboxes"],
-            }
-            if result["text_style"] is not None:
-                metadata["text_style"] = result["text_style"]
-            if result["scan_augmentation"] is not None:
-                metadata["scan_augmentation"] = result["scan_augmentation"]
-            with open(meta_path, "w", encoding="utf-8") as f:
-                json.dump(metadata, f, ensure_ascii=False, indent=2)
-
-            total_count += 1
-            print(f"  [{total_count}] {out_image.name}  font={font_name}")
-
-    print(f"\nDone. {total_count} form variant(s) generated in {output_arg.parent}/")
-
-
-if __name__ == "__main__":
-    main()
