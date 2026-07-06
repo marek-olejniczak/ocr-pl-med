@@ -3,7 +3,8 @@
 Reads ground_truth.csv from the dataset and draws bboxes with different
 colors per source:
     - red   = `printed` (static printed text on the form template)
-    - green = `rendered` (tight bbox of actually-rendered fill-in text)
+    - green = `synthetic`/`rendered` (tight bbox of actually-rendered fill-in text)
+    - blue  = `handwritten` (real handwriting kept from a _partial base)
 
 Usage:
     python visualize_bboxes.py yolo_dataset/images/88_0001.jpg
@@ -19,8 +20,10 @@ from PIL import Image, ImageDraw
 
 
 COLOR_BY_SOURCE = {
-    "printed": (255, 50, 50),    # red
-    "rendered": (50, 200, 80),   # green
+    "printed": (255, 50, 50),      # red
+    "rendered": (50, 200, 80),    # green (legacy source name)
+    "synthetic": (50, 200, 80),   # green
+    "handwritten": (40, 90, 255), # blue
 }
 DEFAULT_COLOR = (50, 120, 255)   # blue, for any unexpected source
 
@@ -60,7 +63,7 @@ def main() -> None:
     img = Image.open(img_path).convert("RGB")
     draw = ImageDraw.Draw(img)
 
-    counts = {"printed": 0, "rendered": 0, "other": 0}
+    counts = {"printed": 0, "rendered": 0, "synthetic": 0, "handwritten": 0, "other": 0}
     with open(csv_path, "r", encoding="utf-8") as f:
         for row in csv.DictReader(f):
             if row["filename"] != img_path.name:
@@ -79,10 +82,11 @@ def main() -> None:
 
     total = sum(counts.values())
     print(f"Drew {total} bbox(es) on {out_path}")
-    print(f"  red   (printed):  {counts['printed']}")
-    print(f"  green (rendered): {counts['rendered']}")
+    print(f"  red   (printed):     {counts['printed']}")
+    print(f"  green (synthetic):   {counts['synthetic'] + counts['rendered']}")
+    print(f"  blue  (handwritten): {counts['handwritten']}")
     if counts["other"]:
-        print(f"  blue  (other):    {counts['other']}")
+        print(f"  blue  (other):       {counts['other']}")
 
 
 if __name__ == "__main__":

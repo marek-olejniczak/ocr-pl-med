@@ -1,31 +1,19 @@
-"""Generate a COCO line-detection training dataset from labeled form templates.
+"""Generate a COCO line-detection + OCR training dataset from form templates.
 
-Reads `dataset/annotations.csv` (produced by labeling_tool.py) which marks
-WHERE on each blank form template text can be written, generates many random
-variants per template, and writes a COCO-format dataset:
-
-    output-dir/
-    ├── images/
-    │   ├── {template_stem}_0001.jpg
-    │   └── ...
-    ├── annotations.json               (COCO: images / annotations / categories)
-    ├── ground_truth.csv               (same bboxes, flat CSV for easy metrics)
-    └── metadata/                      (optional: --no-metadata)
-        └── {template_stem}_0001.json
-
-COCO annotation format: bbox = [x_min, y_min, width, height] in absolute
-pixels, one category: "text_line" (id=1).
-
-The ground-truth bboxes are computed automatically from the actually-inked
-pixels (not the original field bbox), so they tightly match the rendered
-text — independent of how long the random content turned out to be.
+Input:  a templates/ directory built by build_templates.py (COCO
+        annotations.json with p/n/t/f/mix labels + per-page _blank/_partial
+        base images).
+Output: output-dir/
+        ├── images/{page}_{v:04d}.jpg
+        ├── annotations.json    COCO; each annotation carries "text" (what was
+        │                       written; None for printed/handwritten) and
+        │                       "source" (printed|synthetic|handwritten)
+        ├── ground_truth.csv    filename,label,x_min,y_min,x_max,y_max,source,text
+        └── metadata/*.json     per-image generation parameters
 
 Usage:
-    python generate_yolo_dataset.py \\
-        --forms-dir forms/segmentation/images \\
-        --annotations dataset/annotations.csv \\
-        --output-dir coco_dataset \\
-        --variants-per-form 111
+    python src/generate_yolo_dataset.py --templates-dir templates \
+        --output-dir output/run1 --variants-per-form 25 --seed 42
 """
 
 import argparse
@@ -38,32 +26,29 @@ from typing import Optional
 
 from PIL import Image
 
-# Reuse helpers from fill_form.py and friends
 from vocabulary import Vocabulary
 from renderer import find_fonts
 from fill_form import EXCLUDED_FONTS, fill_single_form
+from template_loader import load_templates
 from transforms import AugmentConfig, TransformPipeline
 
-
 CLASS_NAME = "text_line"
-COCO_CATEGORY_ID = 1  # COCO category ids start at 1
+COCO_CATEGORY_ID = 1
+
+# When a page has a _partial base, half the variants use it (real handwriting
+# in f-fields), half use _blank (f-fields filled synthetically)
+PARTIAL_BASE_PROB = 0.5
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Build a YOLO line-detection dataset from labeled forms."
+        description="Build a YOLO line-detection dataset from form templates."
     )
     parser.add_argument(
-        "--forms-dir",
+        "--templates-dir",
         type=str,
-        required=True,
-        help="Directory containing form template images (PNG/JPG).",
-    )
-    parser.add_argument(
-        "--annotations",
-        type=str,
-        required=True,
-        help="Path to dataset/annotations.csv (from labeling_tool).",
+        default="templates",
+        help="Directory containing templates (annotations.json + per-page images).",
     )
     parser.add_argument(
         "--output-dir",
@@ -100,24 +85,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Disable scan/photo simulation (clean output, perfect bboxes).",
     )
-    parser.add_argument(
-        "--rotate",
-        action="store_true",
-        help="Re-enable page rotation (OFF by default — axis-aligned bboxes "
-             "get looser on rotated text, hurting IoU).",
-    )
     return parser.parse_args()
-
-
-def list_csv_filenames(csv_path: Path) -> set[str]:
-    """Return the unique `filename` values present in the annotations CSV."""
-    out: set[str] = set()
-    with open(csv_path, "r", encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            fn = row.get("filename", "").strip()
-            if fn:
-                out.add(fn)
-    return out
 
 
 def build_form_filling_config() -> AugmentConfig:
@@ -161,21 +129,23 @@ def clamp_bbox(
 
 def main() -> None:
     args = parse_args()
-
     if args.seed is not None:
         random.seed(args.seed)
 
-    forms_dir = Path(args.forms_dir)
-    if not forms_dir.is_dir():
-        print(f"ERROR: forms-dir not found: {forms_dir}", file=sys.stderr)
+    templates_dir = Path(args.templates_dir)
+    if not templates_dir.is_dir():
+        print(f"ERROR: templates-dir not found: {templates_dir}", file=sys.stderr)
         sys.exit(1)
 
-    csv_path = Path(args.annotations)
-    if not csv_path.exists():
-        print(f"ERROR: annotations CSV not found: {csv_path}", file=sys.stderr)
+    pages = load_templates(templates_dir)
+    if not pages:
+        print("ERROR: no usable template pages", file=sys.stderr)
         sys.exit(1)
+    print(f"Templates to fill: {len(pages)}")
+    for p in pages:
+        partial = " (+partial)" if p.partial_path else ""
+        print(f"  {p.name} ({len(p.fields)} fields){partial}")
 
-    # Set up output structure
     output_dir = Path(args.output_dir)
     images_dir = output_dir / "images"
     metadata_dir = output_dir / "metadata"
@@ -183,49 +153,6 @@ def main() -> None:
     if not args.no_metadata:
         metadata_dir.mkdir(parents=True, exist_ok=True)
 
-    # COCO skeleton — filled incrementally, written once at the end
-    coco: dict = {
-        "info": {
-            "description": "Synthetic Polish medical forms — text line detection",
-            "version": "1.0",
-        },
-        "licenses": [],
-        "images": [],
-        "annotations": [],
-        "categories": [
-            {"id": COCO_CATEGORY_ID, "name": CLASS_NAME, "supercategory": "text"}
-        ],
-    }
-    next_image_id = 1
-    next_ann_id = 1
-
-    # Open ground_truth.csv for cumulative writing (one row per bbox).
-    # Same shape as dataset/annotations.csv so existing tooling works.
-    csv_out_path = output_dir / "ground_truth.csv"
-    csv_out = open(csv_out_path, "w", encoding="utf-8", newline="")
-    csv_writer = csv.writer(csv_out)
-    csv_writer.writerow(["filename", "label", "x_min", "y_min", "x_max", "y_max", "source"])
-
-    # Discover labeled templates that physically exist in forms-dir
-    csv_filenames = list_csv_filenames(csv_path)
-    templates: list[Path] = []
-    for fn in sorted(csv_filenames):
-        p = forms_dir / fn
-        if p.exists():
-            templates.append(p)
-        else:
-            print(f"  SKIP: '{fn}' in CSV but not found in {forms_dir}", file=sys.stderr)
-
-    if not templates:
-        print("ERROR: no labeled templates exist in forms-dir", file=sys.stderr)
-        sys.exit(1)
-
-    print(f"Templates to fill: {len(templates)}")
-    for t in templates:
-        n = len(load_annotations(csv_path, t.name))
-        print(f"  {t.name} ({n} annotations)")
-
-    # Load vocab + fonts
     print("Loading vocabulary...")
     vocab = Vocabulary(args.resource_dir)
     all_fonts = find_fonts(args.font_dir)
@@ -239,61 +166,68 @@ def main() -> None:
     pipeline = TransformPipeline(config)
     apply_scan = not args.no_scan
 
+    coco: dict = {
+        "info": {
+            "description": "Synthetic Polish medical forms — text lines with transcriptions",
+            "version": "2.0",
+        },
+        "licenses": [],
+        "images": [],
+        "annotations": [],
+        "categories": [
+            {"id": COCO_CATEGORY_ID, "name": CLASS_NAME, "supercategory": "text"}
+        ],
+    }
+    next_image_id = 1
+    next_ann_id = 1
+
+    csv_out = open(output_dir / "ground_truth.csv", "w", encoding="utf-8", newline="")
+    csv_writer = csv.writer(csv_out)
+    csv_writer.writerow(
+        ["filename", "label", "x_min", "y_min", "x_max", "y_max", "source", "text"])
+
     n_variants = max(1, args.variants_per_form)
     print(f"Generating {n_variants} variants per template "
-          f"({n_variants * len(templates)} total)")
+          f"({n_variants * len(pages)} total)")
     print(f"Scan augmentation: {'ON' if apply_scan else 'OFF'}")
 
     total_count = 0
     skipped_blank = 0
 
-    for template_path in templates:
-        annotations = load_annotations(csv_path, template_path.name)
-        if not annotations:
-            print(f"  WARN: no annotations for {template_path.name}, skipping")
-            continue
-
+    for page in pages:
         for v in range(1, n_variants + 1):
             font_path = random.choice(fonts)
-            stem = f"{template_path.stem}_{v:04d}"
+            stem = f"{page.name}_{v:04d}"
+
+            use_partial = (
+                page.partial_path is not None and random.random() < PARTIAL_BASE_PROB
+            )
+            base_path = page.partial_path if use_partial else page.blank_path
 
             result = fill_single_form(
-                form_path=template_path,
-                annotations=annotations,
+                form_path=base_path,
+                fields=page.fields,
                 vocab=vocab,
                 font_path=font_path,
                 config=config,
                 pipeline=pipeline,
                 apply_scan=apply_scan,
-                filler_mode=True,            # content irrelevant for line detection
-                empty_field_prob=EMPTY_FIELD_PROB,
+                skip_f_fields=use_partial,
             )
 
             img: Image.Image = result["image"]
             iw, ih = img.size
             img_path = images_dir / f"{stem}.jpg"
 
-            # Ground truth = `printed_bboxes` (tight around static printed text)
-            # PLUS `tight_bboxes` (tight around actually-rendered fill-in text).
-            # The user labels these as SEPARATE regions in labeling_tool — the
-            # printed label and its fill-in space sit side by side, not nested —
-            # so they produce non-overlapping annotations with accurate IoU.
-            ground_truth_records = (
-                [("printed", r) for r in result["printed_bboxes"]]
-                + [("rendered", r) for r in result["tight_bboxes"]]
-            )
-
             image_id = next_image_id
             next_image_id += 1
             coco["images"].append({
-                "id": image_id,
-                "file_name": img_path.name,
-                "width": iw,
-                "height": ih,
+                "id": image_id, "file_name": img_path.name,
+                "width": iw, "height": ih,
             })
 
             n_boxes = 0
-            for source, rec in ground_truth_records:
+            for rec in result["records"]:
                 clamped = clamp_bbox(tuple(rec["bbox"]), iw, ih)
                 if clamped is None:
                     skipped_blank += 1
@@ -304,35 +238,38 @@ def main() -> None:
                     "id": next_ann_id,
                     "image_id": image_id,
                     "category_id": COCO_CATEGORY_ID,
-                    "bbox": [x1, y1, w, h],   # COCO: [x, y, width, height]
+                    "bbox": [x1, y1, w, h],
                     "area": w * h,
                     "iscrowd": 0,
+                    "source": rec["source"],
+                    "text": rec["text"],
                 })
                 next_ann_id += 1
                 n_boxes += 1
-                csv_writer.writerow([img_path.name, CLASS_NAME, x1, y1, x2, y2, source])
+                csv_writer.writerow(
+                    [img_path.name, CLASS_NAME, x1, y1, x2, y2,
+                     rec["source"], rec["text"] or ""])
 
-            # Save image
             img.save(img_path, quality=92)
 
-            # Optional metadata
             if not args.no_metadata:
                 metadata = {
-                    "form_image": template_path.name,
+                    "template": page.name,
+                    "base": "partial" if use_partial else "blank",
                     "output_image": img_path.name,
                     "image_size": [iw, ih],
                     "font": result["font"],
                     "ink_color": result["ink_color"],
-                    "fields": result["tight_bboxes"],
-                    "printed_lines": result["printed_bboxes"],
+                    "empty_field_prob": result["empty_field_prob"],
+                    "multiline_fields": result["multiline_fields"],
+                    "fields": result["records"],
                     "num_annotations": n_boxes,
                 }
                 if result["text_style"] is not None:
                     metadata["text_style"] = result["text_style"]
                 if result["scan_augmentation"] is not None:
                     metadata["scan_augmentation"] = result["scan_augmentation"]
-                meta_path = metadata_dir / f"{stem}.json"
-                with open(meta_path, "w", encoding="utf-8") as f:
+                with open(metadata_dir / f"{stem}.json", "w", encoding="utf-8") as f:
                     json.dump(metadata, f, ensure_ascii=False, indent=2)
 
             total_count += 1
@@ -340,19 +277,14 @@ def main() -> None:
                 print(f"  [{total_count}] {stem}.jpg  ({n_boxes} bboxes)")
 
     csv_out.close()
-
-    # Write the COCO annotation file
-    coco_path = output_dir / "annotations.json"
-    with open(coco_path, "w", encoding="utf-8") as f:
+    with open(output_dir / "annotations.json", "w", encoding="utf-8") as f:
         json.dump(coco, f, ensure_ascii=False)
 
     print(f"\nDone. {total_count} images generated in {output_dir}/")
-    print(f"  images/           --> {total_count} JPGs")
-    print(f"  annotations.json  --> COCO ({len(coco['annotations'])} annotations, "
-          f"1 category: '{CLASS_NAME}')")
-    print(f"  ground_truth.csv  --> all bboxes (filename, label, x_min, y_min, x_max, y_max, source)")
+    print(f"  annotations.json  --> COCO ({len(coco['annotations'])} annotations "
+          f"with text+source)")
     if skipped_blank:
-        print(f"  Skipped {skipped_blank} blank/degenerate bbox(es) across all images")
+        print(f"  Skipped {skipped_blank} blank/degenerate bbox(es)")
 
 
 if __name__ == "__main__":
