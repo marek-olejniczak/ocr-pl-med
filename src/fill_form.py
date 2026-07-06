@@ -35,9 +35,11 @@ from transforms import (
     gaussian_noise,
     gaussian_blur,
     uneven_brightness,
-    page_rotation,
     jpeg_artifacts,
-    rotate_bbox,
+    to_grayscale,
+    photocopy_contrast,
+    salt_pepper_noise,
+    toner_streak,
 )
 
 
@@ -541,63 +543,79 @@ def render_field_to_bbox(
     return img
 
 
-def apply_scan_augmentation(
-    form: Image.Image,
-    enable_rotation: bool = False,
-) -> tuple[Image.Image, dict, Optional[float], tuple[int, int]]:
-    """Apply scan/photo simulation effects to a fully-filled form image.
+# Scan profiles: how a filled paper form typically enters the system.
+# Weights chosen with the user (2026-07): no phone-photo profile, no rotation.
+SCAN_PROFILES: list[tuple[str, float]] = [
+    ("clean_color", 0.45),
+    ("grayscale", 0.35),
+    ("photocopy", 0.20),
+]
 
-    Models what the OCR model will actually see in production: scanner noise,
-    slight defocus, uneven lighting, JPEG compression. Each parameter is
-    randomized per call so a batch of variants spans realistic capture
-    conditions.
 
-    Page rotation is OFF by default: axis-aligned ground-truth bboxes get
-    visibly looser when rotated (the box must cover the tilted text), which
-    degrades IoU during training — and the line-detection model copes with
-    skewed scans on its own anyway.
+def pick_scan_profile() -> str:
+    """Pick a scan profile name according to SCAN_PROFILES weights."""
+    names, weights = zip(*SCAN_PROFILES)
+    return random.choices(names, weights=weights, k=1)[0]
 
-    Args:
-        form: Fully filled form image (RGB).
-        enable_rotation: If True, also apply a small page skew (±1.5°).
-            Bboxes must then be remapped via the returned angle.
+
+def apply_scan_augmentation(form: Image.Image) -> tuple[Image.Image, dict]:
+    """Apply scan simulation to a fully-filled form using a random profile.
+
+    Profiles model the three ways documents reach the system:
+        clean_color — office scanner, mild noise/blur, color kept
+        grayscale   — same scanner in mono mode (the common default)
+        photocopy   — repeatedly-copied document: crushed contrast,
+                      salt-pepper dropout, occasional toner streak
+
+    All effects are photometric only — geometry (and thus every ground-truth
+    bbox) is untouched. Page rotation was removed for good: axis-aligned
+    boxes degrade on rotated text and the detector copes with skew anyway.
 
     Returns:
-        Tuple of:
-            - degraded image (PIL.Image, RGB)
-            - metadata dict with the chosen parameters
-            - rotation angle in degrees (or None if rotation was skipped)
-            - source size (width, height) just before rotation, needed by
-              downstream code to remap ground-truth bboxes through the rotation
+        Tuple of (degraded RGB image, metadata dict incl. "profile").
     """
-    noise_sigma = random.uniform(2.0, 6.0)
-    blur_radius = random.uniform(0.3, 0.8)
-    brightness_var = random.uniform(0.05, 0.15)
-    rotation_max = 1.5  # ±1.5° max page skew (only when enable_rotation)
-    jpeg_q_min, jpeg_q_max = 70, 92
+    profile = pick_scan_profile()
+    meta: dict = {"profile": profile}
 
-    form = uneven_brightness(form, brightness_var)
-    form = gaussian_noise(form, noise_sigma)
-    form = gaussian_blur(form, blur_radius)
+    if profile in ("clean_color", "grayscale"):
+        brightness_var = random.uniform(0.05, 0.15)
+        noise_sigma = random.uniform(2.0, 6.0)
+        blur_radius = random.uniform(0.3, 0.8)
+        jpeg_q = (80, 92)
+        form = uneven_brightness(form, brightness_var)
+        form = gaussian_noise(form, noise_sigma)
+        form = gaussian_blur(form, blur_radius)
+        if profile == "grayscale":
+            form = to_grayscale(form)
+        meta.update({
+            "noise_sigma": round(noise_sigma, 2),
+            "blur_radius": round(blur_radius, 2),
+            "brightness_variation": round(brightness_var, 3),
+        })
+    else:  # photocopy
+        low = random.randint(80, 115)
+        high = random.randint(175, 205)
+        sp_amount = random.uniform(0.002, 0.008)
+        blur_radius = random.uniform(0.2, 0.5)
+        jpeg_q = (75, 90)
+        form = to_grayscale(form)
+        form = photocopy_contrast(form, low=low, high=high)
+        form = salt_pepper_noise(form, amount=sp_amount)
+        has_streak = random.random() < 0.35
+        if has_streak:
+            form = toner_streak(form)
+        form = gaussian_blur(form, blur_radius)
+        meta.update({
+            "contrast_low": low,
+            "contrast_high": high,
+            "salt_pepper_amount": round(sp_amount, 4),
+            "blur_radius": round(blur_radius, 2),
+            "toner_streak": has_streak,
+        })
 
-    pre_rot_size = form.size
-    if enable_rotation:
-        form, angle = page_rotation(form, rotation_max)
-    else:
-        angle = None
-
-    form = jpeg_artifacts(form, jpeg_q_min, jpeg_q_max)
-
-    meta = {
-        "noise_sigma": round(noise_sigma, 2),
-        "blur_radius": round(blur_radius, 2),
-        "brightness_variation": round(brightness_var, 3),
-        "jpeg_quality_range": [jpeg_q_min, jpeg_q_max],
-    }
-    if angle is not None:
-        meta["rotation_angle_deg"] = round(angle, 3)
-
-    return form, meta, angle, pre_rot_size
+    form = jpeg_artifacts(form, *jpeg_q)
+    meta["jpeg_quality_range"] = list(jpeg_q)
+    return form, meta
 
 
 def _make_ink_mask(text_img: Image.Image, white_threshold: int = 245) -> Image.Image:
@@ -866,16 +884,14 @@ def fill_single_form(
     apply_scan: bool,
     filler_mode: bool = False,
     empty_field_prob: float = 0.0,
-    enable_rotation: bool = False,
 ) -> dict:
     """Generate one filled-form variant and return image + ground-truth bboxes.
 
     This is the core pipeline shared between the per-form CLI in this script
     and the bulk YOLO-dataset generator. It fills every annotation, records
     the tight bbox of the actual ink for each field, then optionally applies
-    scan/photo simulation. When scan rotation is applied, the bboxes are
-    rotated to match the new image so downstream code gets coordinates in
-    the *final* image space.
+    scan/photo simulation. Scan simulation is photometric only, so bboxes
+    stay valid in the final image without remapping.
 
     Args:
         form_path: Path to the source form image (PNG/JPG).
@@ -894,7 +910,6 @@ def fill_single_form(
         empty_field_prob: Probability of leaving a fill-in field empty.
             Real forms are never 100% filled; the detector must learn that
             an empty dotted line is not a text line.
-        enable_rotation: Pass-through to apply_scan_augmentation (page skew).
 
     Returns:
         Dict with keys:
@@ -1056,26 +1071,10 @@ def fill_single_form(
             "field_bbox": [x_min, y_min, x_max, y_max],  # original field bbox for reference
         })
 
-    # Apply scan/photo simulation; rotation may change the canvas size,
-    # in which case we must remap each tight bbox into the final coords.
+    # Scan simulation is photometric only — bboxes stay valid as-is.
     scan_meta = None
-    rotation_angle = None
-    pre_rot_size = form.size
-
     if apply_scan:
-        form, scan_meta, rotation_angle, pre_rot_size = apply_scan_augmentation(
-            form, enable_rotation=enable_rotation
-        )
-        if rotation_angle is not None and abs(rotation_angle) > 1e-6:
-            post_rot_size = form.size
-            for rec in tight_records:
-                rec["bbox"] = list(
-                    rotate_bbox(tuple(rec["bbox"]), rotation_angle, pre_rot_size, post_rot_size)
-                )
-            for rec in printed_records:
-                rec["bbox"] = list(
-                    rotate_bbox(tuple(rec["bbox"]), rotation_angle, pre_rot_size, post_rot_size)
-                )
+        form, scan_meta = apply_scan_augmentation(form)
 
     text_style_meta = None
     if form_style is not None:

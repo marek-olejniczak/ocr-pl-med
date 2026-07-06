@@ -272,7 +272,6 @@ def main() -> None:
                 apply_scan=apply_scan,
                 filler_mode=True,            # content irrelevant for line detection
                 empty_field_prob=EMPTY_FIELD_PROB,
-                enable_rotation=args.rotate,
             )
 
             img: Image.Image = result["image"]
