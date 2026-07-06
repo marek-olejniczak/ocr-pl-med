@@ -77,9 +77,13 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
-    args = parse_args()
-    out_dir = Path(args.output)
+def build(new_dataset: Path, old_images: Path, old_csv: Path, output: Path) -> None:
+    """Build the unified templates/ directory from the two source layouts.
+
+    See module docstring for the merge rules. Writes PNGs and
+    ``annotations.json`` under ``output``.
+    """
+    out_dir = output
     out_dir.mkdir(parents=True, exist_ok=True)
 
     coco_out: dict = {"images": [], "annotations": [], "categories": CATEGORIES}
@@ -87,7 +91,7 @@ def main() -> None:
     next_ann_id = 1
 
     # --- 1) New dataset: copy _blank/_partial + re-id annotations ---
-    new_root = Path(args.new_dataset)
+    new_root = new_dataset
     with open(new_root / "annotations.json", "r", encoding="utf-8") as f:
         src = json.load(f)
     src_cats = {c["id"]: c["name"] for c in src["categories"]}
@@ -123,6 +127,8 @@ def main() -> None:
             if name not in CAT_ID:
                 continue
             x, y, w, h = a["bbox"]
+            if w <= 0 or h <= 0:
+                continue
             coco_out["annotations"].append({
                 "id": next_ann_id,
                 "image_id": image_id,
@@ -135,9 +141,8 @@ def main() -> None:
         n_new_pages += 1
 
     # --- 2) Old templates: CSV labels -> p/t/n, template PNG becomes _blank ---
-    old_images = Path(args.old_images)
     rows_by_file: dict[str, list[dict]] = {}
-    with open(args.old_csv, "r", encoding="utf-8") as f:
+    with open(old_csv, "r", encoding="utf-8") as f:
         for row in csv.DictReader(f):
             rows_by_file.setdefault(row["filename"].strip(), []).append(row)
 
@@ -191,6 +196,16 @@ def main() -> None:
     print(f"  {len(coco_out['annotations'])} annotations total")
     if n_skipped_labels:
         print(f"  Skipped {n_skipped_labels} rows with unknown labels")
+
+
+def main() -> None:
+    args = parse_args()
+    build(
+        new_dataset=Path(args.new_dataset),
+        old_images=Path(args.old_images),
+        old_csv=Path(args.old_csv),
+        output=Path(args.output),
+    )
 
 
 if __name__ == "__main__":
