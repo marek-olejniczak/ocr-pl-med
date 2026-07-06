@@ -149,6 +149,11 @@ def render_text_per_char(
         and font_size >= THICKEN_MIN_FONT_SIZE
     )
 
+    # Horizontal looseness: Google handwriting fonts are very condensed
+    # compared to real pen writing — widen glyphs and add letter spacing
+    x_stretch = word_style.x_stretch if word_style is not None else 1.0
+    tracking_px = (word_style.tracking_ratio * font_size) if word_style is not None else 0.0
+
     # Render each character individually
     char_entries: list[tuple[Image.Image, int]] = []  # (image, advance_width)
     for char in text:
@@ -168,14 +173,23 @@ def render_text_per_char(
             if do_thicken:
                 char_img = char_stroke_variation(char_img, word_style.thicken_kernel)
 
+        # Widen the glyph itself (condensed font -> natural pen width)
+        if x_stretch != 1.0 and char_img.width > 1:
+            char_img = char_img.resize(
+                (max(1, int(char_img.width * x_stretch)), char_img.height),
+                Image.BICUBIC,
+            )
+
         char_entries.append((char_img, advance_w))
 
     if not char_entries:
         img = Image.new("RGB", (2 * padding, 2 * padding), "white")
         return img, [padding, padding, padding, padding]
 
-    # Calculate total canvas size using font advance widths (not image widths)
-    total_advance = sum(adv for _, adv in char_entries)
+    # Calculate total canvas size using font advance widths (not image widths),
+    # accounting for glyph stretch and letter tracking
+    total_advance = sum(int(adv * x_stretch) for _, adv in char_entries)
+    total_advance += int(tracking_px * len(char_entries))
     max_height = max(ci.height for ci, _ in char_entries)
 
     # Pick a linear baseline drift for this render: the whole line gradually
@@ -222,8 +236,10 @@ def render_text_per_char(
             + wander_budget // 2 + drift_budget + y_offset
         )
 
+        eff_advance = int(advance_w * x_stretch)
+
         # Center the character image on the advance position
-        x_pos = x_cursor - (char_img.width - advance_w) // 2
+        x_pos = x_cursor - (char_img.width - eff_advance) // 2
 
         # Ensure within bounds
         y_pos = max(0, min(y_pos, canvas_h - char_img.height))
@@ -240,8 +256,8 @@ def render_text_per_char(
             text_max_x = max(text_max_x, x_pos + char_img.width)
             text_max_y = max(text_max_y, y_pos + char_img.height)
 
-        # Advance cursor by font advance width + optional jitter
-        x_cursor += advance_w
+        # Advance cursor: stretched advance width + letter tracking + jitter
+        x_cursor += eff_advance + int(tracking_px)
         if line_cfg.enabled and line_cfg.spacing_jitter_px > 0:
             jitter = random.uniform(-line_cfg.spacing_jitter_px, line_cfg.spacing_jitter_px)
             x_cursor += int(jitter)

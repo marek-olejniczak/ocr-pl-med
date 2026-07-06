@@ -237,8 +237,10 @@ def generate_filler_text(
     font_size: int,
     bbox_w: int,
     kind: str,
+    x_stretch: float = 1.0,
+    tracking_px: float = 0.0,
 ) -> str:
-    """Build random filler content that fills 80-100% of the bbox width.
+    """Build random filler content that fills 30-100% of the bbox width.
 
     For YOLO line detection the content is irrelevant — what matters is that
     the written line spans most of the field (like real handwriting does),
@@ -250,9 +252,12 @@ def generate_filler_text(
         font_size: Font size the field will be rendered at.
         bbox_w: Field width in pixels.
         kind: "number" for digit groups, anything else for pseudo-words.
+        x_stretch: Glyph widening factor the renderer will apply — the
+            measured width is scaled by it so the final render still fits.
+        tracking_px: Extra per-letter spacing the renderer will add.
 
     Returns:
-        Filler string whose rendered width is <= bbox_w and >= ~80% of it
+        Filler string whose rendered width is <= bbox_w and >= ~30% of it
         (single unit may be shorter if the box fits only one short unit).
     """
     try:
@@ -260,7 +265,11 @@ def generate_filler_text(
     except (OSError, IOError):
         font = ImageFont.load_default()
 
-    target = bbox_w * random.uniform(0.80, 1.00)
+    def rendered_width(t: str) -> float:
+        """Estimate final on-form width incl. glyph stretch and tracking."""
+        return font.getlength(t) * x_stretch + tracking_px * len(t)
+
+    target = bbox_w * random.uniform(0.30, 1.00)
     # Hard cap so augmentation jitter doesn't push us past the field edge
     hard_cap = bbox_w * 0.97
 
@@ -269,7 +278,7 @@ def generate_filler_text(
 
     text = make_unit()
     # Even the first unit may overflow a tiny box — trim it down
-    while text and font.getlength(text) > hard_cap:
+    while text and rendered_width(text) > hard_cap:
         text = text[:-1]
     if not text:
         return ""
@@ -277,7 +286,7 @@ def generate_filler_text(
     while True:
         sep = random.choice(separators)
         candidate = text + sep + make_unit()
-        w = font.getlength(candidate)
+        w = rendered_width(candidate)
         if w > hard_cap:
             break
         text = candidate
@@ -878,7 +887,7 @@ def fill_single_form(
             for API stability; scan augmentation is applied below).
         apply_scan: Whether to apply scan/photo simulation at the end.
         filler_mode: If True, fields are filled with random pseudo-words /
-            digit groups sized to span 80-100% of the field width (content
+            digit groups sized to span 30-100% of the field width (content
             is irrelevant for line detection; line LENGTH realism matters).
             If False, content comes from the medical vocabulary (for OCR
             datasets where the text itself is the label).
@@ -999,10 +1008,18 @@ def fill_single_form(
             )
 
             if filler_mode:
-                # Random pseudo-words / digit groups spanning 80-100% of the
+                # Random pseudo-words / digit groups spanning 30-100% of the
                 # field width — realistic line length, irrelevant content
                 kind = "number" if category in _NUMBERISH_CATEGORIES else "text"
-                text = generate_filler_text(font_path, field_font_size, bbox_w, kind)
+                stretch = form_style.x_stretch if form_style is not None else 1.0
+                tracking = (
+                    form_style.tracking_ratio * field_font_size
+                    if form_style is not None else 0.0
+                )
+                text = generate_filler_text(
+                    font_path, field_font_size, bbox_w, kind,
+                    x_stretch=stretch, tracking_px=tracking,
+                )
             else:
                 # Pick vocabulary content sized to fit at a readable font
                 text = pick_fitting_content(
@@ -1066,6 +1083,8 @@ def fill_single_form(
             "base_rotation_deg": round(form_style.base_rotation, 2),
             "base_scale": round(form_style.base_scale, 3),
             "handwriting_size_px": form_font_px,
+            "x_stretch": round(form_style.x_stretch, 3),
+            "tracking_ratio": round(form_style.tracking_ratio, 3),
         }
 
     return {
