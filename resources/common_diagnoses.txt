@@ -1,0 +1,147 @@
+# Choroby układu krążenia
+nadciśnienie tętnicze
+choroba niedokrwienna serca
+niewydolność serca
+migotanie przedsionków
+zawał mięśnia sercowego
+dławica piersiowa
+miażdżyca
+żylaki kończyn dolnych
+zakrzepica żył głębokich
+zatorowość płucna
+kardiomiopatia
+wada zastawkowa serca
+tętniak aorty
+udar mózgu niedokrwienny
+udar mózgu krwotoczny
+
+# Choroby układu oddechowego
+ostre zakażenie górnych dróg oddechowych
+zapalenie płuc
+zapalenie oskrzeli
+astma oskrzelowa
+przewlekła obturacyjna choroba płuc
+zapalenie zatok przynosowych
+zapalenie gardła
+zapalenie migdałków
+grypa
+zapalenie krtani
+odma opłucnowa
+
+# Choroby układu pokarmowego
+choroba wrzodowa żołądka
+choroba wrzodowa dwunastnicy
+refluks żołądkowo-przełykowy
+kamica żółciowa
+zapalenie trzustki
+zapalenie wyrostka robaczkowego
+choroba Leśniowskiego-Crohna
+wrzodziejące zapalenie jelita grubego
+zespół jelita drażliwego
+zapalenie błony śluzowej żołądka
+marskość wątroby
+przepuklina pachwinowa
+zapalenie uchyłków jelita grubego
+
+# Choroby układu moczowego
+zakażenie dróg moczowych
+kamica nerkowa
+przewlekła choroba nerek
+ostra niewydolność nerek
+zapalenie pęcherza moczowego
+odmiedniczkowe zapalenie nerek
+łagodny rozrost gruczołu krokowego
+
+# Choroby endokrynologiczne
+cukrzyca typu 1
+cukrzyca typu 2
+niedoczynność tarczycy
+nadczynność tarczycy
+wole guzkowe tarczycy
+zespół Cushinga
+niedoczynność kory nadnerczy
+hiperlipidemia
+hipercholesterolemia
+otyłość
+
+# Choroby układu nerwowego
+padaczka
+choroba Parkinsona
+choroba Alzheimera
+stwardnienie rozsiane
+migrena
+neuropatia obwodowa
+rwa kulszowa
+zespół cieśni nadgarstka
+zapalenie opon mózgowo-rdzeniowych
+
+# Choroby układu ruchu
+zwyrodnienie stawów
+reumatoidalne zapalenie stawów
+osteoporoza
+dyskopatia lędźwiowa
+złamanie kości udowej
+złamanie kości promieniowej
+skręcenie stawu skokowego
+zapalenie ścięgna Achillesa
+zespół bólowy kręgosłupa lędźwiowego
+dna moczanowa
+
+# Choroby psychiczne
+depresja
+zaburzenia lękowe
+zaburzenia lękowo-depresyjne
+schizofrenia
+zaburzenia snu
+bezsenność
+zaburzenia obsesyjno-kompulsyjne
+zaburzenia odżywiania
+zespół stresu pourazowego
+uzależnienie od alkoholu
+
+# Choroby skóry
+łuszczyca
+atopowe zapalenie skóry
+pokrzywka
+grzybica skóry
+trądzik pospolity
+róża
+opryszczka
+kontaktowe zapalenie skóry
+czerniak złośliwy
+rak podstawnokomórkowy skóry
+
+# Choroby oczu i uszu
+zaćma
+jaskra
+zwyrodnienie plamki żółtej
+zapalenie spojówek
+zapalenie ucha środkowego
+niedosłuch
+szum w uszach
+
+# Choroby krwi
+niedokrwistość z niedoboru żelaza
+niedokrwistość z niedoboru witaminy B12
+małopłytkowość
+białaczka
+chłoniak
+
+# Choroby zakaźne
+borelioza
+wirusowe zapalenie wątroby typu B
+wirusowe zapalenie wątroby typu C
+COVID-19
+gruźlica
+posocznica
+półpasiec
+
+# Nowotwory (ogólne)
+rak płuca
+rak piersi
+rak jelita grubego
+rak prostaty
+rak żołądka
+rak pęcherza moczowego
+rak nerki
+rak tarczycy

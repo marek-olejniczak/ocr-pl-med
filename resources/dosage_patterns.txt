@@ -1,0 +1,99 @@
+# Schematy dawkowania - częstotliwość
+1x dziennie
+2x dziennie
+3x dziennie
+4x dziennie
+co 4h
+co 6h
+co 8h
+co 12h
+co 24h
+raz na dobę
+dwa razy na dobę
+trzy razy na dobę
+
+# Schematy dawkowania - wzorce liczbowe
+1-0-0
+0-0-1
+1-0-1
+1-1-1
+2-0-2
+1-1-0
+0-1-1
+1-0-0-1
+1-1-1-1
+2-2-2
+
+# Dawki przykładowe
+1x50mg
+1x100mg
+2x250mg
+2x500mg
+3x500mg
+1x1000mg
+1x10mg
+1x20mg
+1x5mg
+2x5mg
+1x75mg
+1x150mg
+
+# Pora podania
+rano
+wieczorem
+rano i wieczorem
+przed posiłkiem
+po posiłku
+na czczo
+przed snem
+w trakcie posiłku
+po przebudzeniu
+
+# Czas trwania
+przez 3 dni
+przez 5 dni
+przez 7 dni
+przez 10 dni
+przez 14 dni
+przez 21 dni
+przez 30 dni
+przez 3 miesiące
+przez 6 miesięcy
+do odwołania
+na stałe
+wg zaleceń
+wg potrzeb
+doraźnie
+
+# Dodatkowe instrukcje
+w razie bólu
+w razie gorączki
+w razie bezsenności
+w razie nudności
+popić szklanką wody
+nie łączyć z alkoholem
+nie rozdrabniać
+nie rozgryzać
+połknąć w całości
+rozpuścić w wodzie
+stosować miejscowo
+nałożyć cienką warstwę
+zakroplić do oka
+1 wziew
+2 wziewy
+
+# Ilość do wydania
+10 tabl.
+14 tabl.
+20 tabl.
+28 tabl.
+30 tabl.
+50 tabl.
+60 tabl.
+90 tabl.
+100 tabl.
+1 op.
+2 op.
+3 op.
+1 fl.
+2 fl.

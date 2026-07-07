@@ -1,0 +1,91 @@
+# Skróty recepturowe
+Rp.
+D.S.
+S.
+aa.
+ad us. ext.
+ad us. int.
+aq. dest.
+cito
+statim
+
+# Postacie leku
+tabl.
+kaps.
+amp.
+czop.
+maść
+krople
+syr.
+inj.
+roztw.
+susp.
+draż.
+past.
+proszek
+żel
+krem
+aerozol
+plaster
+globulki
+
+# Drogi podania
+p.o.
+i.v.
+i.m.
+s.c.
+p.r.
+s.l.
+i.d.
+doustnie
+dożylnie
+domięśniowo
+podskórnie
+doodbytniczo
+podjęzykowo
+śródskórnie
+zewnętrznie
+donosowo
+wziewnie
+miejscowo
+
+# Jednostki
+mg
+g
+kg
+ml
+l
+j.m.
+mcg
+µg
+mmol
+mmHg
+IU
+
+# Skróty ogólnomedyczne
+wg
+bns
+BNO
+bp
+bm
+lek. med.
+dr n. med.
+prof. dr hab.
+nr PESEL
+nr PWZ
+NIP
+REGON
+NFZ
+POZ
+SOR
+OIT
+RTG
+USG
+EKG
+TK
+MRI
+BMI
+RR
+HR
+temp.
+sat.
