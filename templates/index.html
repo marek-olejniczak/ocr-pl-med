@@ -437,6 +437,10 @@ canvas { display: block; }
       <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
       Open Folder
     </button>
+    <button class="btn" onclick="document.getElementById('pdfInput').click()">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+      Open PDF
+    </button>
   </div>
 
   <div class="btn-group">
@@ -469,6 +473,7 @@ canvas { display: block; }
 <!-- File inputs -->
 <input type="file" id="fileInput" class="hidden-input" accept="image/*" multiple>
 <input type="file" id="folderInput" class="hidden-input" webkitdirectory>
+<input type="file" id="pdfInput" class="hidden-input" accept="application/pdf,.pdf" multiple>
 
 <!-- Main -->
 <div class="main">
@@ -480,8 +485,8 @@ canvas { display: block; }
     <canvas id="canvas"></canvas>
     <div class="empty-state" id="emptyState">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      <p>Open images or drag &amp; drop to get started</p>
-      <span class="hint">Supports JPG, PNG, BMP, TIFF</span>
+      <p>Open images, a PDF, or drag &amp; drop to get started</p>
+      <span class="hint">Supports JPG, PNG, BMP, TIFF, PDF</span>
     </div>
     <div class="drop-zone" id="dropZone">
       <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -560,6 +565,7 @@ const var_accent = "#6c5ce7";
 // ── File handling ──────────────────────────────────────────────
 document.getElementById("fileInput").addEventListener("change", (e) => uploadFiles(e.target.files));
 document.getElementById("folderInput").addEventListener("change", (e) => uploadFiles(e.target.files));
+document.getElementById("pdfInput").addEventListener("change", (e) => uploadFiles(e.target.files));
 
 // Drag and drop
 const dropZone = document.getElementById("dropZone");
@@ -576,13 +582,13 @@ wrap.addEventListener("drop", (e) => {
 
 async function uploadFiles(fileList) {
   const form = new FormData();
-  const validExts = new Set(["jpg","jpeg","png","bmp","tiff","tif"]);
+  const validExts = new Set(["jpg","jpeg","png","bmp","tiff","tif","pdf"]);
   let count = 0;
   for (const f of fileList) {
     const ext = f.name.split(".").pop().toLowerCase();
     if (validExts.has(ext)) { form.append("images", f); count++; }
   }
-  if (count === 0) { toast("No valid image files found", "error"); return; }
+  if (count === 0) { toast("No valid image or PDF files found", "error"); return; }
 
   const res = await fetch("/api/upload", { method: "POST", body: form });
   const data = await res.json();

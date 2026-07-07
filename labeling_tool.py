@@ -12,10 +12,14 @@ import webbrowser
 from pathlib import Path
 from uuid import uuid4
 
+import fitz  # PyMuPDF
 from flask import Flask, render_template, jsonify, request, send_file, abort
 from PIL import Image
 
 APP_DIR = Path(__file__).parent.resolve()
+
+# DPI used when rasterizing PDF pages to images (higher = sharper, larger)
+PDF_RENDER_DPI = 200
 DATASET_DIR = APP_DIR / "dataset"
 DATASET_DIR.mkdir(exist_ok=True)
 
@@ -45,10 +49,16 @@ def upload():
     for f in files:
         if not f.filename:
             continue
-        fid = uuid4().hex[:12]
         data = f.read()
-        image_store[fid] = {"name": f.filename, "data": data}
-        new_ids.append(fid)
+        if Path(f.filename).suffix.lower() == ".pdf":
+            try:
+                new_ids.extend(_ingest_pdf(f.filename, data))
+            except Exception as e:  # noqa: BLE001
+                return jsonify({"ok": False, "error": f"Cannot read PDF {f.filename}: {e}"})
+        else:
+            fid = uuid4().hex[:12]
+            image_store[fid] = {"name": f.filename, "data": data}
+            new_ids.append(fid)
 
     if not new_ids:
         return jsonify({"ok": False, "error": "No valid images"})
@@ -59,6 +69,31 @@ def upload():
     current_id = new_ids[0]
 
     return jsonify({"ok": True, "images": _all_image_info(), "current": current_id})
+
+
+def _ingest_pdf(filename, pdf_bytes):
+    """Rasterize each PDF page to a PNG image and register it in the store.
+
+    Returns the list of new image ids. Pages are named
+    ``<pdf_stem>_page01.png``, ``<pdf_stem>_page02.png``, ... so they sort
+    naturally and are traceable back to their source document.
+    """
+    base = Path(filename).stem
+    ids = []
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    try:
+        pad = max(2, len(str(doc.page_count)))
+        for i in range(doc.page_count):
+            page = doc.load_page(i)
+            pix = page.get_pixmap(dpi=PDF_RENDER_DPI)
+            png_bytes = pix.tobytes("png")
+            fid = uuid4().hex[:12]
+            name = f"{base}_page{str(i + 1).zfill(pad)}.png"
+            image_store[fid] = {"name": name, "data": png_bytes}
+            ids.append(fid)
+    finally:
+        doc.close()
+    return ids
 
 
 @app.route("/api/image/<fid>")
