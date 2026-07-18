@@ -31,6 +31,10 @@ cut from the base image. The coordinates transfer 1:1 because this stage
 touches only pixel values, never geometry. Crops go to the OCR service in
 reading order and the texts come back joined into the final result.
 
+The OCR model is picked from a dropdown that lists every service from the
+OCR benchmark with a marker showing which ones are actually running (there
+is a refresh button next to it).
+
 The pipeline logic lives in `pipeline.py` and has no UI in it, gradio is just
 a thin layer on top. If we ever want a nicer front (FastAPI + React), the
 pipeline moves over unchanged.
@@ -45,7 +49,7 @@ pip install -r requirements.txt
 docker compose up -d tesseract-pol
 
 # the app (from app/)
-python ui.py --weights ../best_iou_median.pt --ocr-url http://localhost:8007
+python ui.py --weights ../best_iou_median.pt
 ```
 
 Open http://localhost:7860, drop in a file, press Run. Test inputs: anything
@@ -67,7 +71,12 @@ swappable without touching the pipeline:
   it gets a small HTTP wrapper in its existing container and a second adapter
   in `detectors.py`.
 - OCR: every service in `benchmark/` exposes the same API, so switching the
-  model means switching the URL. Ports from `benchmark/docker-compose.yml`:
+  model is just the dropdown in the UI. The list comes straight from
+  `benchmark/docker-compose.yml`, so new services show up on their own.
+  Picking a service whose container is down gives an error with the exact
+  `docker compose up` command to run. `--ocr-url` still exists for a service
+  running outside the compose file (it shows up as "custom"). Ports for
+  reference:
 
   | service | port | | service | port |
   |---|---|---|---|---|
