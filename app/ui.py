@@ -19,6 +19,7 @@ import requests
 from PIL import ImageDraw
 
 import documents
+import overlay
 import pipeline
 import preprocess
 import services
@@ -73,7 +74,7 @@ def build_app(detector, registry, default_service,
             raise gr.Error(str(e))
         ocr = get_ocr(model_name)
 
-        annotated, prep_views, texts, table = [], [], [], []
+        pages_results, prep_views, texts, table = [], [], [], []
         for pno, page in enumerate(pages, 1):
             # geometric stage is global: its output is the base image for
             # detection, crops and display alike
@@ -89,13 +90,15 @@ def build_app(detector, registry, default_service,
                                              preprocess=reuse)
             except requests.RequestException as e:
                 raise gr.Error(f"OCR service unreachable: {e}")
-            annotated.append(annotate(base, results))
+            pages_results.append((base, results))
             if det_input is not None:
                 prep_views.append(det_input)
             texts.append(text)
             table += [[pno, i, f"{r.score:.2f}", r.text]
                       for i, r in enumerate(results, 1)]
-        return annotated, prep_views or None, "\n\n".join(texts), table
+        annotated = [annotate(img, res) for img, res in pages_results]
+        return (overlay.render(pages_results), annotated, prep_views or None,
+                "\n\n".join(texts), table)
 
     with gr.Blocks(title="OCR pipeline") as demo:
         gr.Markdown("# Document OCR pipeline\n"
@@ -109,7 +112,13 @@ def build_app(detector, registry, default_service,
                                        label="OCR model (● running)")
                 refresh_btn = gr.Button("Refresh status", size="sm")
         btn = gr.Button("Run", variant="primary")
-        outp = gr.Gallery(label="Detected lines", columns=2)
+        with gr.Tabs():
+            with gr.Tab("Select text"):
+                gr.Markdown("Drag over the page to select the recognized "
+                            "text, then copy it as usual.")
+                overlay_view = gr.HTML()
+            with gr.Tab("Detected boxes"):
+                boxes_view = gr.Gallery(label="Detected lines", columns=2)
         text = gr.Textbox(label="Recognized text", lines=10)
         table = gr.Dataframe(headers=["page", "line", "conf", "text"],
                              label="Per-line results")
@@ -117,7 +126,7 @@ def build_app(detector, registry, default_service,
             prep_view = gr.Gallery(label="What the detector sees", columns=2)
         refresh_btn.click(refresh, inputs=model_dd, outputs=model_dd)
         btn.click(process, inputs=[inp, model_dd],
-                  outputs=[outp, prep_view, text, table])
+                  outputs=[overlay_view, boxes_view, prep_view, text, table])
     return demo
 
 

@@ -31,9 +31,13 @@ cut from the base image. The coordinates transfer 1:1 because this stage
 touches only pixel values, never geometry. Crops go to the OCR service in
 reading order and the texts come back joined into the final result.
 
-The OCR model is picked from a dropdown that lists every service from the
-OCR benchmark with a marker showing which ones are actually running (there
-is a refresh button next to it).
+Results show up in two tabs. "Select text" is the page with an invisible
+text layer on top of it, positioned on the detected lines, so you can drag
+over the image and copy the recognized text like in a searchable PDF. It is
+plain SVG, the same trick pdf.js uses. "Detected boxes" is the classic view
+with numbered boxes. The OCR model is picked from a dropdown that lists
+every service from the OCR benchmark with a marker showing which ones are
+actually running (there is a refresh button next to it).
 
 The pipeline logic lives in `pipeline.py` and has no UI in it, gradio is just
 a thin layer on top. If we ever want a nicer front (FastAPI + React), the
