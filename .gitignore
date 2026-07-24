@@ -26,6 +26,8 @@ __pycache__/
 line_benchmark/dataset/
 line_benchmark/results/
 line_benchmark/*.pt
+e2e_benchmark/dataset/
+e2e_benchmark/results/
 yolo_dataset/
 inference_compare/
 runs/
