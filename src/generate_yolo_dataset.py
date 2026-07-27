@@ -32,6 +32,7 @@ from renderer import find_fonts
 from fill_form import EXCLUDED_FONTS, fill_single_form
 from template_loader import load_templates
 from transforms import AugmentConfig, TransformPipeline
+from dataset_card import build_card, write_card, update_registry
 
 CLASS_NAME = "text_line"
 COCO_CATEGORY_ID = 1
@@ -85,6 +86,19 @@ def parse_args() -> argparse.Namespace:
         "--no-scan",
         action="store_true",
         help="Disable scan/photo simulation (clean output, perfect bboxes).",
+    )
+    parser.add_argument(
+        "--dataset-name",
+        type=str,
+        default=None,
+        help="Name recorded in the dataset card and registry "
+             "(default: output directory name).",
+    )
+    parser.add_argument(
+        "--note",
+        type=str,
+        default="",
+        help="Free-text note stored in the dataset card and registry.",
     )
     return parser.parse_args()
 
@@ -196,6 +210,17 @@ def main() -> None:
     total_count = 0
     skipped_blank = 0
 
+    # Counters feeding the dataset card: what the run actually produced,
+    # as opposed to what the probabilities say it should have produced.
+    observed_profiles: dict[str, int] = {}
+    observed_bases: dict[str, int] = {}
+    observed_multiline = 0
+    observed_stamps = 0
+    observed_stamps_in_gt = 0
+    observed_strokes = 0
+    observed_highlights = 0
+    fonts_used: set[str] = set()
+
     for page in pages:
         for v in range(1, n_variants + 1):
             font_path = random.choice(fonts)
@@ -216,6 +241,22 @@ def main() -> None:
                 apply_scan=apply_scan,
                 skip_f_fields=use_partial,
             )
+
+            fonts_used.add(result["font"])
+            base_kind = "partial" if use_partial else "blank"
+            observed_bases[base_kind] = observed_bases.get(base_kind, 0) + 1
+            observed_multiline += result["multiline_fields"]
+            if result["scan_augmentation"] is not None:
+                profile = result["scan_augmentation"]["profile"]
+                observed_profiles[profile] = observed_profiles.get(profile, 0) + 1
+            stamp_meta = result["artifacts"]["stamp"]
+            if stamp_meta is not None:
+                observed_stamps += 1
+                observed_stamps_in_gt += int(stamp_meta["in_gt"])
+            if result["artifacts"]["strokes"] is not None:
+                observed_strokes += 1
+            if result["artifacts"]["highlights"] is not None:
+                observed_highlights += 1
 
             img: Image.Image = result["image"]
             iw, ih = img.size
@@ -283,9 +324,42 @@ def main() -> None:
     with open(output_dir / "annotations.json", "w", encoding="utf-8") as f:
         json.dump(coco, f, ensure_ascii=False)
 
+    source_counts: dict[str, int] = {}
+    for ann in coco["annotations"]:
+        source_counts[ann["source"]] = source_counts.get(ann["source"], 0) + 1
+
+    repo_root = Path(__file__).resolve().parent.parent
+    card = build_card(
+        name=args.dataset_name or output_dir.name,
+        command="python " + " ".join([Path(sys.argv[0]).as_posix()] + sys.argv[1:]),
+        seed=args.seed,
+        repo_root=repo_root,
+        counts={
+            "images": total_count,
+            "annotations": len(coco["annotations"]),
+            "templates": len(pages),
+        },
+        sources=source_counts,
+        fonts=sorted(fonts_used),
+        observed={
+            "scan_profiles": observed_profiles,
+            "bases": observed_bases,
+            "multiline_fields": observed_multiline,
+            "stamps": observed_stamps,
+            "stamps_in_ground_truth": observed_stamps_in_gt,
+            "strokes": observed_strokes,
+            "highlights": observed_highlights,
+        },
+        note=args.note,
+    )
+    card_path = write_card(output_dir, card)
+    update_registry(repo_root / "docs" / "datasets.md", card)
+
     print(f"\nDone. {total_count} images generated in {output_dir}/")
     print(f"  annotations.json  --> COCO ({len(coco['annotations'])} annotations "
           f"with text+source)")
+    print(f"  dataset_card.json --> {card_path}")
+    print(f"  docs/datasets.md  --> wpis '{card['name']}' zaktualizowany")
     if skipped_blank:
         print(f"  Skipped {skipped_blank} blank/degenerate bbox(es)")
 
