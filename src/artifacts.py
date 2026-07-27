@@ -16,9 +16,16 @@ dark mark on paper is a line of text.
 
 import math
 import random
+from functools import lru_cache
+from pathlib import Path
+from typing import Optional
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
+
+from text_sanitize import sanitize
+from transforms import rotate_bbox
+from vocabulary import Vocabulary
 
 # --- stray pen strokes ---
 STROKE_PROB = 0.20
@@ -194,3 +201,245 @@ def draw_highlights(form: Image.Image, records: list[dict]) -> dict:
 
     form.paste(Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8)))
     return {"count": count, "colors": colors, "targets": targets}
+
+
+# --- stamps ---
+STAMP_PROB = 0.30
+STAMP_ROUND_PROB = 0.30
+STAMP_ANGLE_MAX = 20.0
+# Above this angle an axis-aligned box around slanted text gets too loose to
+# be useful ground truth, so those stamps stay unlabelled noise.
+STAMP_GT_MAX_ANGLE = 5.0
+STAMP_PLACEMENT_TRIES = 8
+STAMP_MAX_COVER_FRAC = 0.15
+PRINT_FONT_DIR = "resources/fonts_print"
+STAMP_COLORS: list[tuple[int, int, int]] = [
+    (30, 60, 140),   # blue pad
+    (35, 35, 40),    # black pad
+    (150, 40, 45),   # red pad
+]
+
+
+@lru_cache(maxsize=16)
+def _print_font(font_dir: str, size: int, bold: bool) -> ImageFont.FreeTypeFont:
+    """Load the printed font stamps are set in (cached: same file every call)."""
+    name = "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"
+    try:
+        return ImageFont.truetype(str(Path(font_dir) / name), size)
+    except (OSError, IOError):
+        return ImageFont.load_default()
+
+
+def _stamp_lines(vocab: Vocabulary, font_dir: str) -> list[str]:
+    """Compose the 2-4 lines a clinic stamp carries."""
+    department, _ = vocab.get_random_text("department")
+    doctor, _ = vocab.get_random_text("doctor_name")
+    lines = [department, doctor]
+    if random.random() < 0.7:
+        lines.append(f"nr prawa wyk. zawodu {random.randint(1000000, 9999999)}")
+    if random.random() < 0.3:
+        lines.append(
+            f"NIP {random.randint(100, 999)}-{random.randint(100, 999)}"
+            f"-{random.randint(10, 99)}-{random.randint(10, 99)}"
+        )
+    font_path = str(Path(font_dir) / "DejaVuSans.ttf")
+    return [sanitize(line, font_path) for line in lines[:4]]
+
+
+def _render_rect_stamp(
+    lines: list[str], font: ImageFont.FreeTypeFont, color: tuple[int, int, int]
+) -> tuple[Image.Image, list[list[int]]]:
+    """Draw a bordered rectangular stamp; also return each line's ink bbox."""
+    pad_x, pad_y = 14, 10
+    line_h = int(font.size * 1.5)
+    width = int(max(font.getlength(t) for t in lines) + 2 * pad_x)
+    height = int(len(lines) * line_h + 2 * pad_y)
+
+    layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(layer)
+    border = random.choice((1, 2))
+    draw.rectangle([0, 0, width - 1, height - 1], outline=color + (255,), width=border)
+    if random.random() < 0.35:
+        gap = border + 3
+        draw.rectangle(
+            [gap, gap, width - 1 - gap, height - 1 - gap],
+            outline=color + (255,), width=1,
+        )
+
+    boxes: list[list[int]] = []
+    for i, text in enumerate(lines):
+        y = pad_y + i * line_h
+        draw.text((pad_x, y), text, font=font, fill=color + (255,))
+        left, top, right, bottom = draw.textbbox((pad_x, y), text, font=font)
+        boxes.append([int(left), int(top), int(right), int(bottom)])
+    return layer, boxes
+
+
+def _render_round_stamp(
+    lines: list[str], font: ImageFont.FreeTypeFont, color: tuple[int, int, int]
+) -> Image.Image:
+    """Draw a circular stamp: arc text on top, straight text in the middle."""
+    diameter = random.randint(180, 300)
+    layer = Image.new("RGBA", (diameter, diameter), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(layer)
+    draw.ellipse(
+        [2, 2, diameter - 3, diameter - 3],
+        outline=color + (255,), width=random.choice((2, 3)),
+    )
+    inset = random.randint(10, 18)
+    draw.ellipse(
+        [inset, inset, diameter - 1 - inset, diameter - 1 - inset],
+        outline=color + (255,), width=1,
+    )
+
+    arc_text = lines[0][:32]
+    centre = diameter / 2
+    radius = centre - inset - font.size * 0.7
+    span = math.radians(min(200.0, 12.0 * len(arc_text)))
+    start = -math.pi / 2 - span / 2
+    for i, char in enumerate(arc_text):
+        angle = start + span * i / max(1, len(arc_text) - 1)
+        glyph = Image.new("RGBA", (font.size * 2, font.size * 2), (0, 0, 0, 0))
+        ImageDraw.Draw(glyph).text(
+            (font.size // 2, font.size // 2), char, font=font, fill=color + (255,)
+        )
+        glyph = glyph.rotate(-math.degrees(angle) - 90, resample=Image.BICUBIC)
+        layer.alpha_composite(
+            glyph,
+            (int(centre + radius * math.cos(angle) - glyph.width / 2),
+             int(centre + radius * math.sin(angle) - glyph.height / 2)),
+        )
+
+    if len(lines) > 1:
+        text = lines[1][:22]
+        left, top, right, bottom = draw.textbbox((0, 0), text, font=font)
+        draw.text(
+            (centre - (right - left) / 2, centre - (bottom - top) / 2),
+            text, font=font, fill=color + (255,),
+        )
+    return layer
+
+
+def _apply_ink_unevenness(layer: Image.Image) -> Image.Image:
+    """Fade parts of the stamp: a rubber pad never transfers ink evenly."""
+    width, height = layer.size
+    small = np.random.random((max(2, height // 12), max(2, width // 12)))
+    noise = np.array(
+        Image.fromarray((small * 255).astype(np.uint8)).resize(
+            (width, height), Image.BICUBIC
+        ),
+        dtype=np.float32,
+    ) / 255.0
+    factor = np.clip(0.45 + noise * 0.85, 0.0, 1.0)
+    alpha = np.array(layer.getchannel("A"), dtype=np.float32) * factor
+    layer.putalpha(Image.fromarray(np.clip(alpha, 0, 255).astype(np.uint8)))
+    return layer
+
+
+def _overlaps_text(
+    rect: tuple[int, int, int, int],
+    records: list[dict],
+    max_cover: float = STAMP_MAX_COVER_FRAC,
+) -> bool:
+    """True if the rect would bury more than `max_cover` of any text line."""
+    rx1, ry1, rx2, ry2 = rect
+    for record in records:
+        x1, y1, x2, y2 = record["bbox"]
+        area = max(1, (x2 - x1) * (y2 - y1))
+        overlap_w = max(0, min(rx2, x2) - max(rx1, x1))
+        overlap_h = max(0, min(ry2, y2) - max(ry1, y1))
+        if overlap_w * overlap_h / area > max_cover:
+            return True
+    return False
+
+
+def _find_spot(
+    form_size: tuple[int, int], stamp_size: tuple[int, int], records: list[dict]
+) -> Optional[tuple[int, int]]:
+    """Look for a free patch in the bottom third, where stamps really land."""
+    form_w, form_h = form_size
+    stamp_w, stamp_h = stamp_size
+    if stamp_w >= form_w or stamp_h >= form_h:
+        return None
+
+    y_low = int(form_h * 0.60)
+    y_high = max(y_low, form_h - stamp_h - 10)
+    x_high = max(10, form_w - stamp_w - 10)
+    for _ in range(STAMP_PLACEMENT_TRIES):
+        y = random.randint(y_low, y_high)
+        x = random.randint(10, x_high)
+        if not _overlaps_text((x, y, x + stamp_w, y + stamp_h), records):
+            return x, y
+    return None
+
+
+def draw_stamp(
+    form: Image.Image,
+    vocab: Vocabulary,
+    records: list[dict],
+    print_font_dir: str = PRINT_FONT_DIR,
+) -> tuple[Optional[dict], list[dict]]:
+    """Press one clinic stamp onto the form, in place.
+
+    Rectangular stamps pressed straight (|angle| <= STAMP_GT_MAX_ANGLE) hand
+    back one ground-truth record per text line, because an axis-aligned box
+    still hugs the text at that angle. Round stamps and heavily tilted ones
+    are unlabelled noise.
+
+    Args:
+        form: Filled form image (RGB), modified in place.
+        vocab: Vocabulary supplying department and doctor names.
+        records: Existing ground-truth records, used to avoid burying text.
+        print_font_dir: Directory holding the printed stamp font.
+
+    Returns:
+        Tuple of (metadata, new records). Metadata is None when no free spot
+        was found, in which case nothing was drawn and no records are returned.
+    """
+    lines = _stamp_lines(vocab, print_font_dir)
+    color = random.choice(STAMP_COLORS)
+    is_round = random.random() < STAMP_ROUND_PROB
+    font = _print_font(print_font_dir, random.randint(14, 22), random.random() < 0.4)
+
+    if is_round:
+        layer = _render_round_stamp(lines, font, color)
+        line_boxes: list[list[int]] = []
+    else:
+        layer, line_boxes = _render_rect_stamp(lines, font, color)
+
+    layer = _apply_ink_unevenness(layer)
+    if random.random() < 0.6:
+        layer = layer.filter(ImageFilter.GaussianBlur(random.uniform(0.3, 0.6)))
+
+    angle = random.uniform(-STAMP_ANGLE_MAX, STAMP_ANGLE_MAX)
+    src_size = layer.size
+    rotated = layer.rotate(angle, resample=Image.BICUBIC, expand=True)
+
+    spot = _find_spot(form.size, rotated.size, records)
+    if spot is None:
+        return None, []
+    x, y = spot
+    form.paste(rotated, (x, y), rotated)
+
+    in_gt = (not is_round) and abs(angle) <= STAMP_GT_MAX_ANGLE
+    new_records: list[dict] = []
+    if in_gt:
+        for text, box in zip(lines, line_boxes):
+            bx1, by1, bx2, by2 = rotate_bbox(
+                tuple(box), angle, src_size, rotated.size
+            )
+            new_records.append({
+                "label": "stamp",
+                "source": "stamp",
+                "text": text,
+                "bbox": [bx1 + x, by1 + y, bx2 + x, by2 + y],
+            })
+
+    meta = {
+        "shape": "round" if is_round else "rect",
+        "angle_deg": round(angle, 2),
+        "color": list(color),
+        "in_gt": in_gt,
+        "lines": len(lines),
+    }
+    return meta, new_records
