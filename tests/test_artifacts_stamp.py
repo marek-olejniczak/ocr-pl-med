@@ -1,3 +1,4 @@
+import math
 import random
 from pathlib import Path
 
@@ -11,7 +12,6 @@ from artifacts import (
     STAMP_ROUND_PROB,
     STAMP_ANGLE_MAX,
     STAMP_GT_MAX_ANGLE,
-    STAMP_MAX_COVER_FRAC,
     PRINT_FONT_DIR,
     _overlaps_text,
 )
@@ -23,6 +23,12 @@ REPO = Path(__file__).resolve().parent.parent
 @pytest.fixture(scope="module")
 def vocab():
     return Vocabulary(str(REPO / "resources"))
+
+
+def _seed(value):
+    """Seed both RNGs: the stamp's ink fading draws from numpy, not random."""
+    random.seed(value)
+    np.random.seed(value)
 
 
 def _blank(w=1654, h=2338):
@@ -42,7 +48,7 @@ def test_print_font_is_shipped():
 
 
 def test_stamp_is_drawn_and_geometry_survives(vocab):
-    random.seed(1)
+    _seed(1)
     form = _blank()
     before = np.array(form).copy()
     meta, records = draw_stamp(form, vocab, [])
@@ -57,7 +63,7 @@ def test_ground_truth_rule_holds_over_many_draws(vocab):
     """Only straight rectangular stamps may produce boxes."""
     seen_gt = seen_no_gt = 0
     for seed in range(60):
-        random.seed(seed)
+        _seed(seed)
         form = _blank()
         meta, records = draw_stamp(form, vocab, [])
         if meta is None:
@@ -84,7 +90,7 @@ def test_ground_truth_rule_holds_over_many_draws(vocab):
 
 def test_round_stamps_never_labelled(vocab):
     for seed in range(60):
-        random.seed(seed)
+        _seed(seed)
         meta, records = draw_stamp(_blank(), vocab, [])
         if meta and meta["shape"] == "round":
             assert meta["in_gt"] is False
@@ -94,7 +100,7 @@ def test_round_stamps_never_labelled(vocab):
 def test_stamp_bboxes_land_on_actual_ink(vocab):
     """A labelled box must contain dark pixels — proof the maths lines up."""
     for seed in range(40):
-        random.seed(seed)
+        _seed(seed)
         form = _blank()
         meta, records = draw_stamp(form, vocab, [])
         if not records:
@@ -107,6 +113,69 @@ def test_stamp_bboxes_land_on_actual_ink(vocab):
             assert (patch < 160).sum() > 0, "stamp bbox contains no ink"
 
 
+def test_stamp_boxes_are_tall_enough_for_their_own_tilt(vocab):
+    """A tilted line's axis-aligned box must clear the rise across its width.
+
+    Rotating a line of width w by angle a lifts one end above the other by
+    w * sin(a), so the enclosing axis-aligned box cannot be shorter than that
+    — before even counting the glyph height. A box built from the unrotated
+    text (or one mapped with the rotation's source and destination sizes
+    swapped) keeps roughly the flat line height and fails this, which is the
+    label-corrupting case: at a stamp's line pitch the miss is about a whole
+    line of text. Pure geometry, so no ink statistics are involved.
+    """
+    checked = 0
+    for seed in range(60):
+        _seed(seed)
+        meta, records = draw_stamp(_blank(), vocab, [])
+        if not records:
+            continue
+        rise_per_px = math.sin(abs(math.radians(meta["angle_deg"])))
+        for rec in records:
+            x1, y1, x2, y2 = rec["bbox"]
+            checked += 1
+            assert (y2 - y1) >= (x2 - x1) * rise_per_px, (
+                f"box {rec['bbox']} is too flat for a {meta['angle_deg']} deg tilt"
+            )
+    assert checked > 0, "no labelled stamp in 60 draws"
+
+
+def test_labelled_boxes_sit_inside_the_stamp_footprint(vocab):
+    """The line boxes must fall within the stamp's border, not straddle it.
+
+    A stamp's text is inset from its frame by the padding, so on an otherwise
+    blank page the topmost box starts well below the stamp's first inked row
+    and the bottom-most ends well above its last. Passing the rotation's
+    source and destination sizes to rotate_bbox in the wrong order shifts
+    every box up by the expansion the rotation added, which pushes the top box
+    onto (or past) the frame — a translation the per-line ink check cannot
+    see, because the shifted box still lands on a neighbouring line.
+
+    Measured over 120 seeds: the true margin is at least 12 px top and 14 px
+    bottom, while the swapped variant reaches -1 px at the top.
+    """
+    checked = 0
+    for seed in range(60):
+        _seed(seed)
+        form = _blank()
+        meta, records = draw_stamp(form, vocab, [])
+        if not records:
+            continue
+        checked += 1
+        rows = np.nonzero((np.array(form.convert("L")) < 200).any(axis=1))[0]
+        ink_top, ink_bottom = int(rows.min()), int(rows.max())
+        box_top = min(rec["bbox"][1] for rec in records)
+        box_bottom = max(rec["bbox"][3] for rec in records)
+        assert box_top - ink_top >= 5, (
+            f"top box starts {box_top - ink_top}px below the stamp's ink top; "
+            "boxes look shifted off the text"
+        )
+        assert ink_bottom - box_bottom >= 5, (
+            f"bottom box ends {ink_bottom - box_bottom}px above the stamp's ink bottom"
+        )
+    assert checked > 0, "no labelled stamp in 60 draws"
+
+
 def test_stamp_records_keep_line_order(vocab):
     """Record i's box must sit above record i+1's.
 
@@ -117,7 +186,7 @@ def test_stamp_records_keep_line_order(vocab):
     """
     checked = 0
     for seed in range(60):
-        random.seed(seed)
+        _seed(seed)
         meta, records = draw_stamp(_blank(), vocab, [])
         if len(records) < 2:
             continue
@@ -137,7 +206,7 @@ def test_overlap_rejection_helper():
 
 def test_stamp_skipped_when_page_is_full(vocab):
     """Bottom third packed with text: no room, no stamp, no crash."""
-    random.seed(9)
+    _seed(9)
     form = _blank(800, 1000)
     records = [
         {"label": "p", "source": "printed", "text": None,
