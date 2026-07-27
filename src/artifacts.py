@@ -119,6 +119,7 @@ def _ensure_min_luma(
     color: tuple[int, int, int], min_luma: float = HIGHLIGHT_MIN_LUMA
 ) -> tuple[int, int, int]:
     """Lighten a colour toward white until it clears the readability floor."""
+    min_luma = min(min_luma, 255.0)  # white is the ceiling; higher would never terminate
     r, g, b = color
     while _luminance((r, g, b)) < min_luma:
         r = min(255, int(r + (255 - r) * 0.15) + 1)

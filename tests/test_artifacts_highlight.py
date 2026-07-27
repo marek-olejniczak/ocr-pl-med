@@ -48,6 +48,7 @@ def test_ensure_min_luma_lightens_dark_colours():
 def test_paper_gets_tinted_and_geometry_survives():
     random.seed(2)
     form, records = _form_with_text()
+    before = np.array(form).copy()
     meta = draw_highlights(form, records)
 
     assert form.size == (600, 400)
@@ -58,6 +59,7 @@ def test_paper_gets_tinted_and_geometry_survives():
     arr = np.array(form)
     tinted = ((arr != 255).any(axis=2)).sum()
     assert tinted > 0
+    assert not np.array_equal(before, np.array(form))  # the page really changed
 
 
 def test_text_stays_darker_than_the_band():
