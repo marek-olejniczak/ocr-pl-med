@@ -146,7 +146,13 @@ def generate_field_content(
         return ""
 
     while True:
-        candidate = text + " " + sample_unit()
+        unit = sample_unit()
+        if not unit:
+            # A unit made entirely of removable characters (a lone dagger)
+            # would append a trailing space that renders as nothing, breaking
+            # the character-for-character match between transcription and ink.
+            break
+        candidate = text + " " + unit
         w = measure(candidate)
         if w > hard_cap:
             break
