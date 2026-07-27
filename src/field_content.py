@@ -18,8 +18,9 @@ hard-capped at 97% so augmentation jitter can't push ink past the field edge.
 """
 
 import random
-from typing import Callable
+from typing import Callable, Optional
 
+from text_sanitize import normalize_for_handwriting, sanitize
 from vocabulary import Vocabulary
 
 # Probability that a text field draws medical content (vs personal data)
@@ -110,6 +111,7 @@ def generate_field_content(
     vocab: Vocabulary,
     measure: Callable[[str], float],
     bbox_w: int,
+    font_path: Optional[str] = None,
 ) -> str:
     """Build field content spanning ~30-100% of the field width.
 
@@ -119,6 +121,11 @@ def generate_field_content(
         measure: Callable returning the rendered pixel width of a string
             (must already account for glyph stretch and letter tracking).
         bbox_w: Field width in pixels.
+        font_path: Font the text will be rendered with. When given, content
+            is sanitized against that font's glyph coverage BEFORE it is
+            measured, so the returned string is exactly what gets drawn and
+            recorded as ground truth. When None, only typographic
+            normalization is applied.
 
     Returns:
         Content string whose measured width is <= 0.97 * bbox_w
@@ -128,12 +135,18 @@ def generate_field_content(
     target = bbox_w * random.uniform(FILL_FRAC_MIN, FILL_FRAC_MAX)
     hard_cap = bbox_w * HARD_CAP_FRAC
 
-    text = _shrink_to_fit(sampler(vocab), measure, hard_cap)
+    def sample_unit() -> str:
+        raw = sampler(vocab)
+        if font_path is None:
+            return normalize_for_handwriting(raw)
+        return sanitize(raw, font_path)
+
+    text = _shrink_to_fit(sample_unit(), measure, hard_cap)
     if not text:
         return ""
 
     while True:
-        candidate = text + " " + sampler(vocab)
+        candidate = text + " " + sample_unit()
         w = measure(candidate)
         if w > hard_cap:
             break

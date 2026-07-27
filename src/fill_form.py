@@ -654,7 +654,7 @@ def fill_single_form(
             line_h = int(field_font_size * 1.4)
             for slot in slots:
                 line_text = generate_field_content(
-                    content_kind, vocab, measure, bbox_w
+                    content_kind, vocab, measure, bbox_w, font_path=font_path
                 )
                 if not line_text:
                     continue
@@ -670,7 +670,9 @@ def fill_single_form(
             continue
 
         # Single-line fill
-        text = generate_field_content(content_kind, vocab, measure, bbox_w)
+        text = generate_field_content(
+            content_kind, vocab, measure, bbox_w, font_path=font_path
+        )
         if not text:
             continue
         tight = _render_and_paste(
