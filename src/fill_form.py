@@ -9,6 +9,14 @@ from typing import Optional
 import numpy as np
 from PIL import Image, ImageFont
 
+from artifacts import (
+    draw_stamp,
+    draw_highlights,
+    draw_stray_strokes,
+    STAMP_PROB,
+    HIGHLIGHT_PROB,
+    STROKE_PROB,
+)
 from field_content import generate_field_content
 from vocabulary import Vocabulary
 from char_renderer import render_text_per_char
@@ -506,6 +514,7 @@ def fill_single_form(
     apply_scan: bool,
     skip_f_fields: bool = False,
     empty_field_range: tuple[float, float] = (0.0, 0.40),
+    enable_artifacts: bool = True,
 ) -> dict:
     """Generate one filled-form variant and return image + ground-truth records.
 
@@ -524,6 +533,9 @@ def fill_single_form(
         empty_field_range: Per-FORM diligence: one empty-probability is drawn
             from this range per variant and applied to every fill-in field
             (real forms are correlated — one is fully filled, another half-empty).
+        enable_artifacts: Whether to add paper artifacts (stamp, highlighter,
+            stray pen strokes) after the text is written. Off in tests that
+            need an exactly predictable record list.
 
     Returns:
         Dict with keys:
@@ -534,6 +546,8 @@ def fill_single_form(
             font (str), text_style (dict|None), ink_color (list[int]),
             scan_augmentation (dict|None), empty_field_prob (float),
             multiline_fields (int) — how many fields got >= 2 lines
+            artifacts (dict) — {"stamp": ..., "highlights": ..., "strokes": ...},
+                each None when that artifact did not fire
     """
     font_name = Path(font_path).name
 
@@ -684,6 +698,21 @@ def fill_single_form(
                 "text": text, "bbox": list(tight),
             })
 
+    # Paper artifacts: stamped, highlighted, then accidentally scribbled on —
+    # the order a real document collects them. All are photometric-only, so
+    # the ground-truth boxes recorded above stay valid to the pixel.
+    artifact_meta: dict = {"stamp": None, "highlights": None, "strokes": None}
+    if enable_artifacts:
+        if random.random() < STAMP_PROB:
+            stamp_meta, stamp_records = draw_stamp(form, vocab, records)
+            if stamp_meta is not None:
+                artifact_meta["stamp"] = stamp_meta
+                records.extend(stamp_records)
+        if random.random() < HIGHLIGHT_PROB:
+            artifact_meta["highlights"] = draw_highlights(form, records)
+        if random.random() < STROKE_PROB:
+            artifact_meta["strokes"] = draw_stray_strokes(form, ink_color)
+
     # Scan simulation is photometric only — bboxes stay valid as-is.
     scan_meta = None
     if apply_scan:
@@ -708,4 +737,5 @@ def fill_single_form(
         "scan_augmentation": scan_meta,
         "empty_field_prob": round(form_empty_prob, 3),
         "multiline_fields": multiline_fields,
+        "artifacts": artifact_meta,
     }

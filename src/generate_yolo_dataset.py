@@ -264,6 +264,7 @@ def main() -> None:
                     "ink_color": result["ink_color"],
                     "empty_field_prob": result["empty_field_prob"],
                     "multiline_fields": result["multiline_fields"],
+                    "artifacts": result["artifacts"],
                     "fields": result["records"],
                     "num_annotations": n_boxes,
                 }

@@ -53,7 +53,10 @@ def test_generator_end_to_end(tmp_path):
     assert "printed" in sources and "synthetic" in sources
     for a in coco["annotations"]:
         assert "text" in a and "source" in a
-        if a["source"] == "synthetic":
+        # synthetic fills and stamp lines are the two sources we know the
+        # exact wording of; printed/handwritten lines are boxes without a
+        # transcription
+        if a["source"] in ("synthetic", "stamp"):
             assert isinstance(a["text"], str) and a["text"]
         else:
             assert a["text"] is None

@@ -55,6 +55,7 @@ def _run(tmp_path, vocab, font_path, **kwargs):
         config=config,
         pipeline=None,
         apply_scan=False,
+        enable_artifacts=False,
         **kwargs,
     )
 
