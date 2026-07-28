@@ -1,5 +1,6 @@
 import csv
 import json
+from pathlib import Path
 
 from PIL import Image
 
@@ -85,7 +86,8 @@ def test_build_merges_new_and_old_sources(tmp_path):
     output = tmp_path / "templates"
 
     # --- Act ---
-    build(new_dataset=new_dataset, old_images=old_images, old_csv=old_csv, output=output)
+    build(new_datasets=[new_dataset], old_images=old_images, old_csv=old_csv,
+          output=output)
 
     # --- Assert: only _blank/_partial copied for the new page ---
     new_out_dir = output / "page1"
@@ -113,3 +115,79 @@ def test_build_merges_new_and_old_sources(tmp_path):
     bboxes = {tuple(a["bbox"]) for a in coco["annotations"]}
     assert (1, 2, 3, 4) in bboxes
     assert (10, 10, 30, 20) in bboxes
+
+
+def _make_coco_dataset(root: Path, page: str, category_order: list[str]) -> None:
+    """Write a one-page COCO dataset whose category ids follow the given order."""
+    page_dir = root / page
+    page_dir.mkdir(parents=True)
+    Image.new("RGB", (80, 120), "white").save(page_dir / f"{page}_blank.png")
+    categories = [{"id": i + 1, "name": n} for i, n in enumerate(category_order)]
+    label_id = next(c["id"] for c in categories if c["name"] == "t")
+    payload = {
+        "images": [{"id": 7, "file_name": f"{page}.png", "width": 80, "height": 120}],
+        "annotations": [
+            {"id": 1, "image_id": 7, "category_id": label_id, "bbox": [4, 5, 20, 10]}
+        ],
+        "categories": categories,
+    }
+    with open(root / "annotations.json", "w", encoding="utf-8") as handle:
+        json.dump(payload, handle)
+
+
+def test_multiple_datasets_merge_and_match_categories_by_name(tmp_path):
+    """Two source PDFs merge, even with different category id orderings."""
+    first = tmp_path / "pdf_one"
+    second = tmp_path / "pdf_two"
+    _make_coco_dataset(first, "alpha", ["p", "n", "t", "f", "mix"])
+    _make_coco_dataset(second, "beta", ["mix", "p", "t", "n", "f"])
+
+    old_images = tmp_path / "old_images"
+    old_images.mkdir()
+    old_csv = tmp_path / "old.csv"
+    with open(old_csv, "w", encoding="utf-8", newline="") as f:
+        csv.writer(f).writerow(
+            ["filename", "label", "x_min", "y_min", "x_max", "y_max", "crop"]
+        )
+
+    output = tmp_path / "templates"
+    build(new_datasets=[first, second], old_images=old_images, old_csv=old_csv,
+          output=output)
+
+    assert (output / "alpha" / "alpha_blank.png").exists()
+    assert (output / "beta" / "beta_blank.png").exists()
+
+    with open(output / "annotations.json", "r", encoding="utf-8") as f:
+        coco = json.load(f)
+
+    assert [im["file_name"] for im in coco["images"]] == ["alpha.png", "beta.png"]
+    assert [im["id"] for im in coco["images"]] == [1, 2]
+    assert [a["id"] for a in coco["annotations"]] == [1, 2]
+    # Both pages labelled "t" despite the second dataset numbering it differently.
+    t_id = next(c["id"] for c in coco["categories"] if c["name"] == "t")
+    assert {a["category_id"] for a in coco["annotations"]} == {t_id}
+
+
+def test_duplicate_page_name_is_skipped_not_overwritten(tmp_path):
+    """A page name may only be claimed once, so data cannot be clobbered."""
+    first = tmp_path / "pdf_one"
+    second = tmp_path / "pdf_two"
+    _make_coco_dataset(first, "same_name", ["p", "n", "t", "f", "mix"])
+    _make_coco_dataset(second, "same_name", ["p", "n", "t", "f", "mix"])
+
+    old_images = tmp_path / "old_images"
+    old_images.mkdir()
+    old_csv = tmp_path / "old.csv"
+    with open(old_csv, "w", encoding="utf-8", newline="") as f:
+        csv.writer(f).writerow(
+            ["filename", "label", "x_min", "y_min", "x_max", "y_max", "crop"]
+        )
+
+    output = tmp_path / "templates"
+    build(new_datasets=[first, second], old_images=old_images, old_csv=old_csv,
+          output=output)
+
+    with open(output / "annotations.json", "r", encoding="utf-8") as f:
+        coco = json.load(f)
+    assert len(coco["images"]) == 1
+    assert len(coco["annotations"]) == 1

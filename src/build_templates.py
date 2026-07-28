@@ -1,11 +1,14 @@
 """Build the unified templates/ directory for the dataset generator.
 
-Merges two sources into one COCO annotations.json + per-page folders:
+Merges two kinds of source into one COCO annotations.json + per-page folders:
 
-1. The new labeled dataset (dataset_30zPierwszegoPDF): COCO annotations with
-   p/n/t/f/mix categories and per-page folders containing _blank/_partial
-   PNGs. Only _blank/_partial images are copied (originals and lines/ stay
-   behind — they contain unmasked or redundant data).
+1. Labelled COCO datasets, one per source PDF (dataset_30zPierwszegoPDF,
+   dataset_21zDrugiegoPDF, ...): p/n/t/f/mix categories plus per-page folders
+   containing _blank/_partial PNGs. Only _blank/_partial images are copied
+   (originals and lines/ stay behind — they hold unmasked or redundant data).
+   Categories are matched by name, so datasets whose category ids are ordered
+   differently still merge correctly. A page name may only appear once; a
+   later dataset reusing a name is skipped rather than silently overwriting.
 
 2. Old templates (forms/segmentation/images) labeled via the flat CSV from
    labeling_tool.py. Labels are mapped printed->p, text->t, number->n (plus
@@ -14,7 +17,7 @@ Merges two sources into one COCO annotations.json + per-page folders:
 
 Usage:
     python src/build_templates.py \
-        --new-dataset dataset_30zPierwszegoPDF \
+        --new-dataset dataset_30zPierwszegoPDF dataset_21zDrugiegoPDF \
         --old-images forms/segmentation/images \
         --old-csv "C:/Users/tomek/Desktop/inzynierka/dataset/annotations.csv" \
         --output templates
@@ -69,7 +72,13 @@ def map_old_label(label: str) -> Optional[str]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build unified templates/ directory.")
-    parser.add_argument("--new-dataset", type=str, default="dataset_30zPierwszegoPDF")
+    parser.add_argument(
+        "--new-dataset",
+        type=str,
+        nargs="+",
+        default=["dataset_30zPierwszegoPDF", "dataset_21zDrugiegoPDF"],
+        help="One or more labelled COCO dataset directories (one per source PDF).",
+    )
     parser.add_argument("--old-images", type=str, default="forms/segmentation/images")
     parser.add_argument("--old-csv", type=str,
                         default="C:/Users/tomek/Desktop/inzynierka/dataset/annotations.csv")
@@ -77,8 +86,14 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def build(new_dataset: Path, old_images: Path, old_csv: Path, output: Path) -> None:
-    """Build the unified templates/ directory from the two source layouts.
+def build(
+    new_datasets: list[Path], old_images: Path, old_csv: Path, output: Path
+) -> None:
+    """Build the unified templates/ directory from the source layouts.
+
+    Accepts any number of labelled COCO datasets (one per source PDF) plus the
+    legacy CSV-labelled templates. Categories are matched by NAME, so datasets
+    whose category ids are ordered differently merge cleanly.
 
     See module docstring for the merge rules. Writes PNGs and
     ``annotations.json`` under ``output``.
@@ -90,55 +105,62 @@ def build(new_dataset: Path, old_images: Path, old_csv: Path, output: Path) -> N
     next_image_id = 1
     next_ann_id = 1
 
-    # --- 1) New dataset: copy _blank/_partial + re-id annotations ---
-    new_root = new_dataset
-    with open(new_root / "annotations.json", "r", encoding="utf-8") as f:
-        src = json.load(f)
-    src_cats = {c["id"]: c["name"] for c in src["categories"]}
-    anns_by_image: dict[int, list[dict]] = {}
-    for a in src["annotations"]:
-        anns_by_image.setdefault(a["image_id"], []).append(a)
-
+    # --- 1) Labelled COCO datasets: copy _blank/_partial + re-id annotations ---
     n_new_pages = 0
-    for im in src["images"]:
-        stem = Path(im["file_name"]).stem
-        src_dir = new_root / stem
-        blank_src = src_dir / f"{stem}_blank.png"
-        if not blank_src.exists():
-            print(f"  SKIP {stem}: no _blank.png in source", file=sys.stderr)
-            continue
-        dst_dir = out_dir / stem
-        dst_dir.mkdir(exist_ok=True)
-        shutil.copy2(blank_src, dst_dir / blank_src.name)
-        partial_src = src_dir / f"{stem}_partial.png"
-        if partial_src.exists():
-            shutil.copy2(partial_src, dst_dir / partial_src.name)
+    seen_stems: set[str] = set()
+    for new_root in new_datasets:
+        with open(new_root / "annotations.json", "r", encoding="utf-8") as f:
+            src = json.load(f)
+        src_cats = {c["id"]: c["name"] for c in src["categories"]}
+        anns_by_image: dict[int, list[dict]] = {}
+        for a in src["annotations"]:
+            anns_by_image.setdefault(a["image_id"], []).append(a)
 
-        image_id = next_image_id
-        next_image_id += 1
-        coco_out["images"].append({
-            "id": image_id,
-            "file_name": im["file_name"],
-            "width": im["width"],
-            "height": im["height"],
-        })
-        for a in anns_by_image.get(im["id"], []):
-            name = src_cats.get(a["category_id"])
-            if name not in CAT_ID:
+        for im in src["images"]:
+            stem = Path(im["file_name"]).stem
+            src_dir = new_root / stem
+            blank_src = src_dir / f"{stem}_blank.png"
+            if not blank_src.exists():
+                print(f"  SKIP {stem}: no _blank.png in {new_root}", file=sys.stderr)
                 continue
-            x, y, w, h = a["bbox"]
-            if w <= 0 or h <= 0:
+            if stem in seen_stems:
+                print(f"  SKIP {stem}: page name already taken by an earlier "
+                      f"dataset", file=sys.stderr)
                 continue
-            coco_out["annotations"].append({
-                "id": next_ann_id,
-                "image_id": image_id,
-                "category_id": CAT_ID[name],
-                "bbox": [x, y, w, h],
-                "area": w * h,
-                "iscrowd": 0,
+            seen_stems.add(stem)
+
+            dst_dir = out_dir / stem
+            dst_dir.mkdir(exist_ok=True)
+            shutil.copy2(blank_src, dst_dir / blank_src.name)
+            partial_src = src_dir / f"{stem}_partial.png"
+            if partial_src.exists():
+                shutil.copy2(partial_src, dst_dir / partial_src.name)
+
+            image_id = next_image_id
+            next_image_id += 1
+            coco_out["images"].append({
+                "id": image_id,
+                "file_name": im["file_name"],
+                "width": im["width"],
+                "height": im["height"],
             })
-            next_ann_id += 1
-        n_new_pages += 1
+            for a in anns_by_image.get(im["id"], []):
+                name = src_cats.get(a["category_id"])
+                if name not in CAT_ID:
+                    continue
+                x, y, w, h = a["bbox"]
+                if w <= 0 or h <= 0:
+                    continue
+                coco_out["annotations"].append({
+                    "id": next_ann_id,
+                    "image_id": image_id,
+                    "category_id": CAT_ID[name],
+                    "bbox": [x, y, w, h],
+                    "area": w * h,
+                    "iscrowd": 0,
+                })
+                next_ann_id += 1
+            n_new_pages += 1
 
     # --- 2) Old templates: CSV labels -> p/t/n, template PNG becomes _blank ---
     rows_by_file: dict[str, list[dict]] = {}
@@ -201,7 +223,7 @@ def build(new_dataset: Path, old_images: Path, old_csv: Path, output: Path) -> N
 def main() -> None:
     args = parse_args()
     build(
-        new_dataset=Path(args.new_dataset),
+        new_datasets=[Path(p) for p in args.new_dataset],
         old_images=Path(args.old_images),
         old_csv=Path(args.old_csv),
         output=Path(args.output),
