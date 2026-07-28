@@ -80,6 +80,14 @@ def parse_args() -> argparse.Namespace:
                         help="Skip scan simulation (clean renders).")
     parser.add_argument("--dataset-name", type=str, default=None)
     parser.add_argument("--note", type=str, default="")
+    parser.add_argument(
+        "--registry",
+        type=str,
+        default=None,
+        help="Registry file to update (default: docs/datasets.md in the repo). "
+             "Pass 'none' to skip the registry — use this for throwaway runs, "
+             "which should not append rows to the repo's registry.",
+    )
     return parser.parse_args()
 
 
@@ -328,7 +336,12 @@ def main() -> None:
     card["augmentations"]["neighbour_bleed_prob"] = NEIGHBOUR_BLEED_PROB
     card["augmentations"]["content_kinds"] = [list(k) for k in CONTENT_KINDS]
     card_path = write_card(output_dir, card)
-    update_registry(repo_root / "docs" / "datasets.md", card)
+    if args.registry != "none":
+        registry_path = (
+            Path(args.registry) if args.registry
+            else repo_root / "docs" / "datasets.md"
+        )
+        update_registry(registry_path, card)
 
     print(f"\nDone. {len(rows)} lines in {output_dir}/")
     print(f"  images/           --> {len(rows)} JPGs")

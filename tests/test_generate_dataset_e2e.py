@@ -42,7 +42,9 @@ def test_generator_end_to_end(tmp_path):
          "--variants-per-form", "6",
          "--font-dir", str(REPO / "resources" / "fonts"),
          "--resource-dir", str(REPO / "resources"),
-         "--seed", "123"],
+         "--seed", "123",
+         # Must not append a row to the repo's real registry.
+         "--registry", "none"],
         capture_output=True, text=True, cwd=str(REPO),
     )
     assert result.returncode == 0, result.stderr
@@ -74,3 +76,55 @@ def test_generator_end_to_end(tmp_path):
     assert "empty_field_prob" in meta0
     assert meta0["scan_augmentation"]["profile"] in (
         "clean_color", "grayscale", "photocopy")
+
+
+def test_generator_does_not_touch_the_repo_registry(tmp_path):
+    """A run must never append to docs/datasets.md unless asked to.
+
+    The registry is committed to the repo; a test run that silently adds a row
+    to it turns every test invocation into a working-tree change.
+    """
+    registry = REPO / "docs" / "datasets.md"
+    before = registry.read_text(encoding="utf-8") if registry.exists() else None
+
+    tdir = _make_mini_templates(tmp_path)
+    out = tmp_path / "out_registry_check"
+    result = subprocess.run(
+        [sys.executable, str(REPO / "src" / "generate_yolo_dataset.py"),
+         "--templates-dir", str(tdir),
+         "--output-dir", str(out),
+         "--variants-per-form", "1",
+         "--font-dir", str(REPO / "resources" / "fonts"),
+         "--resource-dir", str(REPO / "resources"),
+         "--seed", "4",
+         "--registry", "none"],
+        capture_output=True, text=True, cwd=str(REPO),
+    )
+    assert result.returncode == 0, result.stderr
+
+    after = registry.read_text(encoding="utf-8") if registry.exists() else None
+    assert after == before, "the run modified the repo's registry"
+    # The card itself still lands next to the data.
+    assert (out / "dataset_card.json").exists()
+
+
+def test_registry_can_be_redirected(tmp_path):
+    """--registry PATH writes the row somewhere harmless instead."""
+    tdir = _make_mini_templates(tmp_path)
+    out = tmp_path / "out_redirect"
+    registry = tmp_path / "own_registry.md"
+    result = subprocess.run(
+        [sys.executable, str(REPO / "src" / "generate_yolo_dataset.py"),
+         "--templates-dir", str(tdir),
+         "--output-dir", str(out),
+         "--variants-per-form", "1",
+         "--font-dir", str(REPO / "resources" / "fonts"),
+         "--resource-dir", str(REPO / "resources"),
+         "--seed", "4",
+         "--dataset-name", "redirected",
+         "--registry", str(registry)],
+        capture_output=True, text=True, cwd=str(REPO),
+    )
+    assert result.returncode == 0, result.stderr
+    assert registry.exists()
+    assert "| redirected |" in registry.read_text(encoding="utf-8")

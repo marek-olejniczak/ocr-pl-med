@@ -100,6 +100,14 @@ def parse_args() -> argparse.Namespace:
         default="",
         help="Free-text note stored in the dataset card and registry.",
     )
+    parser.add_argument(
+        "--registry",
+        type=str,
+        default=None,
+        help="Registry file to update (default: docs/datasets.md in the repo). "
+             "Pass 'none' to skip the registry — use this for throwaway runs and "
+             "tests, which must not append rows to the repo's registry.",
+    )
     return parser.parse_args()
 
 
@@ -353,13 +361,20 @@ def main() -> None:
         note=args.note,
     )
     card_path = write_card(output_dir, card)
-    update_registry(repo_root / "docs" / "datasets.md", card)
+    registry_path = None
+    if args.registry != "none":
+        registry_path = (
+            Path(args.registry) if args.registry
+            else repo_root / "docs" / "datasets.md"
+        )
+        update_registry(registry_path, card)
 
     print(f"\nDone. {total_count} images generated in {output_dir}/")
     print(f"  annotations.json  --> COCO ({len(coco['annotations'])} annotations "
           f"with text+source)")
     print(f"  dataset_card.json --> {card_path}")
-    print(f"  docs/datasets.md  --> wpis '{card['name']}' zaktualizowany")
+    if registry_path is not None:
+        print(f"  {registry_path}  --> wpis '{card['name']}' zaktualizowany")
     if skipped_blank:
         print(f"  Skipped {skipped_blank} blank/degenerate bbox(es)")
 
