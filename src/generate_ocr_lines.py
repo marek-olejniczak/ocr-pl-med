@@ -261,64 +261,75 @@ def main() -> None:
     print(f"Rendering {args.count} lines (scan simulation: "
           f"{'ON' if apply_scan else 'OFF'})")
 
-    rows: list[tuple[str, str, str]] = []  # (relative path, text, split)
-    metas: list[dict] = []
     fonts_used: set[str] = set()
     profiles: dict[str, int] = {}
     kinds: dict[str, int] = {}
     skipped = 0
     index = 0
+    n_val = 0
 
-    while index < args.count:
-        image, text, meta = render_line(vocab, fonts, config, apply_scan)
-        if image is None:
-            skipped += 1
-            if skipped > args.count:
-                print("ERROR: content generation kept coming back empty",
-                      file=sys.stderr)
-                sys.exit(1)
-            continue
+    # Labels are written as each line is rendered, not collected in memory and
+    # dumped at the end: a run of this length WILL sometimes be interrupted,
+    # and images without transcriptions are worthless for OCR training. The
+    # label files are the source of truth — a killed run leaves a consistent
+    # dataset covering however many lines it managed to finish.
+    handles = {
+        "all": open(output_dir / "labels.txt", "w", encoding="utf-8"),
+        "train": open(output_dir / "labels_train.txt", "w", encoding="utf-8"),
+        "val": open(output_dir / "labels_val.txt", "w", encoding="utf-8"),
+        "jsonl": open(output_dir / "labels.jsonl", "w", encoding="utf-8"),
+    }
+    try:
+        while index < args.count:
+            image, text, meta = render_line(vocab, fonts, config, apply_scan)
+            if image is None:
+                skipped += 1
+                if skipped > args.count:
+                    print("ERROR: content generation kept coming back empty",
+                          file=sys.stderr)
+                    sys.exit(1)
+                continue
 
-        name = f"{index:07d}.jpg"
-        image.save(images_dir / name, quality=93)
-        split = "val" if random.random() < args.val_frac else "train"
-        rows.append((f"images/{name}", text, split))
+            name = f"{index:07d}.jpg"
+            image.save(images_dir / name, quality=93)
+            split = "val" if random.random() < args.val_frac else "train"
+            path = f"images/{name}"
 
-        fonts_used.add(meta["font"])
-        kinds[meta["kind"]] = kinds.get(meta["kind"], 0) + 1
-        if meta["scan_profile"]:
-            profiles[meta["scan_profile"]] = profiles.get(meta["scan_profile"], 0) + 1
-        metas.append({"file_name": f"images/{name}", "text": text, "split": split,
-                      **meta})
+            handles["all"].write(f"{path}\t{text}\n")
+            handles[split].write(f"{path}\t{text}\n")
+            handles["jsonl"].write(json.dumps(
+                {"file_name": path, "text": text, "split": split, **meta},
+                ensure_ascii=False) + "\n")
 
-        index += 1
-        if index % 1000 == 0 or index == 1:
-            print(f"  [{index}] {name}  {text[:48]!r}")
+            fonts_used.add(meta["font"])
+            kinds[meta["kind"]] = kinds.get(meta["kind"], 0) + 1
+            if meta["scan_profile"]:
+                profiles[meta["scan_profile"]] = (
+                    profiles.get(meta["scan_profile"], 0) + 1
+                )
+            n_val += int(split == "val")
 
-    # PaddleOCR / MMOCR / CRNN style: path<TAB>text
-    for split in ("train", "val"):
-        with open(output_dir / f"labels_{split}.txt", "w", encoding="utf-8") as handle:
-            for path, text, row_split in rows:
-                if row_split == split:
-                    handle.write(f"{path}\t{text}\n")
-    with open(output_dir / "labels.txt", "w", encoding="utf-8") as handle:
-        for path, text, _ in rows:
-            handle.write(f"{path}\t{text}\n")
+            index += 1
+            # Flush often so a killed run's four label files stay in step with
+            # each other; flush() only reaches the OS buffer, so it is cheap.
+            if index % 200 == 0:
+                for handle in handles.values():
+                    handle.flush()
+            if index % 1000 == 0 or index == 1:
+                print(f"  [{index}] {name}  {text[:48]!r}")
+    finally:
+        for handle in handles.values():
+            handle.close()
 
-    # HuggingFace / TrOCR style
-    with open(output_dir / "labels.jsonl", "w", encoding="utf-8") as handle:
-        for entry in metas:
-            handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
-
-    n_val = sum(1 for _, _, s in rows if s == "val")
+    n_lines = index
     repo_root = Path(__file__).resolve().parent.parent
     card = build_card(
         name=args.dataset_name or output_dir.name,
         command="python " + " ".join([Path(sys.argv[0]).as_posix()] + sys.argv[1:]),
         seed=args.seed,
         repo_root=repo_root,
-        counts={"lines": len(rows), "train": len(rows) - n_val, "val": n_val},
-        sources={"synthetic": len(rows)},
+        counts={"lines": n_lines, "train": n_lines - n_val, "val": n_val},
+        sources={"synthetic": n_lines},
         fonts=sorted(fonts_used),
         observed={"scan_profiles": profiles, "content_kinds": kinds,
                   "empty_content_retries": skipped},
@@ -343,10 +354,10 @@ def main() -> None:
         )
         update_registry(registry_path, card)
 
-    print(f"\nDone. {len(rows)} lines in {output_dir}/")
-    print(f"  images/           --> {len(rows)} JPGs")
+    print(f"\nDone. {n_lines} lines in {output_dir}/")
+    print(f"  images/           --> {n_lines} JPGs")
     print(f"  labels.txt        --> path<TAB>text (all)")
-    print(f"  labels_train.txt  --> {len(rows) - n_val} lines")
+    print(f"  labels_train.txt  --> {n_lines - n_val} lines")
     print(f"  labels_val.txt    --> {n_val} lines")
     print(f"  labels.jsonl      --> per-line metadata (HuggingFace style)")
     print(f"  dataset_card.json --> {card_path}")
