@@ -1,0 +1,6 @@
+[core]
+    remote = origin
+['remote "storage"']
+    url = gdrive://1YieYCzUlfOdE9DzaFGGa2isaCXr15xrL
+['remote "origin"']
+    url = https://dagshub.com/JakubGorniak-git/inzynierka.dvc
