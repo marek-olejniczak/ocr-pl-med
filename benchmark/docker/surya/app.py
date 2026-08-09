@@ -47,13 +47,45 @@ def _build_surya_state(options: dict) -> dict:
     FoundationPredictor = getattr(foundation_module, "FoundationPredictor")
     RecognitionPredictor = getattr(recognition_module, "RecognitionPredictor")
 
-    foundation_predictor = FoundationPredictor()
+    # --- custom checkpoint / LoRA adapter ---
+    checkpoint_path = options.get("checkpoint_path")
+    lora_adapter_path = options.get("lora_adapter_path")
+
+    if checkpoint_path:
+        # Pełny fine-tuning checkpoint — przekaż do FoundationPredictor
+        emit_event(
+            logger, logging.INFO, "loading_custom_checkpoint",
+            service=SERVICE_NAME, checkpoint_path=checkpoint_path,
+        )
+        foundation_predictor = FoundationPredictor(checkpoint=checkpoint_path)
+    else:
+        foundation_predictor = FoundationPredictor()
+
+    # LoRA adapter (opcjonalnie — wymaga peft)
+    if lora_adapter_path:
+        try:
+            from peft import PeftModel
+        except ImportError:
+            raise RuntimeError(
+                "PEFT nie jest zainstalowany. "
+                "Zainstaluj: pip install peft"
+            )
+        emit_event(
+            logger, logging.INFO, "loading_lora_adapter",
+            service=SERVICE_NAME, lora_adapter_path=lora_adapter_path,
+        )
+        foundation_predictor.model = PeftModel.from_pretrained(
+            foundation_predictor.model, lora_adapter_path
+        )
+
     recognition_predictor = RecognitionPredictor(foundation_predictor)
     return {
         "recognition_predictor": recognition_predictor,
         "task_name": str(options.get("task_name", "ocr_without_boxes")),
         "disable_math": bool(options.get("disable_math", True)),
         "batch_size": int(options.get("batch_size", 32)),
+        "checkpoint_path": checkpoint_path,
+        "lora_adapter_path": lora_adapter_path,
     }
 
 

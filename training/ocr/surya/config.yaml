@@ -1,0 +1,48 @@
+# Domyślne hiperparametry dla fine-tuningu Surya
+# Wszystkie wartości nadpisywalne przez CLI (argparse)
+
+# --- Model ---
+model:
+  pretrained_checkpoint: null      # null = domyślny checkpoint surya (vikp/surya_ocr2)
+  max_sequence_length: 1024
+  image_size: [1024, 512]          # OCR_MAX_IMAGE_SIZE — nie zmieniać
+
+# --- LoRA ---
+lora:
+  enabled: false
+  rank: 32
+  alpha: 64
+  dropout: 0.1
+  target_modules: ["q_proj", "v_proj", "o_proj"]  # attention-only
+
+# --- Trening (HuggingFace TrainingArguments) ---
+training:
+  output_dir: "results/ocr/surya"
+  num_train_epochs: 10
+  per_device_train_batch_size: 8
+  gradient_accumulation_steps: 1
+  learning_rate: 5.0e-5
+  weight_decay: 0.01
+  warmup_ratio: 0.1
+  lr_scheduler_type: "cosine"
+  logging_steps: 10
+  save_strategy: "epoch"
+  evaluation_strategy: "epoch"     # wymaga datasetu walidacyjnego
+  save_total_limit: 3
+  load_best_model_at_end: true
+  metric_for_best_model: "eval_loss"
+  greater_is_better: false
+  bf16: true                       # mixed precision (Ampere+)
+  gradient_checkpointing: true
+  dataloader_num_workers: 4
+  remove_unused_columns: false     # wymagane przez Surya
+  report_to: []                    # ["wandb"] dla logowania do W&B
+
+# --- Dane ---
+data:
+  dataset_name: null               # HuggingFace dataset (np. "datalab-to/ocr_finetune_example")
+  train_metadata: null             # path do metadata.jsonl (lokalne dane)
+  train_images_dir: null           # path do katalogu z obrazami
+  val_metadata: null
+  val_images_dir: null
+  num_loading_proc: 4
