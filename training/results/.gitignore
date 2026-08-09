@@ -1,0 +1,4 @@
+# Cały katalog results jest ignorowany — checkpointy i logi są duże
+# i nie wersjonowane w gicie.
+*
+!.gitignore
