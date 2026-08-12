@@ -11,11 +11,12 @@ Creates:
 
 Usage (from line_benchmark/):
     python data_prep/converters/to_yolo.py --annotations-dir dataset/annotations \
-        --images-root ../../dataset --out-dir dataset/yolo_raw
+        --images-root dataset/docs_20k/images --out-dir dataset/yolo_raw
 """
 
 import argparse
 import json
+import os
 import shutil
 from collections import defaultdict
 from pathlib import Path
@@ -63,7 +64,10 @@ def convert_coco_to_yolo(coco_path, images_root, out_dir, split, copy=False):
         if copy:
             shutil.copy2(src, dst)
         else:
-            dst.symlink_to(src)
+            # relative target, so the link resolves both on the host and
+            # under the /benchmark bind mount; keep images-root inside the
+            # tree that gets mounted
+            dst.symlink_to(os.path.relpath(src, dst.parent.resolve()))
 
         lines = coco_to_yolo_lines(anns[img["id"]],
                                    img["width"], img["height"])
