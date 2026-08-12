@@ -34,9 +34,12 @@ def read_rows(csv_path):
 
 
 def find_page(dataset_root, file_name):
-    """Pages sit either flat or in a directory named after them."""
+    """Pages sit in a directory named after them, or flat. The CSV sometimes
+    prefixes the name with the labeling group (KOSCI/, MIESNIE/), which is not
+    part of the path on disk."""
     root = Path(dataset_root)
-    for cand in (root / Path(file_name).stem / file_name, root / file_name):
+    rel = Path(file_name)
+    for cand in (root / rel.stem / rel.name, root / rel, root / rel.name):
         if cand.exists():
             return cand
     return None
@@ -48,15 +51,22 @@ def build(rows, dataset_root, non_text=NON_TEXT):
         by_page[r["filename"]].append(r)
 
     images, annotations, missing, crops = [], [], [], []
+    seen = {}
     for file_name in sorted(by_page):
         src = find_page(dataset_root, file_name)
         if src is None:
             missing.append(file_name)
             continue
+        # the group prefix is dropped, so the page images can be flattened
+        name = Path(file_name).name
+        if name in seen:
+            raise ValueError(f"duplicate page name: {name} "
+                             f"({seen[name]} and {file_name})")
+        seen[name] = file_name
         image_id = len(images) + 1
         with Image.open(src) as im:
             width, height = im.size
-        images.append({"id": image_id, "file_name": file_name,
+        images.append({"id": image_id, "file_name": name,
                        "width": width, "height": height})
         for r in by_page[file_name]:
             x1, y1 = int(r["x_min"]), int(r["y_min"])
