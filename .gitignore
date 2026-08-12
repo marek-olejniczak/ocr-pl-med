@@ -22,6 +22,9 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 
+# DVC-tracked data (dataset.dvc is the pointer)
+/dataset/
+
 # Line segmentation benchmark artifacts
 line_benchmark/dataset/
 line_benchmark/results/
