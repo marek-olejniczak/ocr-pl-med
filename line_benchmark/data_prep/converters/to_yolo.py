@@ -46,8 +46,12 @@ def convert_coco_to_yolo(coco_path, images_root, out_dir, split, copy=False):
 
     img_out = Path(out_dir) / "images" / split
     lbl_out = Path(out_dir) / "labels" / split
-    img_out.mkdir(parents=True, exist_ok=True)
-    lbl_out.mkdir(parents=True, exist_ok=True)
+    # the layout is derived from the COCO file, so start clean: leftovers from
+    # an earlier dataset would silently join the training set
+    for d in (img_out, lbl_out):
+        if d.exists():
+            shutil.rmtree(d)
+        d.mkdir(parents=True)
 
     stems = set()
     for img in coco["images"]:
