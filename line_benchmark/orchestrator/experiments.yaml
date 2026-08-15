@@ -3,7 +3,8 @@
 dataset: docs_20k
 
 defaults:
-  epochs: 30         # 14k train images, ~6x the pilot; revisit once the curves are in
+  # yolo11 raw plateaued around epoch 13 of 30, so 20 with patience is plenty
+  epochs: 20
   # 1024, not 640: the thinnest lines are ~22 px on a 2338 px page, i.e. 6 px
   # after downscaling to 640
   imgsz: 1024
@@ -38,7 +39,9 @@ models:
   # yolo11n + rtdetr-l TODO, fall back to defaults.lr0 for now)
   yolov8:  {service: ultralytics, weights: yolov8n.pt,  finetune: true, zeroshot: false, lr0: 0.0005}
   yolo11:  {service: ultralytics, weights: yolo11n.pt,  finetune: true, zeroshot: false}
-  rtdetr:  {service: ultralytics, weights: rtdetr-l.pt, finetune: true, zeroshot: false}
+  # rtdetr-l is ~12x the parameters of the nano models; 16 would not fit at
+  # 1024 on a 24 GB card (yolo11n alone sits at 11 GB). Confirm with a short run.
+  rtdetr:  {service: ultralytics, weights: rtdetr-l.pt, finetune: true, zeroshot: false, batch: 4}
   # Faster R-CNN R50-FPN (detection, COCO-native -> data_format: coco). Diagnostics/
   # line-val are ultralytics-only, so train_flags empty; lr0 after lr-find.
   frcnn:
@@ -48,6 +51,8 @@ models:
     zeroshot: false
     data_format: coco
     train_flags: []
+    # detectron2 counts batch as images per GPU; R50-FPN at 1024 wants 2-4
+    batch: 2
   # Surya: native line detection, predict-only (finetuning unavailable) ->
   # zeroshot=true, finetune=false. Generates only predict+eval (raw and prep).
   surya:

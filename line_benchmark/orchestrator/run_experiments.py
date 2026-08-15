@@ -87,6 +87,10 @@ def job_command(job, cfg, local, results_dir="results"):
         # per-model lr0 (from lr-find) overrides defaults.lr0; ultralytics 'auto'
         # default (~0.002) sits on the unstable side for these models
         lr0 = mc.get("lr0", d.get("lr0"))
+        # heavier backbones need their own batch/imgsz: one 24 GB card, and a
+        # detector that fits at nano scale does not fit at rtdetr-l scale
+        batch = mc.get("batch", d["batch"])
+        imgsz = mc.get("imgsz", d["imgsz"])
         # data_format seam: YOLO models take a data.yaml; COCO-native frameworks
         # (detectron2) take the shared train/val COCO + the variant's images_root
         fmt = mc.get("data_format", "yolo")
@@ -112,9 +116,9 @@ def job_command(job, cfg, local, results_dir="results"):
                 "--weights", job["weights"],
                 *data_args,
                 "--out", f"{results_dir}/checkpoints/{job['exp_id']}",
-                "--epochs", str(d["epochs"]),
-                "--imgsz", str(d["imgsz"]),
-                "--batch", str(d["batch"]),
+                "--epochs", str(mc.get("epochs", d["epochs"])),
+                "--imgsz", str(imgsz),
+                "--batch", str(batch),
                 *(["--lr0", str(lr0)] if lr0 is not None else []),
                 *flags]
     elif job["kind"] == "predict":
