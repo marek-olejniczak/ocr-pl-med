@@ -2,8 +2,10 @@
 # bind-mounted /benchmark (checkpoints, predictions, results) is owned by you,
 # not root. Set HUID/HGID once in a local .env file (gitignored), e.g.:
 #   printf 'HUID=%s\nHGID=%s\n' "$(id -u)" "$(id -g)" > .env
-# HOME=/tmp because a non-root user cannot write /root; wandb/torch/ultralytics
-# caches land in /tmp, model downloads go to /benchmark (writable by you).
+# HOME and the cache/tmp dirs point into the bind mount, not /tmp: a non-root
+# user cannot write /root, and /tmp lives on the container layer, which on a
+# host with a full root filesystem means ENOSPC in the middle of a run.
+# torch, ultralytics and matplotlib each pick their own variable, hence four.
 services:
   ultralytics:
     build: ./docker/ultralytics
@@ -21,7 +23,10 @@ services:
     working_dir: /benchmark
     environment:
       - WANDB_API_KEY
-      - HOME=/tmp
+      - HOME=/benchmark/results/.home
+      - TMPDIR=/benchmark/results/.home/tmp
+      - YOLO_CONFIG_DIR=/benchmark/results/.home/Ultralytics
+      - MPLCONFIGDIR=/benchmark/results/.home/matplotlib
     deploy:
       resources:
         reservations:
@@ -39,7 +44,10 @@ services:
     working_dir: /benchmark
     environment:
       - WANDB_API_KEY
-      - HOME=/tmp
+      - HOME=/benchmark/results/.home
+      - TMPDIR=/benchmark/results/.home/tmp
+      - YOLO_CONFIG_DIR=/benchmark/results/.home/Ultralytics
+      - MPLCONFIGDIR=/benchmark/results/.home/matplotlib
     deploy:
       resources:
         reservations:
@@ -57,7 +65,10 @@ services:
     working_dir: /benchmark
     environment:
       - WANDB_API_KEY
-      - HOME=/tmp
+      - HOME=/benchmark/results/.home
+      - TMPDIR=/benchmark/results/.home/tmp
+      - YOLO_CONFIG_DIR=/benchmark/results/.home/Ultralytics
+      - MPLCONFIGDIR=/benchmark/results/.home/matplotlib
     deploy:
       resources:
         reservations:
@@ -75,7 +86,10 @@ services:
     working_dir: /benchmark
     environment:
       - WANDB_API_KEY
-      - HOME=/tmp
+      - HOME=/benchmark/results/.home
+      - TMPDIR=/benchmark/results/.home/tmp
+      - YOLO_CONFIG_DIR=/benchmark/results/.home/Ultralytics
+      - MPLCONFIGDIR=/benchmark/results/.home/matplotlib
     deploy:
       resources:
         reservations:

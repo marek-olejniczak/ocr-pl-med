@@ -55,6 +55,13 @@ def git_commit():
         return None
 
 
+def ensure_tmpdir():
+    """tempfile needs TMPDIR to exist; compose points it into the bind mount."""
+    tmp = os.environ.get("TMPDIR")
+    if tmp:
+        Path(tmp).mkdir(parents=True, exist_ok=True)
+
+
 def guard_out_dir(out, overwrite=False):
     ckpt = Path(out) / "train" / "weights" / "best.pt"
     if ckpt.exists() and not overwrite:
@@ -98,6 +105,7 @@ def cmd_train(args):
     import sys
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
 
+    ensure_tmpdir()
     guard_out_dir(args.out, args.overwrite)
 
     # single source of truth for the training hyperparameters: the same dict
@@ -198,6 +206,8 @@ def cmd_predict(args):
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
     from common.resources import reset_gpu_peak, resource_meta
+
+    ensure_tmpdir()
 
     reset_gpu_peak()
     model = get_model(args.weights)
