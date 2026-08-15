@@ -10,14 +10,14 @@ import argparse
 import csv
 import json
 import sys
-import tempfile
 from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from evaluation.metrics import coco_map, detection_metrics, ece, line_metrics
+from evaluation.metrics import (coco_map, detection_metrics, ece,
+                               line_metrics, match_greedy)
 
 SUMMARY_COLUMNS = [
     "exp_id",
@@ -116,24 +116,42 @@ def _aggregate(gt, op_preds, all_preds, gt_json_path, image_ids, with_map=True):
     return out
 
 
-def _image_sources(gt):
-    """Map image_id -> source (from its annotations; '?' if absent)."""
-    src = {}
-    for a in gt["annotations"]:
-        src.setdefault(a["image_id"], a.get("source", "?"))
-    return src
+def _per_source(gt, op_preds, image_ids):
+    """Recall per GT source (printed / handwritten / stamp / ...).
 
+    Attribution is per annotation, not per page: one form mixes printed,
+    typed and handwritten lines, so labelling a whole page by its first
+    annotation says nothing. Only recall-side numbers make sense here - a
+    prediction carries no source, so precision has no counterpart.
+    """
+    gt_by_img, pred_by_img = _group_by_image(gt, op_preds)
+    stats = defaultdict(lambda: {"n_gt": 0, "n_matched": 0, "ious": []})
+    for img_id in image_ids:
+        anns = gt_by_img.get(img_id, [])
+        preds = pred_by_img.get(img_id, [])
+        matches = match_greedy([a["bbox"] for a in anns],
+                               [p["bbox"] for p in preds],
+                               [p["score"] for p in preds]) if preds else []
+        matched = {g: iou for g, _, iou in matches}
+        for i, a in enumerate(anns):
+            st = stats[a.get("source", "?")]
+            st["n_gt"] += 1
+            if i in matched:
+                st["n_matched"] += 1
+                st["ious"].append(matched[i])
 
-def _subset_gt_file(gt, image_ids, tmp_dir):
-    ids = set(image_ids)
-    sub = {
-        **gt,
-        "images": [i for i in gt["images"] if i["id"] in ids],
-        "annotations": [a for a in gt["annotations"] if a["image_id"] in ids],
-    }
-    path = Path(tmp_dir) / "gt_subset.json"
-    path.write_text(json.dumps(sub))
-    return path
+    out = {}
+    for src, st in stats.items():
+        n_gt, n_hit = st["n_gt"], st["n_matched"]
+        out[src] = {
+            "n_gt": n_gt,
+            "n_matched": n_hit,
+            "recall": n_hit / n_gt if n_gt else 0.0,
+            "missed_rate": 1 - n_hit / n_gt if n_gt else 0.0,
+            "iou_mean": float(np.mean(st["ious"])) if st["ious"] else 0.0,
+            "iou_median": float(np.median(st["ious"])) if st["ious"] else 0.0,
+        }
+    return out
 
 
 def evaluate_run(gt_json_path, predictions, conf_thresh=0.25, with_map=True):
@@ -146,17 +164,7 @@ def evaluate_run(gt_json_path, predictions, conf_thresh=0.25, with_map=True):
                               with_map),
     }
 
-    sources = _image_sources(gt)
-    by_source = defaultdict(list)
-    for img_id, s in sources.items():
-        by_source[s].append(img_id)
-    result["per_source"] = {}
-    if len(by_source) > 1:
-        with tempfile.TemporaryDirectory() as td:
-            for s, ids in by_source.items():
-                sub_path = _subset_gt_file(gt, ids, td)
-                result["per_source"][s] = _aggregate(
-                    gt, op_preds, predictions, sub_path, ids, with_map)
+    result["per_source"] = _per_source(gt, op_preds, all_ids)
     return result
 
 
