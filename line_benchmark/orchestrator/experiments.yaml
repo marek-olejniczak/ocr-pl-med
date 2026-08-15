@@ -1,18 +1,27 @@
+# Named so experiment ids and the wandb group carry it: the same model gets
+# retrained on other datasets, and every layout lands in the same paths.
+dataset: docs_20k
+
 defaults:
-  epochs: 60         # pilot yolov8n: f1 plateaus ~ep20, iou_median ~ep48; 60 + patience captures it
-  imgsz: 640
-  batch: 64
+  epochs: 30         # 14k train images, ~6x the pilot; revisit once the curves are in
+  # 1024, not 640: the thinnest lines are ~22 px on a 2338 px page, i.e. 6 px
+  # after downscaling to 640
+  imgsz: 1024
+  # 16 keeps ~11 GB of 24 on the 3090; 32 peaked at 22.2 GB and left nothing for
+  # validation. Both accumulate to ultralytics' nominal batch of 64.
+  batch: 16
   conf_thresh: 0.25
   # default LR from yolov8n lr-find (usable band 3e-4..1e-3; ultralytics 0.002
   # default already sits on the rising/unstable side). Per-model override below.
   lr0: 0.0005
-  train_flags: [--line-val, --diagnostics]
+  train_flags: [--line-val, --diagnostics, --wandb]
 
 data:
   raw:
     yolo: dataset/yolo_raw/data.yaml
-    images_root: ../../dataset
+    images_root: dataset/docs_20k/images
     pagexml: dataset/pagexml_raw      # kraken: generate via to_pagexml before training
+  # photometric variant: generate with preprocess_dataset.py before running this
   prep:
     yolo: dataset/yolo_prep/data.yaml
     images_root: dataset/prep
@@ -46,14 +55,14 @@ models:
     weights: surya
     finetune: false
     zeroshot: true
-  # Kraken BLLA: HTR line segmentation. Zero-shot (blla model) + finetuning
-  # (ketos segtrain on PAGE XML from to_pagexml). data_format: pagexml; diagnostics
-  # ultralytics-only -> train_flags empty. NOTE: generate PAGE XML before training:
-  # python data_prep/converters/to_pagexml.py --coco ... --out-dir dataset/pagexml_raw
+  # Kraken BLLA: HTR line segmentation. Zero-shot only for now - segtrain needs
+  # PAGE XML for all 14k train pages and is far slower than the detectors, so it
+  # would dominate the GPU budget. Flip finetune back on (and generate the XML
+  # with to_pagexml) if there is time for it.
   kraken:
     service: kraken
     weights: blla
-    finetune: true
+    finetune: false
     zeroshot: true
     data_format: pagexml
     train_flags: []

@@ -46,15 +46,19 @@ def load_config(path):
 def build_matrix(cfg, results_dir="results"):
     """models x data variants -> ordered job list (train -> predict -> eval)."""
     jobs = []
+    # the dataset belongs in the id: the same model and variant get retrained
+    # on other datasets, and every layout is materialized to the same paths
+    prefix = f"{cfg['dataset']}_" if cfg.get("dataset") else ""
     for model, mc in cfg["models"].items():
         ckpts = {}
         if mc.get("finetune"):
             for variant, dc in cfg["data"].items():
-                train_id = f"{model}_ft-{variant}"
+                train_id = f"{prefix}{model}_ft-{variant}"
                 ckpts[train_id] = (f"{results_dir}/checkpoints/{train_id}/"
                                    f"{_ckpt_rel(mc['service'])}")
                 jobs.append({"kind": "train", "exp_id": train_id,
                              "model": model, "service": mc["service"],
+                             "variant": variant,
                              "weights": mc["weights"], "data_yaml": dc.get("yolo"),
                              "images_root": dc["images_root"],
                              "pagexml": dc.get("pagexml")})
@@ -67,7 +71,7 @@ def build_matrix(cfg, results_dir="results"):
                     jobs.append({"kind": "eval", "exp_id": eid, "model": model})
         if mc.get("zeroshot"):
             for ev, edc in cfg["data"].items():
-                eid = f"{model}_zeroshot_eval-{ev}"
+                eid = f"{prefix}{model}_zeroshot_eval-{ev}"
                 jobs.append({"kind": "predict", "exp_id": eid,
                              "model": model, "service": mc["service"],
                              "weights": mc["weights"],
@@ -98,6 +102,12 @@ def job_command(job, cfg, local, results_dir="results"):
         # train flags are framework-specific (--line-val/--diagnostics are
         # ultralytics-only); per-model override falls back to defaults
         flags = mc.get("train_flags", d.get("train_flags", []))
+        # wandb grouping is ultralytics-only (the other CLIs have no such flags)
+        if "--wandb" in flags and job["service"] == "ultralytics":
+            if cfg.get("dataset"):
+                flags = [*flags, "--wandb-group", cfg["dataset"]]
+            flags = [*flags, "--wandb-tags",
+                     ",".join([job["model"], "ft", job["variant"]])]
         argv = ["python", f"docker/{job['service']}/cli.py", "train",
                 "--weights", job["weights"],
                 *data_args,
