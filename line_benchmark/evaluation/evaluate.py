@@ -59,7 +59,7 @@ def _group_by_image(gt, predictions):
     return gt_by_img, pred_by_img
 
 
-def _aggregate(gt, op_preds, all_preds, gt_json_path, image_ids):
+def _aggregate(gt, op_preds, all_preds, gt_json_path, image_ids, with_map=True):
     """Micro-averaged metrics over the given image subset.
 
     Matching happens per image - boxes from different pages can never pair up.
@@ -107,8 +107,12 @@ def _aggregate(gt, op_preds, all_preds, gt_json_path, image_ids):
             "n_matched": int(totals["n_matched"]),
         }
     )
-    ids = set(image_ids)
-    out.update(coco_map(gt_json_path, [p for p in all_preds if p["image_id"] in ids]))
+    if with_map:
+        # the expensive part, and it does not depend on the operating point -
+        # skip it when sweeping confidence thresholds
+        ids = set(image_ids)
+        out.update(coco_map(gt_json_path,
+                            [p for p in all_preds if p["image_id"] in ids]))
     return out
 
 
@@ -132,13 +136,14 @@ def _subset_gt_file(gt, image_ids, tmp_dir):
     return path
 
 
-def evaluate_run(gt_json_path, predictions, conf_thresh=0.25):
+def evaluate_run(gt_json_path, predictions, conf_thresh=0.25, with_map=True):
     gt = json.loads(Path(gt_json_path).read_text())
     op_preds = [p for p in predictions if p["score"] >= conf_thresh]
     all_ids = [i["id"] for i in gt["images"]]
     result = {
         "conf_thresh": conf_thresh,
-        "overall": _aggregate(gt, op_preds, predictions, gt_json_path, all_ids),
+        "overall": _aggregate(gt, op_preds, predictions, gt_json_path, all_ids,
+                              with_map),
     }
 
     sources = _image_sources(gt)
@@ -151,7 +156,7 @@ def evaluate_run(gt_json_path, predictions, conf_thresh=0.25):
             for s, ids in by_source.items():
                 sub_path = _subset_gt_file(gt, ids, td)
                 result["per_source"][s] = _aggregate(
-                    gt, op_preds, predictions, sub_path, ids)
+                    gt, op_preds, predictions, sub_path, ids, with_map)
     return result
 
 
@@ -175,10 +180,14 @@ def main(argv=None):
     ap.add_argument("--conf-thresh", type=float, default=0.25,
                     help="operating point for line/detection metrics; "
                          "mAP always uses all predictions")
+    ap.add_argument("--no-map", action="store_true",
+                    help="skip COCO mAP - it ignores --conf-thresh anyway, so "
+                         "recomputing it per threshold is wasted work")
     args = ap.parse_args(argv)
 
     predictions = json.loads(Path(args.pred).read_text())
-    result = evaluate_run(args.gt, predictions, conf_thresh=args.conf_thresh)
+    result = evaluate_run(args.gt, predictions, conf_thresh=args.conf_thresh,
+                          with_map=not args.no_map)
 
     # inference speed comes from the predict step's meta.json (sibling of the
     # predictions file); fold it into the result + summary so cost sits next to
@@ -194,11 +203,11 @@ def main(argv=None):
     metrics_dir.mkdir(parents=True, exist_ok=True)
     (metrics_dir / f"{args.exp_id}.json").write_text(json.dumps(result, indent=2))
     _append_summary(args.out_dir, args.exp_id, result)
-    print(
-        f"{args.exp_id}: AP50={result['overall']['ap50']:.3f} "
-        f"F1={result['overall']['f1']:.3f} "
-        f"missed={result['overall']['missed_rate']:.3f}"
-    )
+    o = result["overall"]
+    ap50 = f"{o['ap50']:.3f}" if "ap50" in o else "skipped"
+    print(f"{args.exp_id}: AP50={ap50} P={o['precision']:.3f} "
+          f"R={o['recall']:.3f} F1={o['f1']:.3f} "
+          f"missed={o['missed_rate']:.3f}")
 
 
 if __name__ == "__main__":
