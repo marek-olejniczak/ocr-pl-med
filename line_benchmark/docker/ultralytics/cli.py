@@ -121,6 +121,10 @@ def cmd_train(args):
         lr0=args.lr0,
         lrf=args.lrf,
         warmup_epochs=args.warmup_epochs,
+        # explicit because rtdetr needs it off: its pipeline runs
+        # v8_transforms(stretch=True), which never crops the 2*imgsz mosaic
+        # canvas back, so training silently happens at double the resolution
+        mosaic=args.mosaic,
         cos_lr=True,
         seed=args.seed,
         deterministic=True,
@@ -303,6 +307,8 @@ def main(argv=None):
     t.add_argument("--lr0", type=float, default=0.002)
     t.add_argument("--lrf", type=float, default=0.01)
     t.add_argument("--warmup-epochs", type=float, default=3.0)
+    t.add_argument("--mosaic", type=float, default=1.0,
+                   help="ultralytics default is 1.0; set 0 for rtdetr")
     t.add_argument("--seed", type=int, default=0)
     t.add_argument("--device", default=None)
     t.add_argument("--diagnostics", action="store_true",

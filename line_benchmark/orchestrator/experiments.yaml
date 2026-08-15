@@ -41,7 +41,11 @@ models:
   yolo11:  {service: ultralytics, weights: yolo11n.pt,  finetune: true, zeroshot: false}
   # rtdetr-l is ~12x the parameters of the nano models; 16 would not fit at
   # 1024 on a 24 GB card (yolo11n alone sits at 11 GB). Confirm with a short run.
-  rtdetr:  {service: ultralytics, weights: rtdetr-l.pt, finetune: true, zeroshot: false, batch: 4}
+  # mosaic off: ultralytics builds rtdetr batches with stretch=True, which leaves
+  # the 2x imgsz mosaic canvas uncropped - 2048 px, 4x the pixels, ~50 min/epoch.
+  # With it off, batch 8 costs the same memory as 4 did at 2048 and still
+  # accumulates to the nominal 64.
+  rtdetr:  {service: ultralytics, weights: rtdetr-l.pt, finetune: true, zeroshot: false, batch: 8, mosaic: 0.0}
   # Faster R-CNN R50-FPN (detection, COCO-native -> data_format: coco). Diagnostics/
   # line-val are ultralytics-only, so train_flags empty; lr0 after lr-find.
   frcnn:

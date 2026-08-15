@@ -91,6 +91,7 @@ def job_command(job, cfg, local, results_dir="results"):
         # detector that fits at nano scale does not fit at rtdetr-l scale
         batch = mc.get("batch", d["batch"])
         imgsz = mc.get("imgsz", d["imgsz"])
+        mosaic = mc.get("mosaic", d.get("mosaic"))
         # data_format seam: YOLO models take a data.yaml; COCO-native frameworks
         # (detectron2) take the shared train/val COCO + the variant's images_root
         fmt = mc.get("data_format", "yolo")
@@ -120,6 +121,7 @@ def job_command(job, cfg, local, results_dir="results"):
                 "--imgsz", str(imgsz),
                 "--batch", str(batch),
                 *(["--lr0", str(lr0)] if lr0 is not None else []),
+                *(["--mosaic", str(mosaic)] if mosaic is not None else []),
                 *flags]
     elif job["kind"] == "predict":
         argv = ["python", f"docker/{job['service']}/cli.py", "predict",
