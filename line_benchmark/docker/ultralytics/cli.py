@@ -13,10 +13,54 @@ Usage:
 """
 
 import argparse
+import hashlib
 import json
+import os
 import platform
 import statistics
+import subprocess
 from pathlib import Path
+
+
+def dataset_fingerprint(data_yaml):
+    """Which images each split holds, as counts + a hash of their names.
+
+    Every dataset is materialized into the same yolo layout, so the path in
+    the config cannot tell two of them apart; this can."""
+    import yaml
+    root = Path(data_yaml).resolve().parent
+    cfg = yaml.safe_load(Path(data_yaml).read_text())
+    out = {}
+    for split in ("train", "val", "test"):
+        rel = cfg.get(split)
+        d = root / rel if rel else None
+        if d is None or not d.is_dir():
+            continue
+        names = sorted(p.name for p in d.iterdir())
+        out[f"data_{split}_images"] = len(names)
+        out[f"data_{split}_md5"] = hashlib.md5(
+            "\n".join(names).encode()).hexdigest()[:12]
+    return out
+
+
+def git_commit():
+    """Set GIT_COMMIT when running in the container - .git is not mounted."""
+    if os.environ.get("GIT_COMMIT"):
+        return os.environ["GIT_COMMIT"]
+    try:
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+                              capture_output=True, text=True,
+                              timeout=5).stdout.strip() or None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def guard_out_dir(out, overwrite=False):
+    ckpt = Path(out) / "train" / "weights" / "best.pt"
+    if ckpt.exists() and not overwrite:
+        raise SystemExit(
+            f"{ckpt} already exists - a previous run would be overwritten. "
+            "Use a different --out or pass --overwrite.")
 
 
 def is_rtdetr(weights):
@@ -54,6 +98,8 @@ def cmd_train(args):
     import sys
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
 
+    guard_out_dir(args.out, args.overwrite)
+
     # single source of truth for the training hyperparameters: the same dict
     # feeds model.train() and the wandb config, so the config can never drift
     # from what actually ran (e.g. optimizer, cos_lr were hardcoded before and
@@ -74,12 +120,23 @@ def cmd_train(args):
         device=args.device,
     )
 
+    provenance = {"git_commit": git_commit(),
+                  **dataset_fingerprint(args.data)}
+    # same record on disk, so a run stays documented without wandb
+    meta = {**vars(args), **train_kwargs, **provenance}
+    Path(args.out).mkdir(parents=True, exist_ok=True)
+    (Path(args.out) / "run_meta.json").write_text(
+        json.dumps(meta, indent=2, default=str))
+
     wandb_run = None
     if args.wandb:
         import wandb
-        wandb_run = wandb.init(project=args.wandb_project,
-                               name=Path(args.out).name,
-                               config={**vars(args), **train_kwargs})
+        wandb_run = wandb.init(
+            project=args.wandb_project,
+            name=Path(args.out).name,
+            group=args.wandb_group,
+            tags=[t for t in (args.wandb_tags or "").split(",") if t],
+            config={**vars(args), **train_kwargs, **provenance})
 
     trainer = None
     if args.diagnostics:
@@ -253,6 +310,11 @@ def main(argv=None):
                    help="log prediction overlays every N epochs")
     t.add_argument("--wandb", action="store_true")
     t.add_argument("--wandb-project", default="line-benchmark")
+    t.add_argument("--wandb-group",
+                   help="groups runs in the UI, e.g. the dataset name")
+    t.add_argument("--wandb-tags", help="comma-separated")
+    t.add_argument("--overwrite", action="store_true",
+                   help="replace an --out that already holds a checkpoint")
     t.set_defaults(fn=cmd_train)
 
     p = sub.add_parser("predict")
