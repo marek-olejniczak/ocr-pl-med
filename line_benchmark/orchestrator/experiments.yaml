@@ -54,8 +54,11 @@ models:
     finetune: true
     zeroshot: false
     data_format: coco
-    # --line-val/--diagnostics are ultralytics-only, but this CLI does log to wandb
-    train_flags: [--wandb]
+    # --line-val/--diagnostics are ultralytics-only. --wandb would work (the CLI
+    # supports it) but the built image has no wandb module, and rebuilding needs
+    # space on a root filesystem that is currently full; the training curve can
+    # be backfilled from detectron2's own metrics.json afterwards.
+    train_flags: []
     # batch 2 (the detectron2 default per GPU) left the card at 3 GB of 24 and
     # took 7 h; 8 fits comfortably. lr0 scaled with it to keep the same rate per
     # image (0.00025 x 8), so the optimization is unchanged, just fewer steps.
