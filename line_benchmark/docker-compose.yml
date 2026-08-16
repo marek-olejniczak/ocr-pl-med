@@ -5,7 +5,9 @@
 # HOME and the cache/tmp dirs point into the bind mount, not /tmp: a non-root
 # user cannot write /root, and /tmp lives on the container layer, which on a
 # host with a full root filesystem means ENOSPC in the middle of a run.
-# torch, ultralytics and matplotlib each pick their own variable, hence four.
+# torch, ultralytics and matplotlib each pick their own variable.
+# USER/LOGNAME because getpass.getuser() reads them before /etc/passwd, which
+# has no entry for the host uid we run as - torch._inductor calls it and dies.
 services:
   ultralytics:
     build: ./docker/ultralytics
@@ -27,6 +29,9 @@ services:
       - TMPDIR=/benchmark/results/.home/tmp
       - YOLO_CONFIG_DIR=/benchmark/results/.home/Ultralytics
       - MPLCONFIGDIR=/benchmark/results/.home/matplotlib
+      - TORCHINDUCTOR_CACHE_DIR=/benchmark/results/.home/torchinductor
+      - USER=benchmark
+      - LOGNAME=benchmark
     deploy:
       resources:
         reservations:
@@ -48,6 +53,9 @@ services:
       - TMPDIR=/benchmark/results/.home/tmp
       - YOLO_CONFIG_DIR=/benchmark/results/.home/Ultralytics
       - MPLCONFIGDIR=/benchmark/results/.home/matplotlib
+      - TORCHINDUCTOR_CACHE_DIR=/benchmark/results/.home/torchinductor
+      - USER=benchmark
+      - LOGNAME=benchmark
     deploy:
       resources:
         reservations:
@@ -69,6 +77,9 @@ services:
       - TMPDIR=/benchmark/results/.home/tmp
       - YOLO_CONFIG_DIR=/benchmark/results/.home/Ultralytics
       - MPLCONFIGDIR=/benchmark/results/.home/matplotlib
+      - TORCHINDUCTOR_CACHE_DIR=/benchmark/results/.home/torchinductor
+      - USER=benchmark
+      - LOGNAME=benchmark
     deploy:
       resources:
         reservations:
@@ -90,6 +101,9 @@ services:
       - TMPDIR=/benchmark/results/.home/tmp
       - YOLO_CONFIG_DIR=/benchmark/results/.home/Ultralytics
       - MPLCONFIGDIR=/benchmark/results/.home/matplotlib
+      - TORCHINDUCTOR_CACHE_DIR=/benchmark/results/.home/torchinductor
+      - USER=benchmark
+      - LOGNAME=benchmark
     deploy:
       resources:
         reservations:
