@@ -55,8 +55,15 @@ def _base_cfg(args, zoo_config, num_classes=1):
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file(zoo_config))
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = num_classes
+    # --imgsz means the longest side, as in ultralytics. detectron2 resizes by
+    # the shortest edge and caps the longest with MAX_SIZE (default 1333), so
+    # setting only MIN_SIZE silently trained a 1654x2338 page at 943x1333 -
+    # 1.7x the pixels YOLO gets from its 1024 letterbox. Capping both at imgsz
+    # reproduces the letterbox scale exactly (724x1024 here).
     cfg.INPUT.MIN_SIZE_TRAIN = (args.imgsz,)
+    cfg.INPUT.MAX_SIZE_TRAIN = args.imgsz
     cfg.INPUT.MIN_SIZE_TEST = args.imgsz
+    cfg.INPUT.MAX_SIZE_TEST = args.imgsz
     cfg.MODEL.DEVICE = args.device or "cuda"
     return cfg
 
