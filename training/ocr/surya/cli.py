@@ -288,6 +288,7 @@ def cmd_train(args):
         output_dir=args.output_dir,
         run_name=args.run_name,
         num_train_epochs=args.epochs,
+        max_steps=args.max_steps,
         per_device_train_batch_size=args.batch_size,
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         learning_rate=args.learning_rate,
@@ -370,6 +371,8 @@ def main(argv=None):
     # trening
     ap.add_argument("--output-dir", default="training/results/ocr/surya/default")
     ap.add_argument("--epochs", type=int, default=10)
+    ap.add_argument("--max-steps", type=int, default=-1,
+                   help="Limit kroków treningu (-1 = bez limitu; do smoke testu np. 2)")
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--gradient-accumulation-steps", type=int, default=1)
     ap.add_argument("--learning-rate", type=float, default=5e-5)
