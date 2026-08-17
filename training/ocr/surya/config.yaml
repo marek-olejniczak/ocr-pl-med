@@ -1,15 +1,16 @@
-# Domyślne hiperparametry dla fine-tuningu Surya
-# Wszystkie wartości nadpisywalne przez CLI (argparse)
+# Dokumentacja domyślnych hiperparametrów dla fine-tuningu Surya.
+# UWAGA: ten plik jest tylko referencją — faktycznie obowiązują domyślne wartości
+# z argparse w cli.py (wszystkie nadpisywalne przez CLI).
 
 # --- Model ---
 model:
-  pretrained_checkpoint: null      # null = domyślny checkpoint surya (vikp/surya_ocr2)
+  pretrained_checkpoint: null      # null = domyślny checkpoint foundation (s3://text_recognition/2025_09_23)
   max_sequence_length: 1024
   image_size: [1024, 512]          # OCR_MAX_IMAGE_SIZE — nie zmieniać
 
 # --- LoRA ---
 lora:
-  enabled: false
+  enabled: true                    # rekomendowane dla 24 GB VRAM
   rank: 32
   alpha: 64
   dropout: 0.1
@@ -17,7 +18,7 @@ lora:
 
 # --- Trening (HuggingFace TrainingArguments) ---
 training:
-  output_dir: "results/ocr/surya"
+  output_dir: "training/results/ocr/surya/<run>"
   num_train_epochs: 10
   per_device_train_batch_size: 8
   gradient_accumulation_steps: 1
@@ -32,17 +33,15 @@ training:
   load_best_model_at_end: true
   metric_for_best_model: "eval_loss"
   greater_is_better: false
-  bf16: true                       # mixed precision (Ampere+)
-  gradient_checkpointing: true
-  dataloader_num_workers: 4
+  bf16: true                       # mixed precision (Ampere+, m.in. RTX 3090)
+  gradient_checkpointing: false    # nieprzetestowane z custom forward — zostaw wyłączone
+  dataloader_num_workers: 0        # collator trzyma referencję do modelu — musi być 0
   remove_unused_columns: false     # wymagane przez Surya
-  report_to: []                    # ["wandb"] dla logowania do W&B
+  report_to: ["wandb"]             # [] = brak logowania
 
 # --- Dane ---
 data:
-  dataset_name: null               # HuggingFace dataset (np. "datalab-to/ocr_finetune_example")
-  train_metadata: null             # path do metadata.jsonl (lokalne dane)
-  train_images_dir: null           # path do katalogu z obrazami
-  val_metadata: null
-  val_images_dir: null
-  num_loading_proc: 4
+  train_metadata: "training/data/processed/surya/train/metadata.jsonl"
+  train_images_dir: "training/data/processed/surya/train/images"
+  val_metadata: "training/data/processed/surya/val/metadata.jsonl"
+  val_images_dir: "training/data/processed/surya/val/images"

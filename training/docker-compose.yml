@@ -1,0 +1,51 @@
+# Trening Surya OCR (fine-tuning). Wzorowane na line_benchmark/docker-compose.yml.
+#
+# Kontener działa jako użytkownik hosta (HUID/HGID), żeby pliki zapisywane do
+# bind-mountów (converted data, checkpointy, cache modeli) należały do Ciebie,
+# a nie do roota. Ustaw HUID/HGID raz w lokalnym .env (gitignored):
+#   printf 'HUID=%s\nHGID=%s\n' "$(id -u)" "$(id -g)" > .env
+#
+# HOME=/tmp, bo nie-root nie może pisać /root; cachy wandb/torch lądują w /tmp,
+# a model bazowy (surya foundation) i HF cache idą do /cache (bind z home hosta).
+#
+# Użycie:
+#   docker compose -f training/docker-compose.yml build surya-training
+#   docker compose -f training/docker-compose.yml run --rm surya-training \
+#       python training/ocr/surya/convert_data.py ocr800k \
+#       --input dataset/ocr_800k --output training/data/processed/surya
+#   docker compose -f training/docker-compose.yml run --rm surya-training \
+#       python training/ocr/surya/cli.py train \
+#       --train-metadata training/data/processed/surya/train/metadata.jsonl \
+#       --train-images-dir training/data/processed/surya/train/images \
+#       --val-metadata training/data/processed/surya/val/metadata.jsonl \
+#       --val-images-dir training/data/processed/surya/val/images \
+#       --lora --report-to wandb --output-dir training/results/ocr/surya/run01
+
+services:
+  surya-training:
+    build:
+      context: ..
+      dockerfile: training/ocr/surya/Dockerfile
+    user: "${HUID:-1000}:${HGID:-1000}"
+    # DataLoader trzyma referencję do modelu (dataloader_num_workers=0), więc
+    # shm nie jest krytyczny, ale zostawiamy zapas na przyszłe podbicie workers.
+    shm_size: "8gb"
+    volumes:
+      - ..:/app
+      # Cache modelu bazowego + HF — w home hosta (duży dysk), nie w /tmp.
+      - ${HOME}/models/cache:/cache
+    working_dir: /app
+    environment:
+      - WANDB_API_KEY
+      - WANDB_ENTITY=ocr-pl-med
+      - WANDB_PROJECT=ocr-finetune
+      - HOME=/tmp
+      - MODEL_CACHE_DIR=/cache/surya
+      - HF_HOME=/cache/hf
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

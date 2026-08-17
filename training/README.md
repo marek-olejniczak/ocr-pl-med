@@ -20,13 +20,14 @@ training/
 
 Każdy model w `ocr/<model>/` dostaje:
 - `Dockerfile` — obraz PyTorch + zależności modelu
-- `cli.py` — entry point z subkomendami `train` / `predict`
-- `config.yaml` — domyślne hiperparametry
+- `cli.py` — entry point treningu (`train`); konwersja danych w `convert_data.py`
+- `config.yaml` — dokumentacja domyślnych hiperparametrów
 - `requirements.txt` — zależności Python
 
-Uruchomienie treningu:
+Uruchomienie treningu (szczegóły w `ocr/surya/README.md`):
 ```bash
-docker compose run --rm <model>-training python cli.py train --data ... --epochs 10
+docker compose -f training/docker-compose.yml run --rm surya-training \
+    python training/ocr/surya/cli.py train --train-metadata ... --train-images-dir ... --lora
 ```
 
 ## Dane
