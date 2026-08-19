@@ -5,8 +5,8 @@
 # a nie do roota. Ustaw HUID/HGID raz w lokalnym .env (gitignored):
 #   printf 'HUID=%s\nHGID=%s\n' "$(id -u)" "$(id -g)" > .env
 #
-# HOME=/tmp, bo nie-root nie może pisać /root; cachy wandb/torch lądują w /tmp,
-# a model bazowy (surya foundation) i HF cache idą do /cache (bind z home hosta).
+# HOME=/tmp, bo nie-root nie może pisać /root; cache wandb (artefakty), model
+# bazowy (surya foundation) i HF cache idą do /cache (bind z home hosta).
 #
 # Użycie:
 #   docker compose -f training/docker-compose.yml build surya-training
@@ -40,6 +40,9 @@ services:
       - WANDB_ENTITY=ocr-pl-med
       - WANDB_PROJECT=ocr-finetune
       - HOME=/tmp
+      # Cache wandb (m.in. artefakty) na /cache (home hosta), a nie w /tmp
+      # (które jest w warstwie zapisywalnej kontenera na małej partycji root).
+      - WANDB_CACHE_DIR=/cache/wandb
       - MODEL_CACHE_DIR=/cache/surya
       - HF_HOME=/cache/hf
     deploy:
