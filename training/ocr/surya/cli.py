@@ -290,7 +290,7 @@ def cmd_train(args):
         lr_scheduler_type=args.lr_scheduler_type,
         logging_steps=args.logging_steps,
         save_strategy=args.save_strategy,
-        evaluation_strategy=args.evaluation_strategy if eval_dataset else "no",
+        eval_strategy=args.evaluation_strategy if eval_dataset else "no",
         save_total_limit=args.save_total_limit,
         load_best_model_at_end=bool(eval_dataset),
         metric_for_best_model="eval_loss" if eval_dataset else None,
