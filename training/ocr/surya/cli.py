@@ -120,11 +120,13 @@ class SuryaOCRDataCollator:
 
     def __init__(self, model, processor,
                  max_sequence_length: Optional[int] = None,
-                 encoder_chunk_size: int = 32768):
+                 encoder_chunk_size: int = 32768,
+                 bf16: bool = True):
         self.model = model
         self.processor = processor
         self.max_sequence_length = max_sequence_length
         self.encoder_chunk_size = encoder_chunk_size
+        self.bf16 = bf16
 
     def __call__(self, inputs):
         processed = self.processor(inputs, padding_side="right")
@@ -186,6 +188,28 @@ class SuryaOCRDataCollator:
         )
         labels[skip_mask] = -100
         processed["labels"] = labels
+
+        # 4D causal maska zamiast 2D: SuryaModel._prepare_4d_causal_attention_mask_with_cache_position
+        # ma bug przy batch>1 (buduje causal_mask z batch=1, a masked_fill z attention_mask o batch=8).
+        # Jeśli podamy maskę 4D, surya zwraca ją bez zmian (dim()==4). Dla flash_attention_2
+        # surya zwraca 2D maskę bez zmian — tam NIE budujemy 4D.
+        attn_impl = getattr(self.model.config, "_attn_implementation", None)
+        if attn_impl != "flash_attention_2":
+            batch, seq = processed["input_ids"].shape
+            device = processed["input_ids"].device
+            dtype = torch.bfloat16 if self.bf16 else torch.float32
+            min_dtype = torch.finfo(dtype).min
+            # 0 = można attendować (przeszłość + self), min_dtype = zablokowane.
+            causal = torch.full((batch, 1, seq, seq), min_dtype, dtype=dtype, device=device)
+            causal = causal.masked_fill(
+                torch.tril(torch.ones(seq, seq, dtype=torch.bool, device=device))
+                .unsqueeze(0).unsqueeze(0),
+                0.0,
+            )
+            pad = processed["attention_mask"] == 0  # (batch, seq)
+            causal = causal.masked_fill(pad.unsqueeze(1).unsqueeze(1), min_dtype)  # kv-padding
+            causal = causal.masked_fill(pad.unsqueeze(1).unsqueeze(2), min_dtype)  # query-padding
+            processed["attention_mask"] = causal
 
         return processed
 
@@ -273,7 +297,8 @@ def cmd_train(args):
         })
         print(f"LoRA applied: rank={args.lora_rank}, alpha={args.lora_alpha}")
 
-    collator = SuryaOCRDataCollator(model, processor, args.max_sequence_length)
+    collator = SuryaOCRDataCollator(
+        model, processor, args.max_sequence_length, bf16=args.bf16)
 
     report_to = [r for r in (args.report_to or "").split(",") if r]
 
