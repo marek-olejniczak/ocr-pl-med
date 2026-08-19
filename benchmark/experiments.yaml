@@ -173,6 +173,20 @@ models:
       disable_math: false
       cache_dir: "modele/cache/surya"
 
+  - id: "surya_lora_ocr800k" # nasz fine-tuning: LoRA na ocr_800k
+    service_name: "surya"
+    base_url: "http://localhost:8008"
+    enabled: true
+    timeout: 600
+    options:
+      device: "cuda"
+      batch_size: 8
+      task_name: "ocr_without_boxes"
+      disable_math: false
+      cache_dir: "modele/cache/surya"
+      # ścieżka WEWNĄTRZ kontenera (mount: benchmark/../training/results -> /app/training/results)
+      lora_adapter_path: "/app/training/results/ocr/surya/ocr800k-lora/adapter"
+
   - id: "got_ocr"
     service_name: "got-ocr"
     base_url: "http://localhost:8009"

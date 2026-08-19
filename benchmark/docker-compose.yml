@@ -149,6 +149,9 @@ services:
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     volumes:
       - ./modele/cache/surya:/app/modele/cache/surya
+      # adapter LoRA z treningu — eksponuje training/results do kontenera,
+      # żeby lora_adapter_path (experiments.yaml) mógł wczytać adapter.
+      - ../training/results:/app/training/results
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
