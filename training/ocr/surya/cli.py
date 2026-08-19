@@ -302,6 +302,15 @@ def cmd_train(args):
 
     report_to = [r for r in (args.report_to or "").split(",") if r]
 
+    # load_best_model_at_end wymaga zgodności save/eval strategii; przy
+    # eval co kroki (--evaluation-strategy steps) checkpointy też idą co
+    # kroki (w tych samych krokach), inaczej transformers rzuca ValueError.
+    eval_strategy = args.evaluation_strategy if eval_dataset else "no"
+    save_strategy = args.save_strategy
+    if eval_strategy == "steps":
+        save_strategy = "steps"
+    save_steps = args.eval_steps
+
     training_args = TrainingArguments(
         output_dir=args.output_dir,
         run_name=args.run_name,
@@ -314,8 +323,9 @@ def cmd_train(args):
         warmup_ratio=args.warmup_ratio,
         lr_scheduler_type=args.lr_scheduler_type,
         logging_steps=args.logging_steps,
-        save_strategy=args.save_strategy,
-        eval_strategy=args.evaluation_strategy if eval_dataset else "no",
+        save_strategy=save_strategy,
+        save_steps=save_steps,
+        eval_strategy=eval_strategy,
         eval_steps=args.eval_steps,
         save_total_limit=args.save_total_limit,
         load_best_model_at_end=bool(eval_dataset),
