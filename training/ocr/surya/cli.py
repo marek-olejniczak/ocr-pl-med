@@ -316,6 +316,7 @@ def cmd_train(args):
         logging_steps=args.logging_steps,
         save_strategy=args.save_strategy,
         eval_strategy=args.evaluation_strategy if eval_dataset else "no",
+        eval_steps=args.eval_steps,
         save_total_limit=args.save_total_limit,
         load_best_model_at_end=bool(eval_dataset),
         metric_for_best_model="eval_loss" if eval_dataset else None,
@@ -400,6 +401,8 @@ def main(argv=None):
     ap.add_argument("--logging-steps", type=int, default=10)
     ap.add_argument("--save-strategy", default="epoch")
     ap.add_argument("--evaluation-strategy", default="epoch")
+    ap.add_argument("--eval-steps", type=int, default=None,
+                   help="Co ile kroków ewaluacja (wymaga --evaluation-strategy steps)")
     ap.add_argument("--save-total-limit", type=int, default=3)
     ap.add_argument("--bf16", action="store_true", default=True,
                    help="Mixed precision bfloat16 (Ampere+; domyślnie włączone)")
