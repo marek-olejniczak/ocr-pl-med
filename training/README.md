@@ -27,7 +27,7 @@ Każdy model w `ocr/<model>/` dostaje:
 Uruchomienie treningu (szczegóły w `ocr/surya/README.md`):
 ```bash
 docker compose -f training/docker-compose.yml run --rm surya-training \
-    python training/ocr/surya/cli.py train --train-metadata ... --train-images-dir ... --lora
+    python training/ocr/surya/cli.py --train-metadata ... --train-images-dir ... --lora
 ```
 
 ## Dane

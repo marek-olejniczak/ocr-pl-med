@@ -163,19 +163,10 @@ class SuryaOCRDataCollator:
             split_embeddings.append(image_embeddings[start_idx:end_idx].clone())
             start_idx = end_idx
 
-        max_tokens = max(tokens_per_sample)
-        hidden_dim = image_embeddings.shape[-1]
-        padded = []
-        for emb in split_embeddings:
-            n = emb.shape[0]
-            if n < max_tokens:
-                emb = torch.cat([
-                    emb,
-                    torch.zeros(max_tokens - n, hidden_dim,
-                                dtype=emb.dtype, device=emb.device),
-                ], dim=0)
-            padded.append(emb)
-        processed["image_embeddings"] = torch.stack(padded, dim=0)
+        # PŁASKO, bez padowania: SuryaModel.forward robi masked_scatter, które
+        # wymaga numel(image_embeddings) == liczbie tokenów obrazu w batchu.
+        # Padding/stackowanie rozjechałoby alignment między próbkami.
+        processed["image_embeddings"] = torch.cat(split_embeddings, dim=0)
 
         # Sanity check: liczba tokenów obrazu w input_ids == liczba embeddingów.
         for i in range(batch_size):
@@ -226,7 +217,9 @@ def apply_lora(model, lora_config: dict):
         target_modules=lora_config.get(
             "target_modules", ["q_proj", "v_proj", "o_proj"]
         ),
-        task_type="CAUSAL_LM",
+        # task_type=None: SuryaModel to nie model CausalLM z prepare_inputs_for_generation,
+        # więc PEFT musi użyć generycznego PeftModel, nie PeftModelForCausalLM.
+        task_type=None,
     )
     return get_peft_model(model, peft_config)
 

@@ -41,7 +41,7 @@ docker compose -f training/docker-compose.yml run --rm surya-training \
 
 # 3. Trening (LoRA)
 docker compose -f training/docker-compose.yml run --rm surya-training \
-    python training/ocr/surya/cli.py train \
+    python training/ocr/surya/cli.py \
     --train-metadata training/data/processed/surya/train/metadata.jsonl \
     --train-images-dir training/data/processed/surya/train/images \
     --val-metadata training/data/processed/surya/val/metadata.jsonl \
