@@ -231,6 +231,59 @@ def convert_handlabeled(input_dir: Path, output_dir: Path,
 
 
 # ---------------------------------------------------------------------------
+# handlabeled → format benchmarku (labels.csv + płaskie images/)
+# ---------------------------------------------------------------------------
+
+def convert_handlabeled_benchmark(input_dir: Path, output_dir: Path) -> None:
+    """Konwertuje handlabeled do formatu wymaganego przez benchmark.
+
+    Benchmark (benchmark/src/data_generator.py) oczekuje:
+        labels.csv   # kolumny: file_name,label
+        images/      # płaskie pliki obrazów
+
+    Nazwy plików <page>_<crop> (np. data11_line1.jpg) — unikalne, bo strony
+    mają wspólne nazwy wycinków (line1.jpg w każdej). Dokument/linia są
+    wyciągane z nazwy przez benchmark (regex ^(.+)_(\\d+)$).
+    """
+    import csv
+
+    input_dir = Path(input_dir)
+    output_dir = Path(output_dir)
+    csv_path = input_dir / "annotations.csv"
+    if not csv_path.exists():
+        raise FileNotFoundError(f"Brak annotations.csv w {input_dir}")
+
+    images_dir = output_dir / "images"
+    images_dir.mkdir(parents=True, exist_ok=True)
+
+    rows = []
+    with open(csv_path, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            text = (row.get("label") or "").strip()
+            page = (row.get("filename") or "").strip()
+            crop = (row.get("crop") or "").strip()
+            if not (text and page and crop):
+                continue
+            page_dir = Path(page).stem
+            src = input_dir / page_dir / "lines" / crop
+            if not src.exists():
+                continue
+            flat_name = f"{page_dir}_{crop}"
+            dst = images_dir / flat_name
+            if not dst.exists():
+                shutil.copy2(src, dst)
+            rows.append({"file_name": flat_name, "label": text})
+
+    labels_csv = output_dir / "labels.csv"
+    with open(labels_csv, "w", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["file_name", "label"])
+        writer.writeheader()
+        writer.writerows(rows)
+    print(f"handlabeled-benchmark: {len(rows)} próbek → {labels_csv}")
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
@@ -251,12 +304,21 @@ def main(argv=None):
         Path(a.input), Path(a.output), a.max_samples))
 
     # handlabeled
-    h = sub.add_parser("handlabeled", help="Ręcznie olabelowane wycinki")
+    h = sub.add_parser("handlabeled", help="Ręcznie olabelowane wycinki → format Surya")
     h.add_argument("--input", required=True, help="Katalog z annotations.csv")
     h.add_argument("--output", required=True, help="Katalog wyjściowy")
     h.add_argument("--val-split", type=float, default=0.1)
     h.set_defaults(fn=lambda a: convert_handlabeled(
         Path(a.input), Path(a.output), a.val_split))
+
+    # handlabeled → format benchmarku (labels.csv + images/)
+    hb = sub.add_parser("handlabeled-benchmark",
+                        help="Ręcznie olabelowane wycinki → format benchmarku")
+    hb.add_argument("--input", required=True, help="Katalog z annotations.csv")
+    hb.add_argument("--output", required=True,
+                    help="Katalog wyjściowy (np. benchmark/dane/handlabeled)")
+    hb.set_defaults(fn=lambda a: convert_handlabeled_benchmark(
+        Path(a.input), Path(a.output)))
 
     args = ap.parse_args(argv)
     args.fn(args)
