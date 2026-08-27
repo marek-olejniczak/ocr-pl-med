@@ -247,7 +247,11 @@ def main(argv=None):
                         help="Backend logowania, np. 'wandb' (pusty = brak)")
     train_p.add_argument("--run-name", default=None, help="Nazwa runu (dla W&B)")
 
-    args = train_p.parse_args(argv)
+    # Uwaga: parsem jest ap, nie train_p — ap.parse_args obsługuje subkomendę
+    # (dowolny argv zaczynający się od 'train') i merguje opcje train_p do
+    # namespace. train_p.parse_args(argv) parsowałby argv ponownie i 'train'
+    # wyskoczyłby jako nieznany argument.
+    args = ap.parse_args(argv)
 
     if args.no_bf16:
         args.bf16 = False
