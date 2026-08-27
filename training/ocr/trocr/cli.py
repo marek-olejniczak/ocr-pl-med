@@ -149,7 +149,10 @@ def cmd_train(args):
     model.config.eos_token_id = processor.tokenizer.eos_token_id
     model.config.pad_token_id = processor.tokenizer.pad_token_id
     model.config.vocab_size = model.config.decoder.vocab_size
-    model.config.max_length = args.max_length
+    # UWAGA: nie ustawiamy model.config.max_length — transformers 5.0.0 odmawia
+    # zapisu parametrów generacji w model.config (ValueError przy save_pretrained).
+    # Długość generowania i tak ustawia training_args.generation_max_length, a
+    # benchmark przekazuje max_new_tokens jawnie.
 
     train_dataset = TrOCRDataset(
         args.train_metadata, args.train_images_dir, processor, args.max_length)
