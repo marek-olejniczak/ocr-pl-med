@@ -52,3 +52,46 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+
+  # TrOCR (VisionEncoderDecoderModel) — pełny fine-tuning polskiego wariantu
+  # (PET3R12/trocr-base-polish-handwriting) na danych ocr_800k. Mirror
+  # surya-training, ale: transformers 5.0.0 (model zapisany z 5.0.0). Zamiast
+  # MODEL_CACHE_DIR cli.py domyślnie cache'uje do modele/cache/trocr (repo,
+  # współdzielone z benchmarkiem).
+  #
+  # Użycie:
+  #   docker compose -f training/docker-compose.yml build trocr-training
+  #   docker compose -f training/docker-compose.yml run --rm trocr-training \
+  #       python training/ocr/trocr/cli.py train \
+  #       --train-metadata training/data/processed/surya800k/train/metadata.jsonl \
+  #       --train-images-dir training/data/processed/surya800k/train/images \
+  #       --val-metadata training/data/processed/surya800k/val/metadata.jsonl \
+  #       --val-images-dir training/data/processed/surya800k/val/images \
+  #       --output-dir training/results/ocr/trocr/run01 \
+  #       --max-steps 40000 --report-to wandb
+  trocr-training:
+    build:
+      context: ..
+      dockerfile: training/ocr/trocr/Dockerfile
+    user: "${HUID:-1000}:${HGID:-1000}"
+    shm_size: "8gb"
+    volumes:
+      - ..:/app
+      # Cache modelu bazowego + HF — w home hosta (duży dysk), nie w /tmp.
+      - ${HOME}/models/cache:/cache
+    working_dir: /app
+    environment:
+      - WANDB_API_KEY
+      - WANDB_ENTITY=ocr-pl-med
+      - WANDB_PROJECT=ocr-finetune
+      - HOME=/tmp
+      # Cache wandb (m.in. artefakty) na /cache (home hosta), a nie w /tmp.
+      - WANDB_CACHE_DIR=/cache/wandb
+      - HF_HOME=/cache/hf
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
