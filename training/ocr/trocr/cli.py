@@ -39,6 +39,35 @@ import torch
 from PIL import Image
 
 
+class TrOCRDataCollator:
+    """Collator dla TrOCR.
+
+    W transformers 5.0.0 default_data_collator NIE paduje już labels (stary
+    _torch_collate_batch z -100 zniknął) — batch z labels o różnych długościach
+    wywala się na torch.stack. Ten collator stackuje pixel_values (wszystkie
+    próbki są 384x384, więc równe) i paduje labels do długości najdłuższej
+    próbki w batchu wartością label_pad_token_id (-100, maskowane w loss).
+    """
+
+    def __init__(self, label_pad_token_id: int = -100):
+        self.label_pad_token_id = label_pad_token_id
+
+    def __call__(self, features):
+        pixel_values = torch.stack([f["pixel_values"] for f in features])
+        labels = [f["labels"] for f in features]
+        max_len = max(len(l) for l in labels)
+        padded = torch.full(
+            (len(labels), max_len), self.label_pad_token_id, dtype=torch.long
+        )
+        for i, l in enumerate(labels):
+            n = len(l)
+            padded[i, :n] = l
+        return {
+            "pixel_values": pixel_values,
+            "labels": padded,
+        }
+
+
 class TrOCRDataset(torch.utils.data.Dataset):
     """Dataset ładujący dane z metadata.jsonl + images/ (jak LocalOCRDataset u Suryi)."""
 
@@ -164,14 +193,12 @@ def cmd_train(args):
         generation_max_length=args.max_length,
     )
 
-    from transformers import default_data_collator
-
     trainer = Seq2SeqTrainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
-        data_collator=default_data_collator,
+        data_collator=TrOCRDataCollator(),
     )
 
     trainer.train()
