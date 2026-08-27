@@ -184,8 +184,10 @@ def cmd_train(args):
         dataloader_num_workers=args.dataloader_num_workers,
         remove_unused_columns=False,
         report_to=report_to,
-        predict_with_generate=True,
-        generation_max_length=args.max_length,
+        # Bez predict_with_generate: eval z generowaniem liczyłby tekst na całym
+        # val (39934 obrazów) i kosztował ~1-2h na KAŻDY eval (×8 przy 40k
+        # kroków = 8-16h nadgodzin). Eval = sam eval_loss (jeden forward, szybki);
+        # jakość transkrypcji i tak zmierzy benchmark na handlabeled (CER/WER).
     )
 
     trainer = Seq2SeqTrainer(
