@@ -1,8 +1,8 @@
 experiment:
-  name: "ocr-benchmark-handlabeled-surya-vs-lora-r64"
+  name: "ocr-benchmark-handlabeled-surya-trocr-rysocr"
   project_name: "ocr-benchmark"
   wandb_entity: "ocr-pl-med"
-  tags: ["autorun", "http", "sequential", "surya", "lora", "handlabeled", "server"]
+  tags: ["autorun", "http", "sequential", "surya", "trocr", "rysocr", "handlabeled", "server"]
   hardware_note: "Nvidia RTX 3090, 24GB VRAM"
 
 settings:
@@ -102,6 +102,9 @@ models:
     base_url: "http://localhost:8006"
     enabled: false
     timeout: 36000
+    # ODPALONY OSOBNO (Stage 5b): obraz rysocr (pytorch 2.5.1-cuda12.1 + paddleocr
+    # 3.x + PaddleOCR-VL) wymaga ~5-7GB na /var/lib/docker, a jest tylko 2.5GB
+    # wolnego. Po zwolnieniu dysku: enabled: true + osobny build/run.
     options:
       adapter_model_id: "kacperwikiel/RysOCR"
       base_model_id: "PaddlePaddle/PaddleOCR-VL"
@@ -113,17 +116,32 @@ models:
       use_amp: true
       cache_dir: "modele/cache/rysocr"
 
-  - id: "trocr" # nie ma sensu uzywac - tylko angielski
+  - id: "trocr_polish" # polski TrOCR base (PET3R12, transformers 5.0.0)
     service_name: "trocr"
     base_url: "http://localhost:8002"
-    enabled: false
+    enabled: true
     timeout: 3600
     options:
-      model_id: "microsoft/trocr-base-handwritten"
+      model_id: "PET3R12/trocr-base-polish-handwriting"
       max_new_tokens: 256
       device: "cuda"
       local_files_only: false
-      batch_size: 4
+      batch_size: 8
+      use_amp: true
+      cache_dir: "modele/cache/trocr"
+
+  - id: "trocr_polish_ft" # nasz fine-tune: pelny checkpoint TrOCR na ocr_800k (40k krokow)
+    service_name: "trocr"
+    base_url: "http://localhost:8002"
+    enabled: true
+    timeout: 3600
+    options:
+      # sciezka WEWNATRZ kontenera (mount: benchmark/../training/results -> /app/training/results)
+      model_id: "/app/training/results/ocr/trocr/ocr800k-full"
+      max_new_tokens: 256
+      device: "cuda"
+      local_files_only: false
+      batch_size: 8
       use_amp: true
       cache_dir: "modele/cache/trocr"
 

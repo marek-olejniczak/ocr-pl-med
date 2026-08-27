@@ -33,6 +33,9 @@ services:
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     volumes:
       - ./modele/cache/trocr:/app/modele/cache/trocr
+      # nasz fine-tune TrOCR — eksponuje training/results do kontenera,
+      # żeby trocr_polish_ft (experiments.yaml) mógł wczytać checkpoint.
+      - ../training/results:/app/training/results
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s

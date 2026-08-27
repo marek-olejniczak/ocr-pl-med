@@ -1,6 +1,10 @@
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
-transformers>=4.44.0,<5.0.0
+# transformers 5.0.0 — polski TrOCR (PET3R12/trocr-base-polish-handwriting) i nasz
+# fine-tune są zapisane z transformers 5.0.0 (processor_config.json). Na 4.x się
+# nie załadują. Obraz bazowy (training-trocr-training) ma już 5.0.0 — ta linia
+# pilnuje wersji przy rebuildzie i zapobiega downgrade'owi do 4.x.
+transformers==5.0.0
 sentencepiece>=0.2.0
 protobuf>=5.0.0
 pillow>=10.0.0
