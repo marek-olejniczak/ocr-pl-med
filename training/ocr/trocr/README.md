@@ -82,4 +82,6 @@ dostępny w benchmarku (bez ponownego downloadu).
 - Obraz bazuje na `training-surya-training:latest` (już na serwerze) — delta mała,
   bezpieczna przy 99% pełnej partycji root `/var/lib/docker`.
 - W&B: `WANDB_API_KEY` z `.env` repo (serwis `trocr-training` ma `WANDB_ENTITY=ocr-pl-med`,
-  `WANDB_PROJECT=ocr-finetune`), artefakty modelu logowane jako `trocr-full-best`.
+  `WANDB_PROJECT=ocr-finetune`). Logujemy krzywe treningu; **nie** uploadujemy modelu jako
+  artefaktu W&B (checkpoint ~1.3 GB zostaje na dysku, benchmark czyta go z
+  `training/results/ocr/trocr/<run>/`).

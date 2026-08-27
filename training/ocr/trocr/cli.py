@@ -123,14 +123,6 @@ class TrOCRDataset(torch.utils.data.Dataset):
         }
 
 
-def _log_artifact(run, name: str, dir_path: Path) -> None:
-    if not dir_path.exists():
-        return
-    artifact = __import__("wandb").Artifact(name, type="model")
-    artifact.add_dir(str(dir_path))
-    run.log_artifact(artifact)
-
-
 def cmd_train(args):
     """Pełny fine-tuning TrOCR (encoder ViT + decoder TrOCR)."""
     from transformers import Seq2SeqTrainer, Seq2SeqTrainingArguments
@@ -227,12 +219,13 @@ def cmd_train(args):
 
     if "wandb" in report_to:
         import wandb
-        run = wandb.run
-        if run is not None:
-            _log_artifact(run, "trocr-full-best", save_dir)
-            checkpoints = sorted(Path(args.output_dir).glob("checkpoint-*"))
-            if checkpoints:
-                _log_artifact(run, "trocr-full-last", checkpoints[-1])
+        # UWAGA: NIE logujemy modelu jako artefaktu W&B — pełny checkpoint TrOCR
+        # to ~1.3 GB safetensors, a upload (szczególnie ×2: best + last) potrafi
+        # zawiesić proces na długo po zakończeniu treningu. Checkpoint jest na
+        # dysku (bind mount home), benchmark czyta go stamtąd. Jawnie zamykamy
+        # run, żeby background-upload nie trzymał procesu przy życiu.
+        if wandb.run is not None:
+            wandb.finish()
 
 
 def main(argv=None):
