@@ -3,7 +3,7 @@
 Cel: dotrenować `Felix92/doctr-torch-parseq-multilingual-v1` (docTR PARSeq —
 word-level, 32x128, vocab zawiera już polskie diakrytyki `ąćęłńóśźżĄĆĘŁŃŚŹŻ`) na
 liniach ocr_800k, tych samych co Surya/TrOCR. Wymaga rozszerzenia vocabu o SPACJĘ
-(linie, nie słowa) i podbicia `max_label_length` (~96 vs domyślne 32), bo model
+(linie, nie słowa) i podbicia `max_label_length` (domyślnie 180 vs docTR 32), bo model
 docTR PARSeq sam nie wie, jak długie potrafi być wyjście.
 
 Dlaczego własna pętla, a nie HF Trainer: docTR PARSeq to zwykły `torch.nn.Module`
@@ -32,8 +32,11 @@ Uwagi architektoniczne (dlaczego tak — patrz też README.md):
   letterboxowane (aspect-preserve, centrowane), nie squashowane — tak samo jak w
   oficjalnym treningu docTR (T.Resize preserve_aspect_ratio). Szeroki input =
   osobny wątek (przebudowa pos_embed), poza zakresem tego pipeline'u.
-- max_label_length podnosimy (domyślnie 96 >= najdłuższa linia 84). Pierwsze
-  33 pozycje pos_queries ładujemy z checkpointu (ciepły start), resztę inicjujemy.
+- max_label_length podnosimy (domyślnie 180; dane mają linie do 169). Linie
+  dłuższe niż max_label_length-2 są odrzucane — docTR encode_sequences mieści
+  [SOS | znaki | EOS] w target_size=max_label_length i przy długości K=M-1 EOS
+  jest wypychany rolką (RuntimeError mask 96 vs 95). Pierwsze 33 pozycje
+  pos_queries ładujemy z checkpointu (ciepły start), resztę inicjujemy.
 - Vocab budowany z base + spacja + (opcjonalnie) znaki z danych o częstości >=
   --min-add-count. Dzięki temu żaden znak GT nie jest "nieznany" (chyba że zbyt
   rzadki — wtedy próbki z nim są odrzucane z raportem).
@@ -311,7 +314,12 @@ class ParSeqLineDataset(torch.utils.data.Dataset):
                 text = (entry.get("text") or "").strip()
                 if not text:
                     continue
-                if len(text) > max_label_length:
+                # docTR encode_sequences buduje [SOS | znaki | EOS] w target_size
+                # = max_label_length, wiec linia o dlugosci K musi spelniac
+                # K <= max_label_length - 2 (przy K = M-1 EOS jest wypychany
+                # rolka i wewnetrzne maski PARSeq sie rozjezdzaja: RuntimeError
+                # o rozmiarze 96 vs 95). Odcinamy takie linie z raportem.
+                if len(text) > max_label_length - 2:
                     skipped_long += 1
                     continue
                 bad = next((c for c in text if c not in allowed_chars), None)
@@ -327,10 +335,11 @@ class ParSeqLineDataset(torch.utils.data.Dataset):
             unk_str = ", ".join(f"{c!r}:{n}" for c, n in skipped_unk.most_common())
             logger.warning("%s: pominięto %d próbek z nieznanymi znakami [%s]; "
                            "zbyt długich (>%d): %d", metadata_path, sum(skipped_unk.values()),
-                           unk_str, max_label_length, skipped_long)
+                           unk_str, max_label_length - 2, skipped_long)
         elif skipped_long:
-            logger.warning("%s: pominięto %d próbek dłuższych niż max_label_length=%d",
-                           metadata_path, skipped_long, max_label_length)
+            logger.warning("%s: pominięto %d próbek dłuższych niż max_label_length-2=%d "
+                           "(docTR potrzebuje 2 slotów na SOS/EOS)",
+                           metadata_path, skipped_long, max_label_length - 2)
 
     def __len__(self):
         return len(self.samples)
@@ -849,8 +858,11 @@ def main(argv=None):
                    help="Bazowy model docTR PARSeq: HF hub id albo lokalny katalog treningowy (model.pt+vocab.json)")
     p.add_argument("--cache-dir", default=None,
                    help="Cache modeli HF (domyślnie None = HF_HOME, w kontenerze /cache/hf)")
-    p.add_argument("--max-label-length", type=int, default=96,
-                   help="Maks. długość sekwencji (najdłuższa linia w danych ~84)")
+    p.add_argument("--max-label-length", type=int, default=180,
+                   help="Docelowa szerokość wewnętrzna docTR (target_size). Linie dłuższe "
+                        "niż max_label_length-2 są odrzucane — docTR potrzebuje 2 slotów na "
+                        "SOS/EOS ([SOS|znaki|EOS] musi zmieścić się w target_size). "
+                        "Dane mają linie do 169 znaków, więc domyślnie 180 niczego nie odrzuca")
     p.add_argument("--extra-vocab", default="",
                    help="Dodatkowe znaki do vocabu (oprócz base + spacji), np. '„”'")
     p.add_argument("--min-add-count", type=int, default=2,

@@ -31,8 +31,11 @@ istniejących znaków nie zmieniają indeksów, więc `transfer_from_base` kopiu
 (przesuwają się wraz z `len(vocab)`). `pos_queries` startuje ciepło z base
 (pierwsze `base.max_length+1` rzędów).
 
-DocTR odrzuca próbki z tekstem dłuższym niż `--max-label-length` (domyślnie 96;
-najdłuższa linia w danych ~84) i z nieznanym znakiem (raport co pominął).
+DocTR odrzuca próbki z tekstem dłuższym niż `--max-label-length` **−2** (domyślnie
+178; najdłuższa linia w danych ma 169 znaków): `encode_sequences` musi zmieścić
+`[SOS | znaki | EOS]` w `target_size=max_label_length`, a przy długości `M−1`
+EOS jest wypychany rolką i wewnętrzne maski PARSeq się rozjeżdżają (RuntimeError
+`96 vs 95`). Próbki z nieznanym znakiem też są odrzucane (raport co pominął).
 
 ## Dane
 
