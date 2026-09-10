@@ -68,7 +68,15 @@ co `ocr_800k`, jedna LoRA na serwerze, CER na 2160 liniach. Do tego dwa
 treningi baseline z różnym seedem, żeby znać szum. Dopiero gdy jest lepiej niż
 15,9% — faza 3.
 
-## Faza 3 — ablacja
+## Faza 3 — ablacja (odłożona; ograniczenie z 2026-09-10)
+
+Wg Marka (trening OCR) jeden trening na RTX 3090 zajmuje prawie cały dzień,
+nie ~2 h. Pełne leave-one-out (9 treningów) odpada. Wersja realna:
+3–4 treningi — baseline v1, pełny v2, i najwyżej dwa warianty „bez rodziny"
+wybrane po fazie 2 (te, o które pyta promotor: elastic i sąsiedzi/telefon).
+Zbiory ablacyjne mniejsze (200k linii, krótszy budżet kroków), pełne 800k
+tylko dla zwycięskiej konfiguracji.
+
 
 Baseline bez augmentacji + pełny + „bez jednej rodziny" × 5–6. Ten sam seed
 treści, ten sam budżet kroków, CER rozbity po źródłach (autorach). Wynik:
