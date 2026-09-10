@@ -59,7 +59,9 @@ Do zrobienia:
 - osobna flaga rodziny (`--no-neighbour-glyphs` lub podobna) do ablacji;
   stary `bleed_neighbour` zostaje jako wariant „kreski".
 
-## Faza 2 — szybka weryfikacja
+## Faza 2 — szybka weryfikacja (ODŁOŻONA decyzją z 2026-09-10; najpierw kolejne zmiany w generatorze)
+
+Pełny opis zmian v2 i ich uzasadnienie wynikami: `docs/ocr_generator_v2.md`.
 
 Jeden zbiór tej samej wielkości i z tym samym budżetem (40 000 kroków × batch 8)
 co `ocr_800k`, jedna LoRA na serwerze, CER na 2160 liniach. Do tego dwa
