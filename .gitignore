@@ -4,3 +4,5 @@ output/
 *.zip
 .pytest_cache/
 models/
+dataset_*/
+forms/
