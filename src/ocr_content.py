@@ -21,7 +21,7 @@ import re
 from pathlib import Path
 from typing import Callable, Optional
 
-from field_content import _shrink_to_fit, generate_field_content
+from field_content import generate_field_content
 from text_sanitize import font_charset, normalize_for_handwriting, sanitize
 from vocabulary import Vocabulary
 
@@ -151,8 +151,6 @@ def _compose(kind: str, pools: LinePools, enabled: set[str],
             text = f"{text} {pools.word()}"
     elif kind == "phrase":
         text = pools.phrase()
-        if random.random() < 0.15:
-            text = f"{text} {random.choice(['prawy', 'lewy', 'prawa', 'lewa', 'górny', 'dolny', 'przedni', 'tylny'])}"
     elif kind == "heading":
         text = pools.phrase() if random.random() < 0.6 else pools.word()
         text = text.upper()
@@ -172,6 +170,14 @@ def _compose(kind: str, pools: LinePools, enabled: set[str],
         if random.random() < CAPITALISE_PROB:
             text = _capitalise(text)
     return text
+
+
+def _fit_whole_words(text: str, measure: Callable[[str], float], cap: float) -> str:
+    """Drop trailing words until the line fits; never cut inside a word."""
+    words = text.split(" ")
+    while words and measure(" ".join(words)) > cap:
+        words.pop()
+    return " ".join(words)
 
 
 def generate_line_content(
@@ -211,7 +217,11 @@ def generate_line_content(
         # Short words set their own width; longer kinds are trimmed to the
         # requested width like a form field would be.
         if kind != "word":
-            text = _shrink_to_fit(text, measure, target_width)
+            # Whole words only: a phrase cut inside a word ("Idiopatyczn")
+            # is not something anyone writes, so it must not be trained on.
+            text = _fit_whole_words(text, measure, target_width)
+            if not text:
+                continue
             text = text.rstrip(" -•*>=,;:(")
             # A trimmed line should not end on an orphaned abbreviation
             # ("unerwienie: n.").
