@@ -121,12 +121,15 @@ def write_card(output_dir: Path, card: dict) -> Path:
 
 
 def _row(card: dict) -> str:
+    # Document datasets count images/annotations, line datasets count
+    # lines/train — the table shows whichever the card carries.
+    counts = card["counts"]
     return (
         f"| {card['created'][:10]} | {card['name']} | "
         f"{card['git_commit'] or '-'}{'*' if card['git_dirty'] else ''} | "
         f"{card['seed'] if card['seed'] is not None else '-'} | "
-        f"{card['counts'].get('images', '-')} | "
-        f"{card['counts'].get('annotations', '-')} | {card.get('note', '')} |\n"
+        f"{counts.get('images', counts.get('lines', '-'))} | "
+        f"{counts.get('annotations', counts.get('train', '-'))} | {card.get('note', '')} |\n"
     )
 
 

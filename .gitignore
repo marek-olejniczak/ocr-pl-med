@@ -3,3 +3,4 @@ __pycache__/
 output/
 *.zip
 .pytest_cache/
+models/
