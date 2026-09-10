@@ -44,9 +44,27 @@ from fill_form import (
     apply_pen_fade,
     apply_scan_augmentation,
 )
+from line_effects import (
+    ELASTIC_PROB,
+    GRID_PAPER_PROB,
+    IMAGE_FAMILIES,
+    MORPHOLOGY_PROB,
+    NEIGHBOUR_GLYPH_PROB,
+    PHONE_PHOTO_PROB,
+    apply_elastic,
+    apply_morphology,
+    draw_grid_paper,
+    finish_capture,
+    intrude_neighbour_glyphs,
+)
+from ocr_content import CONTENT_FAMILIES, LinePools, generate_line_content
 from renderer import find_fonts
 from transforms import AugmentConfig, WordStyle
 from vocabulary import Vocabulary
+
+# Every switchable behaviour, by name. `--disable` takes any subset; the
+# ablation study turns them off one at a time.
+ALL_FAMILIES = CONTENT_FAMILIES + IMAGE_FAMILIES
 
 # Width the line is asked to fill, in pixels. Spans a short date to a full
 # diagnosis running the width of a form field.
@@ -78,6 +96,12 @@ def parse_args() -> argparse.Namespace:
                         help="Fraction held out for validation (default: 0.05).")
     parser.add_argument("--no-scan", action="store_true",
                         help="Skip scan simulation (clean renders).")
+    parser.add_argument(
+        "--disable", type=str, default="",
+        help="Comma-separated augmentation families to switch off. One of: "
+             + ", ".join(ALL_FAMILIES) + ". 'all' disables every family "
+             "(the pre-phase-1 renderer).",
+    )
     parser.add_argument("--dataset-name", type=str, default=None)
     parser.add_argument("--note", type=str, default="")
     parser.add_argument(
@@ -89,6 +113,18 @@ def parse_args() -> argparse.Namespace:
              "which should not append rows to the repo's registry.",
     )
     return parser.parse_args()
+
+
+def resolve_families(disable: str) -> set[str]:
+    """Turn the --disable string into the set of ENABLED families."""
+    wanted = {f.strip() for f in disable.split(",") if f.strip()}
+    if "all" in wanted:
+        return set()
+    unknown = wanted - set(ALL_FAMILIES)
+    if unknown:
+        raise SystemExit(f"unknown families in --disable: {sorted(unknown)}; "
+                         f"choose from {list(ALL_FAMILIES)}")
+    return set(ALL_FAMILIES) - wanted
 
 
 def build_line_config() -> AugmentConfig:
@@ -168,9 +204,21 @@ def bleed_neighbour(canvas: Image.Image, ink: tuple[int, int, int]) -> None:
 
 
 def render_line(
-    vocab: Vocabulary, fonts: list[str], config: AugmentConfig, apply_scan: bool
+    vocab: Vocabulary,
+    fonts: list[str],
+    config: AugmentConfig,
+    apply_scan: bool,
+    pools: LinePools | None = None,
+    enabled: set[str] | None = None,
 ) -> tuple[Image.Image, str, dict]:
-    """Render one handwritten line on paper. Returns (image, text, metadata)."""
+    """Render one handwritten line on paper. Returns (image, text, metadata).
+
+    `enabled` names the augmentation families in play (see ALL_FAMILIES);
+    None means all of them. With every family off this is the pre-phase-1
+    renderer: form-style content, plain paper, scanner profiles only.
+    """
+    if enabled is None:
+        enabled = set(ALL_FAMILIES)
     font_path = random.choice(fonts)
     font_size = random.randint(*FORM_FONT_SIZE_RANGE)
     style = WordStyle.random(config.char)
@@ -179,11 +227,10 @@ def render_line(
     base_ink = random.choice([INK_BLACK, INK_BLUE])
     ink = tuple(max(0, min(255, c + random.randint(-8, 8))) for c in base_ink)
 
-    kind = pick_content_kind()
     target_width = random.randint(*TARGET_WIDTH_RANGE)
     measure = make_measure(font_path, font_size, style)
-    text = generate_field_content(
-        kind, vocab, measure, target_width, font_path=font_path
+    text, kind = generate_line_content(
+        pools, vocab, measure, target_width, font_path, enabled
     )
     if not text:
         return None, "", {}
@@ -214,17 +261,32 @@ def render_line(
     canvas = paper_canvas(width, height)
     baseline = top + text_img.height + max(1, int(text_img.height * 0.10))
     rule = None
-    if random.random() < RULE_PROB and 0 < baseline < height:
+    if "grid_paper" in enabled and random.random() < GRID_PAPER_PROB:
+        rule = draw_grid_paper(canvas, text_img.height, baseline)
+    elif random.random() < RULE_PROB and 0 < baseline < height:
         rule = draw_rule(canvas, baseline, ink)
-    if random.random() < NEIGHBOUR_BLEED_PROB:
+
+    neighbours: list[str] = []
+    if "neighbour_glyphs" in enabled:
+        if random.random() < NEIGHBOUR_GLYPH_PROB:
+            word_source = pools.word if pools else (lambda: random.choice(["kość", "staw", "mięsień"]))
+            neighbours = intrude_neighbour_glyphs(
+                canvas, ink, font_path, font_size, config, style, word_source)
+    elif random.random() < NEIGHBOUR_BLEED_PROB:
         bleed_neighbour(canvas, ink)
+        neighbours = ["strokes"]
 
     ink_layer = Image.new("RGB", text_img.size, ink)
     canvas.paste(ink_layer, (left, top), mask)
 
-    scan_meta = None
-    if apply_scan:
-        canvas, scan_meta = apply_scan_augmentation(canvas)
+    morphology = None
+    if "morphology" in enabled and random.random() < MORPHOLOGY_PROB:
+        canvas, morphology = apply_morphology(canvas)
+    elastic = None
+    if "elastic" in enabled and random.random() < ELASTIC_PROB:
+        canvas, elastic = apply_elastic(canvas)
+
+    canvas, scan_meta = finish_capture(canvas, enabled, apply_scan)
 
     meta = {
         "font": Path(font_path).name,
@@ -232,6 +294,9 @@ def render_line(
         "kind": kind,
         "ink": list(ink),
         "rule": rule,
+        "neighbours": neighbours,
+        "morphology": morphology,
+        "elastic": elastic,
         "size": list(canvas.size),
         "scan_profile": scan_meta["profile"] if scan_meta else None,
     }
@@ -256,10 +321,15 @@ def main() -> None:
         sys.exit(1)
     print(f"  {len(fonts)} fonts available")
 
+    enabled = resolve_families(args.disable)
+    pools = LinePools(args.resource_dir) if "anatomy_vocab" in enabled else None
+    disabled = sorted(set(ALL_FAMILIES) - enabled)
+
     config = build_line_config()
     apply_scan = not args.no_scan
     print(f"Rendering {args.count} lines (scan simulation: "
-          f"{'ON' if apply_scan else 'OFF'})")
+          f"{'ON' if apply_scan else 'OFF'}; disabled families: "
+          f"{', '.join(disabled) if disabled else 'none'})")
 
     fonts_used: set[str] = set()
     profiles: dict[str, int] = {}
@@ -281,7 +351,8 @@ def main() -> None:
     }
     try:
         while index < args.count:
-            image, text, meta = render_line(vocab, fonts, config, apply_scan)
+            image, text, meta = render_line(
+                vocab, fonts, config, apply_scan, pools=pools, enabled=enabled)
             if image is None:
                 skipped += 1
                 if skipped > args.count:
@@ -346,6 +417,13 @@ def main() -> None:
     card["augmentations"]["rule_prob"] = RULE_PROB
     card["augmentations"]["neighbour_bleed_prob"] = NEIGHBOUR_BLEED_PROB
     card["augmentations"]["content_kinds"] = [list(k) for k in CONTENT_KINDS]
+    card["augmentations"]["families_enabled"] = sorted(enabled)
+    card["augmentations"]["families_disabled"] = disabled
+    card["augmentations"]["neighbour_glyph_prob"] = NEIGHBOUR_GLYPH_PROB
+    card["augmentations"]["grid_paper_prob"] = GRID_PAPER_PROB
+    card["augmentations"]["morphology_prob"] = MORPHOLOGY_PROB
+    card["augmentations"]["elastic_prob"] = ELASTIC_PROB
+    card["augmentations"]["phone_photo_prob"] = PHONE_PHOTO_PROB
     card_path = write_card(output_dir, card)
     if args.registry != "none":
         registry_path = (

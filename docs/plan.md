@@ -13,20 +13,27 @@ Analiza błędów LoRA (2160 linii): `k→h` 434, `a→o` 216, `t→ł` 115, `ś
 - [x] serwis Surya w benchmarku zdejmuje HTML i tekst po `<br>` (gałąź `server`, `ecfe28d`)
 - [ ] aktualny testset 2160 linii z serwera RTX 3090 (`benchmark/dane/handlabeled/`)
 
-## Faza 1 — generator linii wycelowany w testset
+## Faza 1 — generator linii wycelowany w testset (kod: 2026-09-10)
 
-Każda zmiana adresuje zmierzony błąd, nie hipotezę. Do każdej rodziny
-flaga wyłączająca (potrzebna w fazie 3).
+Każda zmiana adresuje zmierzony błąd, nie hipotezę. Każda rodzina ma flagę
+`--disable <nazwa>` w `generate_ocr_lines.py` (potrzebne w fazie 3); `--disable all`
+daje stary renderer. Arkusze próbek: `python src/preview_line_families.py`.
 
-| Zmiana | Adresuje |
-|---|---|
-| Krótkie wycinki 3–12 znaków, pojedyncze słowa | CER 21–31% na 39% testsetu |
-| Audyt fontów pod otwarte „k"/„a", dobór brakujących kształtów | `k→h`, `a→o` (~20% podmian) |
-| **Sąsiednie linie wchodzące w kadr prawdziwymi literami** (opis niżej) | ciasne cropy z YOLO na gęstych notatkach |
-| Erozja/dylatacja morfologiczna, ElasticTransform, GridDistortion, Downscale, blur (albumentations) | zgubione diakrytyki (13,6%), `t↔ł`, rozmycie telefonu |
-| Nagłówki WIELKIMI, mieszanie wielkości | `w→W`, `p→P` |
-| Kratka zeszytowa, profil „zdjęcie telefonem" | tło i oświetlenie testsetu |
-| Treść anatomiczna (bazy `nlp-ner` + offline LLM „notatki z anatomii"), cyfry 22%→~3%, strzałki `->`/`=>`, wypunktowania | słownictwo i dekoder językowy |
+| Rodzina (`--disable`) | Zmiana | Adresuje | Stan |
+|---|---|---|---|
+| `short_words` | pojedyncze słowa 3–12 znaków (34% linii), czasem dwa | CER 21–31% na 39% testsetu | zrobione |
+| (fonty) | audyt: dodane 20 fontów Google z polskimi znakami, w tym szkolne Playwrite (k z pętlą), 35 fontów razem | `k→h`, `a→o` | zrobione |
+| `neighbour_glyphs` | prawdziwe litery sąsiednich linii w kadrze (opis niżej), 40% | ciasne cropy z YOLO | zrobione |
+| `morphology` | erozja 2×2 z mieszaniem / dylatacja 1–2 px, 30% | zgubione diakrytyki, `t↔ł` | zrobione |
+| `elastic` | ElasticTransform / GridDistortion (albumentations), 30% | wygięta kartka, drżenie ręki | zrobione |
+| `caps` | nagłówki WIELKIMI (8% linii) + wielka litera na początku (12%) | `w→W`, `p→P`; 7% znaków testsetu to wersaliki | zrobione |
+| `grid_paper` | kratka / linie zeszytowe, 45% | tło testsetu | zrobione |
+| `phone_photo` | cień, balans bieli, rozmycie, downscale, mocny JPEG, 40% | zdjęcie telefonem zamiast skanu | zrobione |
+| `arrows_bullets` | `- `, `1) `, `a) `, `->`, `=>` | 7% linii testsetu z wypunktowaniem, 4% ze strzałką | zrobione |
+| `anatomy_vocab` | pule: `anatomy_seed.txt` (ręcznie), `anatomy_phrases.txt` (Ollama gemma4), ICD-11, badania lab., zabiegi; cyfry 22%→~3% | słownictwo i dekoder językowy | zrobione |
+
+Do sprawdzenia przed fazą 2: jakość puli z LLM (gemma4 e4b miesza słowa,
+dostała mniejszą wagę niż lista ręczna).
 
 ### Sąsiednie linie w kadrze (wymaganie z 2026-09-10)
 

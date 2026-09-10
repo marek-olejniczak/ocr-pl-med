@@ -1,0 +1,96 @@
+nadciśnienie tętnicze
+cukrzyca
+grypa
+przeziębienie
+alergia
+bóle głowy
+bóle kręgosłupa
+choroba wieńcowa
+otyłość
+depresja
+bezsenność
+zgaga
+zaparcia
+biegunka
+ból gardła
+katar
+kaszel
+atopowe zapalenie skóry
+trądzik
+niedoczynność tarczycy
+miażdżyca
+astma
+przewlekła obturacyjna choroba płuc
+reumatoidalne zapalenie stawów
+artroza
+osteoporoza
+kamica nerkowa
+zespół jelita drażliwego
+hemoroidy
+grzybica skóry
+opryszczka
+anemia
+migrena
+choroby przyzębia
+próchnica
+zapalenie zatok
+zapalenie pęcherza
+zapalenie spojówek
+nadkwaśność
+wzdęcia
+stres
+nerwica
+cholesterol wysoki
+zespół cieśni nadgarstka
+łuszczyca
+egzema
+zapalenie ucha
+zapalenie oskrzeli
+zapalenie płuc
+zapalenie gardła
+zapalenie migdałków
+zapalenie dziąseł
+zapalenie żołądka
+choroba wrzodowa
+refluks
+nietolerancja laktozy
+celiakia
+nadczynność tarczycy
+niedobór witaminy d
+niedobór magnezu
+niedobór żelaza
+zapalenie stawów
+rwa kulszowa
+ból stawów
+ból mięśni
+skurcze mięśni
+obrzęki nóg
+żylaki
+zaburzenia erekcji
+infekcja intymna
+zespół napięcia przedmiesiączkowego
+menopauza
+zaburzenia lękowe
+fobia społeczna
+zespół chronicznego zmęczenia
+choroba lokomocyjna
+katar sienny
+zapalenie krtani
+zapalenie tchawicy
+zapalenie wątroby
+zapalenie wyrostka robaczkowego
+zapalenie trzustki
+niedociśnienie
+arytmia serca
+tachykardia
+bradykardia
+zakrzepica
+zatorowość
+udar mózgu
+zawał serca
+choroba alzheimera
+choroba parkinsona
+stwardnienie rozsiane
+padaczka
+jaskra
+zaćma

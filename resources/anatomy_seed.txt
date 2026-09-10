@@ -1,0 +1,539 @@
+kość udowa
+kość piszczelowa
+kość strzałkowa
+kość ramienna
+kość łokciowa
+kość promieniowa
+kość krzyżowa
+kość guziczna
+kość biodrowa
+kość kulszowa
+kość łonowa
+kość skroniowa
+kość potyliczna
+kość ciemieniowa
+kość czołowa
+kość klinowa
+kość sitowa
+kość jarzmowa
+kość gnykowa
+rzepka
+obojczyk
+łopatka
+mostek
+żebra prawdziwe
+żebra rzekome
+żebra wolne
+kręgi szyjne
+kręgi piersiowe
+kręgi lędźwiowe
+krążek międzykręgowy
+otwór kręgowy
+wyrostek kolczysty
+wyrostek poprzeczny
+trzon kręgu
+łuk kręgu
+głowa kości udowej
+szyjka kości udowej
+krętarz większy
+krętarz mniejszy
+kłykieć boczny
+kłykieć przyśrodkowy
+nadkłykieć boczny
+guzowatość piszczeli
+kostka boczna
+kostka przyśrodkowa
+kość skokowa
+kość piętowa
+kość łódkowata
+kości klinowate
+kość sześcienna
+kości śródstopia
+paliczki
+kość czółenkowata
+kość księżycowata
+kość trójgraniasta
+kość grochowata
+kość czworoboczna większa
+kość główkowata
+kość haczykowata
+kości śródręcza
+staw biodrowy
+staw kolanowy
+staw skokowy górny
+staw skokowy dolny
+staw ramienny
+staw łokciowy
+staw promieniowo-nadgarstkowy
+staw skroniowo-żuchwowy
+staw krzyżowo-biodrowy
+staw mostkowo-obojczykowy
+staw barkowo-obojczykowy
+torebka stawowa
+błona maziowa
+jama stawowa
+chrząstka stawowa
+łąkotka przyśrodkowa
+łąkotka boczna
+więzadło krzyżowe przednie
+więzadło krzyżowe tylne
+więzadło poboczne piszczelowe
+więzadło poboczne strzałkowe
+więzadło rzepki
+więzadło podkolanowe skośne
+więzadło podkolanowe łukowate
+więzadło biodrowo-udowe
+więzadło łonowo-udowe
+więzadło kulszowo-udowe
+więzadło głowy kości udowej
+więzadło obrączkowe
+więzadło pachwinowe
+więzadło żółte
+więzadło podłużne przednie
+więzadło podłużne tylne
+więzadło karkowe
+mięsień czworogłowy uda
+mięsień prosty uda
+mięsień obszerny boczny
+mięsień obszerny przyśrodkowy
+mięsień obszerny pośredni
+mięsień krawiecki
+mięsień dwugłowy uda
+mięsień półścięgnisty
+mięsień półbłoniasty
+mięsień pośladkowy wielki
+mięsień pośladkowy średni
+mięsień pośladkowy mały
+mięsień naprężacz powięzi szerokiej
+mięsień biodrowo-lędźwiowy
+mięsień gruszkowaty
+mięsień zasłaniacz wewnętrzny
+mięsień zasłaniacz zewnętrzny
+mięsień czworoboczny uda
+mięsień przywodziciel wielki
+mięsień przywodziciel długi
+mięsień przywodziciel krótki
+mięsień smukły
+mięsień grzebieniowy
+mięsień brzuchaty łydki
+mięsień płaszczkowaty
+mięsień podeszwowy
+mięsień podkolanowy
+mięsień piszczelowy przedni
+mięsień piszczelowy tylny
+mięsień strzałkowy długi
+mięsień strzałkowy krótki
+mięsień prostownik długi palców
+mięsień prostownik długi palucha
+mięsień zginacz długi palców
+mięsień zginacz długi palucha
+mięsień naramienny
+mięsień nadgrzebieniowy
+mięsień podgrzebieniowy
+mięsień obły większy
+mięsień obły mniejszy
+mięsień podłopatkowy
+mięsień dwugłowy ramienia
+mięsień trójgłowy ramienia
+mięsień ramienny
+mięsień ramienno-promieniowy
+mięsień kruczo-ramienny
+mięsień nawrotny obły
+mięsień nawrotny czworoboczny
+mięsień odwracacz
+mięsień piersiowy większy
+mięsień piersiowy mniejszy
+mięsień zębaty przedni
+mięsień czworoboczny grzbietu
+mięsień najszerszy grzbietu
+mięsień równoległoboczny
+mięsień dźwigacz łopatki
+mięsień mostkowo-obojczykowo-sutkowy
+mięsień prosty brzucha
+mięsień skośny zewnętrzny brzucha
+mięsień skośny wewnętrzny brzucha
+mięsień poprzeczny brzucha
+mięsień czworoboczny lędźwi
+przepona
+mięsień żwacz
+mięsień skroniowy
+mięsień skrzydłowy boczny
+mięsień skrzydłowy przyśrodkowy
+mięsień okrężny oka
+mięsień okrężny ust
+mięsień policzkowy
+przyczep początkowy
+przyczep końcowy
+ścięgno Achillesa
+ścięgno piętowe
+rozcięgno podeszwowe
+powięź szeroka
+pasmo biodrowo-piszczelowe
+kanał przywodzicieli
+dół podkolanowy
+trójkąt udowy
+kanał udowy
+kanał pachwinowy
+otwór kulszowy większy
+otwór kulszowy mniejszy
+otwór zasłoniony
+tętnica udowa
+tętnica głęboka uda
+tętnica podkolanowa
+tętnica piszczelowa przednia
+tętnica piszczelowa tylna
+tętnica strzałkowa
+tętnica grzbietowa stopy
+tętnica biodrowa wspólna
+tętnica biodrowa zewnętrzna
+tętnica biodrowa wewnętrzna
+tętnica zasłonowa
+tętnica pośladkowa górna
+tętnica pośladkowa dolna
+tętnica maciczna
+tętnica pęcherzowa
+tętnica odbytnicza środkowa
+tętnica sromowa wewnętrzna
+tętnica pachowa
+tętnica ramienna
+tętnica promieniowa
+tętnica łokciowa
+łuk dłoniowy powierzchowny
+łuk dłoniowy głęboki
+tętnica szyjna wspólna
+tętnica szyjna wewnętrzna
+tętnica szyjna zewnętrzna
+tętnica kręgowa
+tętnica podobojczykowa
+aorta wstępująca
+łuk aorty
+aorta zstępująca
+pień ramienno-głowowy
+pień trzewny
+tętnica krezkowa górna
+tętnica krezkowa dolna
+tętnica nerkowa
+tętnice wieńcowe
+tętnica wieńcowa prawa
+tętnica wieńcowa lewa
+gałąź międzykomorowa przednia
+gałąź okalająca
+żyła odpiszczelowa
+żyła odstrzałkowa
+żyła udowa
+żyła podkolanowa
+żyła biodrowa wspólna
+żyła główna dolna
+żyła główna górna
+żyła wrotna
+żyła szyjna wewnętrzna
+żyła podobojczykowa
+żyła odpromieniowa
+żyła odłokciowa
+żyła pośrodkowa łokcia
+zatoka wieńcowa
+splot lędźwiowy
+splot krzyżowy
+splot ramienny
+nerw udowy
+nerw zasłonowy
+nerw kulszowy
+nerw piszczelowy
+nerw strzałkowy wspólny
+nerw strzałkowy powierzchowny
+nerw strzałkowy głęboki
+nerw skórny boczny uda
+nerw pośladkowy górny
+nerw pośladkowy dolny
+nerw sromowy
+nerw pośrodkowy
+nerw łokciowy
+nerw promieniowy
+nerw pachowy
+nerw mięśniowo-skórny
+nerw błędny
+nerw przeponowy
+nerw twarzowy
+nerw trójdzielny
+nerw językowo-gardłowy
+nerw podjęzykowy
+nerw dodatkowy
+nerw wzrokowy
+nerw węchowy
+nerw okoruchowy
+nerw bloczkowy
+nerw odwodzący
+nerw przedsionkowo-ślimakowy
+węzły chłonne pachwinowe
+węzły chłonne pachowe
+węzły chłonne szyjne
+przedsionek prawy
+przedsionek lewy
+komora prawa
+komora lewa
+zastawka trójdzielna
+zastawka dwudzielna
+zastawka mitralna
+zastawka aortalna
+zastawka pnia płucnego
+przegroda międzykomorowa
+przegroda międzyprzedsionkowa
+węzeł zatokowo-przedsionkowy
+węzeł przedsionkowo-komorowy
+pęczek Hisa
+włókna Purkinjego
+osierdzie
+nasierdzie
+wsierdzie
+mięsień sercowy
+koniuszek serca
+podstawa serca
+krążenie duże
+krążenie małe
+krążenie wieńcowe
+tchawica
+oskrzela główne
+oskrzeliki
+pęcherzyki płucne
+opłucna ścienna
+opłucna płucna
+jama opłucnej
+śródpiersie
+płat górny
+płat dolny
+płat środkowy
+wnęka płuca
+krtań
+nagłośnia
+chrząstka tarczowata
+chrząstka pierścieniowata
+fałdy głosowe
+gardło
+przełyk
+żołądek
+dwunastnica
+jelito czcze
+jelito kręte
+jelito ślepe
+wyrostek robaczkowy
+okrężnica wstępująca
+okrężnica poprzeczna
+okrężnica zstępująca
+esica
+odbytnica
+wątroba
+pęcherzyk żółciowy
+przewód żółciowy wspólny
+trzustka
+śledziona
+nerka
+moczowód
+pęcherz moczowy
+cewka moczowa
+nadnercze
+kora nadnerczy
+rdzeń nadnerczy
+tarczyca
+przytarczyce
+przysadka
+podwzgórze
+szyszynka
+grasica
+jajnik
+jajowód
+macica
+pochwa
+jądra
+najądrze
+nasieniowód
+gruczoł krokowy
+pęcherzyki nasienne
+otrzewna
+krezka
+sieć większa
+sieć mniejsza
+mózgowie
+kresomózgowie
+międzymózgowie
+śródmózgowie
+tyłomózgowie
+móżdżek
+most
+rdzeń przedłużony
+rdzeń kręgowy
+komory mózgu
+płyn mózgowo-rdzeniowy
+opona twarda
+opona pajęcza
+opona miękka
+ciało modzelowate
+wzgórze
+jądra podstawne
+hipokamp
+kora mózgowa
+płat czołowy
+płat ciemieniowy
+płat skroniowy
+płat potyliczny
+bruzda środkowa
+bruzda boczna
+ośrodek Broki
+ośrodek Wernickego
+korzenie przednie
+korzenie tylne
+rogi przednie
+rogi tylne
+istota szara
+istota biała
+zwój rdzeniowy
+droga piramidowa
+droga pozapiramidowa
+droga słuchowa
+droga wzrokowa
+małżowina uszna
+przewód słuchowy zewnętrzny
+błona bębenkowa
+młoteczek
+kowadełko
+strzemiączko
+trąbka słuchowa
+ślimak
+kanały półkoliste
+przedsionek
+narząd Cortiego
+gałka oczna
+rogówka
+twardówka
+naczyniówka
+siatkówka
+soczewka
+ciało szkliste
+tęczówka
+źrenica
+ciało rzęskowe
+plamka żółta
+tarcza nerwu wzrokowego
+komora przednia oka
+komora tylna oka
+gruczoł łzowy
+spojówka
+naskórek
+skóra właściwa
+tkanka podskórna
+gruczoły potowe
+gruczoły łojowe
+mieszek włosowy
+kubki smakowe
+nabłonek węchowy
+jama nosowa
+zatoki przynosowe
+zatoka szczękowa
+zatoka czołowa
+zatoka klinowa
+podniebienie twarde
+podniebienie miękkie
+migdałek podniebienny
+migdałek gardłowy
+ślinianka przyuszna
+ślinianka podżuchwowa
+ślinianka podjęzykowa
+nabłonek jednowarstwowy płaski
+nabłonek walcowaty
+nabłonek wielowarstwowy
+tkanka łączna
+tkanka mięśniowa poprzecznie prążkowana
+tkanka mięśniowa gładka
+tkanka nerwowa
+tkanka kostna
+tkanka chrzęstna
+osteoblasty
+osteoklasty
+osteocyty
+okostna
+kość gąbczasta
+kość zbita
+jama szpikowa
+chrząstka nasadowa
+nasada
+trzon
+przynasada
+unaczynienie
+unerwienie
+czynność
+przyczepy
+położenie
+przebieg
+odejście
+gałęzie
+zaopatruje
+zgięcie
+wyprost
+odwodzenie
+przywodzenie
+rotacja zewnętrzna
+rotacja wewnętrzna
+nawracanie
+odwracanie
+zgięcie grzbietowe
+zgięcie podeszwowe
+supinacja
+pronacja
+przyśrodkowo
+bocznie
+proksymalnie
+dystalnie
+powierzchownie
+głęboko
+po stronie przedniej
+po stronie tylnej
+powierzchnia przednia
+powierzchnia tylna
+brzeg przedni
+brzeg tylny
+część górna
+część dolna
+część boczna
+część przyśrodkowa
+odcinek szyjny
+odcinek piersiowy
+odcinek lędźwiowy
+płaszczyzna strzałkowa
+płaszczyzna czołowa
+płaszczyzna poprzeczna
+oś długa
+w stawie kolanowym
+w stawie biodrowym
+w stawie skokowym
+w stawie ramiennym
+w stawie łokciowym
+biegnie wzdłuż
+przechodzi przez
+dzieli się na
+łączy się z
+kończy się
+rozpoczyna się
+leży na
+przykrywa
+oddaje gałęzie
+towarzyszy tętnicy
+towarzyszy żyle
+otwór
+dół
+guzek
+guzowatość
+grzebień
+kresa
+wcięcie
+wyrostek
+kłykieć
+bloczek
+głowa
+szyjka
+trzon
+podstawa
+wierzchołek
+rowek
+bruzda
+powierzchnia
+brzeg
+kąt
