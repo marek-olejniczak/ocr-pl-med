@@ -68,19 +68,26 @@ co `ocr_800k`, jedna LoRA na serwerze, CER na 2160 liniach. Do tego dwa
 treningi baseline z różnym seedem, żeby znać szum. Dopiero gdy jest lepiej niż
 15,9% — faza 3.
 
-## Faza 3 — ablacja (odłożona; ograniczenie z 2026-09-10)
+## Faza 3 — ablacja (przygotowana 2026-09-10, czeka na serwer)
 
-Wg Marka (trening OCR) jeden trening na RTX 3090 zajmuje prawie cały dzień,
-nie ~2 h. Pełne leave-one-out (9 treningów) odpada. Wersja realna:
-3–4 treningi — baseline v1, pełny v2, i najwyżej dwa warianty „bez rodziny"
-wybrane po fazie 2 (te, o które pyta promotor: elastic i sąsiedzi/telefon).
-Zbiory ablacyjne mniejsze (200k linii, krótszy budżet kroków), pełne 800k
-tylko dla zwycięskiej konfiguracji.
+Ograniczenie od Marka: jeden pełny trening na RTX 3090 to prawie dzień.
+Dlatego: 3 grupy zamiast 9 rodzin, ćwierć budżetu, baseline bez ponownego treningu.
 
+| Grupa | Rodziny | Pytanie |
+|---|---|---|
+| A. Treść | short_words, caps, arrows_bullets, anatomy_vocab | czy ważne jest, CO napisane |
+| B. Kadr i tło | neighbour_glyphs, grid_paper | czy ważne, GDZIE i w jakim otoczeniu |
+| C. Degradacja | morphology, elastic, phone_photo | czy ważne, JAK sfotografowano |
 
-Baseline bez augmentacji + pełny + „bez jednej rodziny" × 5–6. Ten sam seed
-treści, ten sam budżet kroków, CER rozbity po źródłach (autorach). Wynik:
-tabela „rodzina → punkty CER". Karty zbiorów dokumentują każdy wariant.
+Treningi: 0) baseline v1 = istniejący `surya_lora_ocr800k`; 1) v2_800k, 40k kroków
+(model właściwy = faza 2); 2) v2_200k, 3) noA_200k, 4) noB_200k, 5) noC_200k,
+po 10k kroków. Razem 2 dni serwera. Bez drugiego seeda: niepewność z bootstrapu
+po 2160 liniach + spójność po autorach. Opcjonalnie +1 run `--disable elastic`.
+
+Gotowe narzędzia: `src/build_ablation_sets.py` (generate/pack),
+`scripts/server/run_ablation_queue.sh` (kolejka pod tmux, też na gałęzi `server`),
+`scripts/server/experiments_ablation.yaml`, `src/ablation_report.py`.
+Komendy krok po kroku: `docs/ablacja_runbook.md`.
 
 ## Faza 4 — finalny zbiór i model
 
