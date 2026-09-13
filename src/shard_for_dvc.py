@@ -2,9 +2,10 @@
 
 DVC hashes and uploads every file separately, so a directory of 800k JPEGs
 takes hours to add and push. One giant tar fixes that but hits the remote's
-per-request size limit (DagsHub answers 413 for a 13.5 GB body). Shards are
-the middle ground: few enough files for DVC to stay fast, small enough for
-the upload to go through.
+per-file limit: DagsHub answers 413 for a 13.5 GB body and silently truncates
+anything over 1 GiB (observed 2026-09-13: 1.4 GB shards arrived cut, a 615 MB
+one intact). Shards are the middle ground: few enough files for DVC to stay
+fast, each under 1 GiB so it survives the round trip.
 
 Each shard is an independent tar — extracting all of them into one directory
 reproduces the original, and no shard depends on its neighbours.
@@ -27,27 +28,41 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("source", type=str, help="Directory to pack.")
     parser.add_argument("--output-dir", type=str, required=True,
                         help="Where the shards are written.")
-    parser.add_argument("--shard-gb", type=float, default=1.0,
-                        help="Target size per shard in GB (default: 1.0).")
+    parser.add_argument("--shard-gb", type=float, default=0.9,
+                        help="Max tar size per shard in GiB (default: 0.9). DagsHub "
+                             "truncates files over 1 GiB, so stay below it.")
     parser.add_argument("--prefix", type=str, default=None,
                         help="Shard file name prefix (default: source dir name).")
     return parser.parse_args()
 
 
+TAR_BLOCK = 512
+
+
+def tar_cost(size: int) -> int:
+    """Bytes a file occupies inside an uncompressed tar.
+
+    Every member has a 512-byte header and is padded to a 512-byte boundary.
+    For 200k five-kilobyte JPEGs that overhead is ~30%: a shard planned on
+    raw sizes alone came out at 1.4 GB, over the remote's 1 GiB per-file cap.
+    """
+    return TAR_BLOCK + ((size + TAR_BLOCK - 1) // TAR_BLOCK) * TAR_BLOCK
+
+
 def plan_shards(files: list[Path], limit_bytes: int) -> list[list[Path]]:
-    """Group files into shards, each staying under the size limit.
+    """Group files into shards whose TAR SIZE stays under the limit.
 
     A single file larger than the limit still gets its own shard — splitting
     inside a file is not this tool's job, and the caller needs to know.
     """
     shards: list[list[Path]] = []
     current: list[Path] = []
-    running = 0
+    running = 2 * TAR_BLOCK  # end-of-archive marker
     for path in files:
-        size = path.stat().st_size
+        size = tar_cost(path.stat().st_size)
         if current and running + size > limit_bytes:
             shards.append(current)
-            current, running = [], 0
+            current, running = [], 2 * TAR_BLOCK
         current.append(path)
         running += size
     if current:
@@ -77,7 +92,7 @@ def main() -> None:
     print(f"{len(files):,} plikow, {total / 1024**3:.2f} GB "
           f"-> {len(shards)} kawalkow po max {args.shard_gb} GB")
 
-    oversized = [s[0] for s in shards if len(s) == 1 and s[0].stat().st_size > limit]
+    oversized = [s[0] for s in shards if len(s) == 1 and tar_cost(s[0].stat().st_size) > limit]
     for path in oversized:
         print(f"  UWAGA: {path.name} sam w sobie przekracza limit "
               f"({path.stat().st_size / 1024**3:.2f} GB)", file=sys.stderr)

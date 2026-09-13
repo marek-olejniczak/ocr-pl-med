@@ -64,7 +64,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--output-root", default="output")
     p.add_argument("--dvc-repo", required=True, help="Clone of the DagsHub repo")
     p.add_argument("--only", nargs="*", default=None)
-    p.add_argument("--shard-gb", type=float, default=1.0)
+    p.add_argument("--shard-gb", type=float, default=0.9,
+                   help="Max tar size per shard in GiB; DagsHub cuts files over 1 GiB.")
 
     sub.add_parser("list", help="Print the variant table")
     return ap.parse_args()
