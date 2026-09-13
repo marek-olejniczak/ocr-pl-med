@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import html
 import importlib
 import logging
 import os
+import re
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -26,6 +28,30 @@ logger = get_service_logger("surya-service")
 @app.on_event("startup")
 def on_startup() -> None:
     emit_event(logger, logging.INFO, "service_startup", service=SERVICE_NAME, title=app.title)
+
+
+_BR_RE = re.compile(r"<br\s*/?>", re.IGNORECASE)
+_TAG_RE = re.compile(r"</?[a-zA-Z][^<>]*>")
+
+
+def _clean_surya_text(raw: str) -> str:
+    """Turn Surya's HTML-ish output into plain text.
+
+    Surya's recognizer emits light markup (<b>, <i>, <br>, <math>). Our inputs
+    are single line crops, so anything after a <br> is a hallucinated second
+    line (observed: "cały<br>niewie", "...kolanowym<br>/") and is dropped.
+    Remaining tags are stripped and entities decoded so the metric compares
+    text with text.
+    """
+    text = _BR_RE.split(raw, maxsplit=1)[0]
+    text = _TAG_RE.sub("", text)
+    return html.unescape(text).strip()
+
+
+def _lines_to_text(result) -> str:
+    text_lines = getattr(result, "text_lines", []) or []
+    parts = [_clean_surya_text(str(getattr(line, "text", ""))) for line in text_lines]
+    return " ".join(part for part in parts if part)
 
 
 def _build_surya_state(options: dict) -> dict:
@@ -263,9 +289,7 @@ def predict(req: PredictRequest) -> dict:
             )
             return {"text": ""}
 
-        text_lines = getattr(results[0], "text_lines", []) or []
-        parts = [str(getattr(line, "text", "")).strip() for line in text_lines]
-        text = " ".join(part for part in parts if part)
+        text = _lines_to_text(results[0])
         success = True
 
         emit_event(
@@ -397,9 +421,7 @@ def predict_batch(req: PredictBatchRequest) -> dict:
                 if not res:
                     texts.append("")
                     continue
-                text_lines = getattr(res, "text_lines", []) or []
-                parts = [str(getattr(line, "text", "")).strip() for line in text_lines]
-                texts.append(" ".join(part for part in parts if part))
+                texts.append(_lines_to_text(res))
         else:
             texts = [""] * len(temp_paths)
 

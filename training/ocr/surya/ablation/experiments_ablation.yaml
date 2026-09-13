@@ -1,0 +1,68 @@
+# Wklej do benchmark/experiments.yaml (sekcja `models:`) po treningach.
+# Sciezki sa WEWNATRZ kontenera (mount: training/results -> /app/training/results).
+# Baseline surya_lora_ocr800k juz tam jest - zostaw wlaczony, to punkt 0 ablacji.
+
+  - id: "surya_lora_v2_800k"
+    service_name: "surya"
+    base_url: "http://localhost:8008"
+    enabled: true
+    timeout: 600
+    options:
+      device: "cuda"
+      batch_size: 8
+      task_name: "ocr_without_boxes"
+      disable_math: false
+      cache_dir: "modele/cache/surya"
+      lora_adapter_path: "/app/training/results/ocr/surya/v2_800k-lora-r64/adapter"
+
+  - id: "surya_lora_v2_200k"
+    service_name: "surya"
+    base_url: "http://localhost:8008"
+    enabled: true
+    timeout: 600
+    options:
+      device: "cuda"
+      batch_size: 8
+      task_name: "ocr_without_boxes"
+      disable_math: false
+      cache_dir: "modele/cache/surya"
+      lora_adapter_path: "/app/training/results/ocr/surya/v2_200k-lora-r64/adapter"
+
+  - id: "surya_lora_noA_200k"
+    service_name: "surya"
+    base_url: "http://localhost:8008"
+    enabled: true
+    timeout: 600
+    options:
+      device: "cuda"
+      batch_size: 8
+      task_name: "ocr_without_boxes"
+      disable_math: false
+      cache_dir: "modele/cache/surya"
+      lora_adapter_path: "/app/training/results/ocr/surya/noA_200k-lora-r64/adapter"
+
+  - id: "surya_lora_noB_200k"
+    service_name: "surya"
+    base_url: "http://localhost:8008"
+    enabled: true
+    timeout: 600
+    options:
+      device: "cuda"
+      batch_size: 8
+      task_name: "ocr_without_boxes"
+      disable_math: false
+      cache_dir: "modele/cache/surya"
+      lora_adapter_path: "/app/training/results/ocr/surya/noB_200k-lora-r64/adapter"
+
+  - id: "surya_lora_noC_200k"
+    service_name: "surya"
+    base_url: "http://localhost:8008"
+    enabled: true
+    timeout: 600
+    options:
+      device: "cuda"
+      batch_size: 8
+      task_name: "ocr_without_boxes"
+      disable_math: false
+      cache_dir: "modele/cache/surya"
+      lora_adapter_path: "/app/training/results/ocr/surya/noC_200k-lora-r64/adapter"
