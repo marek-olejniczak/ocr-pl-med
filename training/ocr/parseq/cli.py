@@ -25,13 +25,16 @@ Co logujemy do W&B per krok (poza loss/lr):
 Sterowanie: --log-every, --hist-every, --optim {adamw,sgd}, --momentum, --grad-clip.
 
 Uwagi architektoniczne (dlaczego tak — patrz też README.md):
-- INPUT SZTYWNO (3, 32, 128). Patch embedding backbone'u ViT-S ma patch (4, 8) i
-  NIE interpoluje pozycji dla niekwadratowych patchy (doctr PatchEmbedding.forward
-  używa self.interpolate tylko dla patchy 4x4), więc pos_embed 32x128 = 129 tokenów
-  nie "rozciągnie się" na szerszy input bez przebudowy backbone'u. Obrazy są zatem
-  letterboxowane (aspect-preserve, centrowane), nie squashowane — tak samo jak w
-  oficjalnym treningu docTR (T.Resize preserve_aspect_ratio). Szeroki input =
-  osobny wątek (przebudowa pos_embed), poza zakresem tego pipeline'u.
+- INPUT konfigurowalny przez --input-size (domyślnie z base: 3x32x128). Patch
+  embedding backbone'u ViT-S ma patch (4, 8) i NIE interpoluje pozycji dla
+  niekwadratowych patchy (doctr PatchEmbedding.forward używa self.interpolate
+  tylko dla patchy kwadratowych), a jego interpolate_pos_encoding zakłada siatkę
+  kwadratową — więc przy zmianie rozmiaru robimy to sami: _interpolate_positions
+  w transfer_from_base przenosi wagi pozycyjne ViT (bicubic, 8x16 -> 8x64 dla
+  32x512). Bez tego byłyby losowe (positions to JEDYNY parametr o innym kształcie
+  przy szerszym wejściu). Obrazy są letterboxowane (aspect-preserve, centrowane),
+  nie squashowane — tak samo jak w oficjalnym treningu docTR
+  (T.Resize preserve_aspect_ratio).
 - max_label_length podnosimy (domyślnie 180; dane mają linie do 169). Linie
   dłuższe niż max_label_length-2 są odrzucane — docTR encode_sequences mieści
   [SOS | znaki | EOS] w target_size=max_label_length i przy długości K=M-1 EOS
@@ -177,7 +180,37 @@ def build_model(vocab: str, input_shape, max_label_length: int):
     )
 
 
-def transfer_from_base(model, base_sd: dict, base_vocab: str):
+def _grid_from_shape(input_shape, patch_size):
+    """(H, W) obrazu -> (H//p_h, W//p_w) siatki patchy."""
+    return (int(input_shape[1]) // patch_size[0], int(input_shape[2]) // patch_size[1])
+
+
+def _interpolate_positions(old: torch.Tensor, new: torch.Tensor,
+                           grid_old, grid_new) -> None:
+    """Interpoluje wagi pozycyjne ViT z siatki grid_old na grid_new (in-place).
+
+    docTR tego za nas NIE zrobi: PatchEmbedding ustawia `interpolate=False`, gdy
+    patch nie jest kwadratowy (PARSeq ma (4, 8)), więc forward zawsze dodaje
+    `self.positions` 1:1 i przy innym rozmiarze wejścia się wywali. Ich własne
+    `interpolate_pos_encoding` też nam nie pomoże, bo zakłada siatkę kwadratową
+    (`sqrt(num_positions)`), a nasza jest 8x16 -> 8x64.
+
+    Interpolujemy tylko siatkę patchy (bicubic, jak w ViT); wiersz cls kopiujemy
+    1:1 — jest niezależny od rozmiaru wejścia.
+    """
+    gh_o, gw_o = grid_old
+    gh_n, gw_n = grid_new
+    d = old.shape[-1]
+    cls_old, patch_old = old[0, 0], old[0, 1:]
+    # (gh_o*gw_o, d) -> (1, d, gh_o, gw_o) -> interpolacja -> (gh_n*gw_n, d)
+    x = patch_old.reshape(gh_o, gw_o, d).permute(2, 0, 1).unsqueeze(0)
+    x = torch.nn.functional.interpolate(x, size=(gh_n, gw_n), mode="bicubic",
+                                        align_corners=False)
+    new[0, 1:].copy_(x.squeeze(0).permute(1, 2, 0).reshape(gh_n * gw_n, d))
+    new[0, 0].copy_(cls_old)
+
+
+def transfer_from_base(model, base_sd: dict, base_vocab: str, base_input_shape=None):
     """Przenosi wagi z checkpointu base na model z rozszerzonym vocabem.
 
     - parametry o identycznych kształtach (backbone, dekoder, norms) kopiujemy 1:1;
@@ -185,10 +218,28 @@ def transfer_from_base(model, base_sd: dict, base_vocab: str):
       a rzędy specjalne EOS/SOS/PAD przenosimy wg ROLI (przesuwają się wraz z
       len(vocab), bo append do vocabu przesuwa ich indeksy);
     - pos_queries: kopiujemy pierwsze min(nowy, stary) rzędów (ciepły start),
-      dalsze pozycje zostają z inicjalizacji.
+      dalsze pozycje zostają z inicjalizacji;
+    - feat_extractor.0.positions: gdy rozmiar wejścia różni się od base, wagi
+      pozycyjne ViT są INTERPOLOWANE (base_input_shape potrzebne, żeby znać
+      siatkę źródłową) — inaczej zostałyby losowe, bo to jedyny parametr o innym
+      kształcie przy szerszym wejściu.
     Model i base_sd muszą być na CPU.
     """
     state = model.state_dict()  # referencje do .data — mutacja zmienia model w miejscu
+
+    # 0) positions — jedyny parametr zależny od rozmiaru wejścia
+    key = "feat_extractor.0.positions"
+    if key in base_sd and state[key].shape != base_sd[key].shape:
+        if base_input_shape is None:
+            logger.warning("Rozmiar wejścia różni się od base, a nie znam jego "
+                           "input_shape — wagi pozycyjne ViT zostają LOSOWE")
+        else:
+            patch = model.feat_extractor["0"].patch_size
+            grid_old = _grid_from_shape(base_input_shape, patch)
+            grid_new = _grid_from_shape(model.cfg["input_shape"], patch)
+            _interpolate_positions(base_sd[key], state[key], grid_old, grid_new)
+            logger.info("Wagi pozycyjne ViT: interpolacja %s -> %s (patch %s)",
+                        f"{grid_old[0]}x{grid_old[1]}", f"{grid_new[0]}x{grid_new[1]}", patch)
     base_c2i = {ch: idx for idx, ch in enumerate(base_vocab)}
 
     # 1) kopiowanie 1:1 (pomijamy rodzinę zależną od vocabu / max_length)
@@ -261,7 +312,7 @@ def load_base_state(base_model: str, cache_dir: Optional[str]):
 
 
 # --------------------------------------------------------------------------- #
-# Dane: obrazy linii -> (3, 32, 128) letterbox
+# Dane: obrazy linii -> (3, H, W) letterbox (H, W z --input-size)
 # --------------------------------------------------------------------------- #
 def _letterbox(path: Path, height: int, width: int, aug: str, rng: random.Random) -> np.ndarray:
     """Otwiera obraz, skaluje aspect-preserve do boxa (width x height), paduje
@@ -292,7 +343,7 @@ def _letterbox(path: Path, height: int, width: int, aug: str, rng: random.Random
 
 
 class ParSeqLineDataset(torch.utils.data.Dataset):
-    """Linie z metadata.jsonl + images/, mapowane pod docTR PARSeq 32x128."""
+    """Linie z metadata.jsonl + images/, letterboxowane pod docTR PARSeq (HxW)."""
 
     def __init__(self, metadata_path: str, images_dir: str, allowed_chars,
                  max_label_length: int, height: int, width: int,
@@ -555,8 +606,21 @@ def cmd_train(args):
     logger.info("device=%s", device)
 
     # -- base / vocab ------------------------------------------------------- #
-    base_sd, base_vocab, input_shape, base_max_len = load_base_state(
+    base_sd, base_vocab, base_input_shape, base_max_len = load_base_state(
         args.base_model, args.cache_dir)
+    if args.input_size:
+        try:
+            h_str, w_str = args.input_size.lower().split("x")
+            input_shape = (3, int(h_str), int(w_str))
+        except ValueError as exc:
+            raise ValueError(
+                f"--input-size musi być w formacie HxW (np. 32x512), "
+                f"dostałem {args.input_size!r}") from exc
+        logger.info("Rozmiar wejścia nadpisany: %s (base miał %s)",
+                    f"{input_shape[1]}x{input_shape[2]}",
+                    f"{base_input_shape[1]}x{base_input_shape[2]}")
+    else:
+        input_shape = base_input_shape
     height, width = int(input_shape[1]), int(input_shape[2])
 
     logger.info("Zliczam znaki w danych (train)...")
@@ -573,7 +637,12 @@ def cmd_train(args):
 
     # -- model --------------------------------------------------------------- #
     model = build_model(vocab, input_shape, args.max_label_length)
-    transfer_from_base(model, base_sd, base_vocab)
+    patch = model.feat_extractor["0"].patch_size
+    if height % patch[0] or width % patch[1]:
+        raise ValueError(
+            f"--input-size {height}x{width} nie dzieli się przez patch {patch} "
+            f"(wymagane H%{patch[0]}==0 i W%{patch[1]}==0, np. 32x512)")
+    transfer_from_base(model, base_sd, base_vocab, base_input_shape)
     del base_sd
     n_params = sum(p.numel() for p in model.parameters())
     logger.info("Model PARSeq: %s parametrów | input=%s | max_label_length=%d (base=%d)",
@@ -858,6 +927,13 @@ def main(argv=None):
                    help="Bazowy model docTR PARSeq: HF hub id albo lokalny katalog treningowy (model.pt+vocab.json)")
     p.add_argument("--cache-dir", default=None,
                    help="Cache modeli HF (domyślnie None = HF_HOME, w kontenerze /cache/hf)")
+    p.add_argument("--input-size", default=None,
+                   help="Rozmiar wejścia 'HxW' (domyślnie z modelu bazowego, tj. 32x128). "
+                        "Linie są letterboxowane do tego rozmiaru. Przy 32x128 tekst "
+                        "zajmuje ~10px wysokości (7%% pikseli linii), przy 32x512 ~32px "
+                        "(58%%) — szerszy input oddaje modelowi szczegół. Musi dzielić się "
+                        "przez patch (4,8); zmiana rozmiaru interpoluje wagi pozycyjne ViT "
+                        "z checkpointu base (inaczej zostałyby losowe)")
     p.add_argument("--max-label-length", type=int, default=180,
                    help="Docelowa szerokość wewnętrzna docTR (target_size). Linie dłuższe "
                         "niż max_label_length-2 są odrzucane — docTR potrzebuje 2 slotów na "

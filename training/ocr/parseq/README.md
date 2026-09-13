@@ -14,10 +14,30 @@ liniach z właściwym vocabem.
 - **Model**: docTR PARSeq (ViT-S backbone), multilingual base z HF hub
   `Felix92/doctr-torch-parseq-multilingual-v1` — ma już wszystkie polskie
   diakrytyki (`ąćęłńóśźż` + wersaliki), brakuje tylko spacji.
-- **Input**: sztywne `(3, 32, 128)` (patch `(4,8)` w backbone'u ViT-S nie
-  interpoluje pozycji dla niekwadratowych patchy, więc pos_embed 129 tokenów się
-  nie „rozciągnie"). Obrazy linii są **letterboxowane** (aspect-preserve,
-  centrowane, białe tło) — jak w oficjalnym treningu docTR, nie squashowane.
+- **Input**: `--input-size HxW` (domyślnie tyle, co base: 32x128). Obrazy linii są
+  **letterboxowane** (aspect-preserve, centrowane, białe tło) — jak w oficjalnym
+  treningu docTR, nie squashowane.
+
+  **Dlaczego warto podnieść szerokość:** linie w ocr_800k są bardzo szerokie
+  (mediana 475x37 px, aspect 12.4:1), a letterbox do 32x128 zachowuje proporcje,
+  więc wąskim gardłem jest szerokość: `scale = min(128/475, 32/37) = 0.27` i tekst
+  zajmuje ~10 px wysokości, z 22 z 32 wierszy canvasu jako biały padding — zostaje
+  ~7% pikseli linii (~5 px na znak przy medianie 26 znaków). Przy 32x512 jest to
+  ~32 px wysokości (pełny canvas) i ~58% pikseli. Porównanie (te same 400 próbek):
+
+  | input | tekst (mediana) | p10 | zachowane piksele | tokeny ViT |
+  |---|---|---|---|---|
+  | 32x128 | 10 px | 5 px | 7% | 129 |
+  | 32x384 | 31 px | 15 px | 46% | 385 |
+  | 32x512 | 32 px | 20 px | 58% | 513 |
+
+  docTR sam pozycji **nie** interpoluje (`PatchEmbedding.interpolate=False` dla
+  niekwadratowego patcha, a jego `interpolate_pos_encoding` zakłada siatkę
+  kwadratową), więc przy zmianie rozmiaru robi to `_interpolate_positions` w
+  `transfer_from_base` (bicubic, siatka patchy 8x16 -> 8x64, wiersz cls 1:1).
+  Gdyby tego nie było, wagi pozycyjne ViT zostałyby **losowe**.
+
+  Koszt: tokeny ViT 129 -> 513 (~4x), więc `--batch-size` trzeba zejść (64 -> 32).
 - **Obraz bazowy**: `training-surya-training:latest` (torch 2.7.1+cu118, wandb)
   + `python-doctr==1.1.0` (od 1.1.0 torch/torchvision to twarde zależności, bez
   extra `[torch]`). Osobna pętla treningowa — docTR to nie transformers.
@@ -97,6 +117,27 @@ docker compose -f training/docker-compose.yml run --rm parseq-training \
   --output-dir training/results/ocr/parseq/ocr800k-full \
   --max-steps 40000 --eval-every 5000 --report-to wandb --run-name parseq-ocr800k-full
 ```
+
+Retrening z **szerszym wejściem** (32x512 — patrz tabela wyżej; osobny
+`--output-dir`, żeby nie nadpisać modelu 32x128, bo oba idą do porównania w
+benchmarku). `--batch-size` w dół, bo ViT ma 4x więcej tokenów:
+
+```bash
+docker compose -f training/docker-compose.yml run --rm parseq-training \
+  python training/ocr/parseq/cli.py train \
+  --base-model Felix92/doctr-torch-parseq-multilingual-v1 \
+  --input-size 32x512 \
+  --train-metadata training/data/processed/surya800k/train/metadata.jsonl \
+  --train-images-dir training/data/processed/surya800k/train/images \
+  --val-metadata training/data/processed/surya800k/val/metadata.jsonl \
+  --val-images-dir training/data/processed/surya800k/val/images \
+  --output-dir training/results/ocr/parseq/ocr800k-full-w512 \
+  --batch-size 32 --max-steps 40000 --eval-every 5000 \
+  --report-to wandb --run-name parseq-ocr800k-w512
+```
+
+W logu na starcie powinno pojawić się `Wagi pozycyjne ViT: interpolacja 8x16 -> 8x64`
+oraz `input=(3, 32, 512)`.
 
 ## Checkpoint i wznowienie
 
