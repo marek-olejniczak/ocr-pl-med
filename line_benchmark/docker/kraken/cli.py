@@ -104,6 +104,7 @@ def cmd_predict(args):
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
     from common.resources import reset_gpu_peak, resource_meta
+    from common.resume import PredictionLog
     from PIL import Image
     from kraken import blla
     from kraken.lib import vgsl
@@ -126,8 +127,12 @@ def cmd_predict(args):
 
     dev = args.device or "cuda"   # blla.segment defaults to cpu; we want GPU
     images = coco["images"][:args.limit] if args.limit else coco["images"]
-    predictions, speeds = [], []
+    log = PredictionLog(out / "predictions.jsonl")
+    if len(log):
+        print(f"resuming: {len(log)} of {len(images)} images already done")
     for img in tqdm(images, desc="kraken predict"):
+        if log.done(img["id"]):
+            continue
         path = Path(args.images_root) / img["file_name"]
         try:
             im = Image.open(path).convert("RGB")
@@ -135,11 +140,12 @@ def cmd_predict(args):
             continue
         t0 = time.perf_counter()
         seg = blla.segment(im, model=model, device=dev)
-        speeds.append((time.perf_counter() - t0) * 1000.0)
+        ms = (time.perf_counter() - t0) * 1000.0
         boundaries = [getattr(ln, "boundary", None) for ln in seg.lines]
-        predictions.extend(lines_to_coco(boundaries, img["id"]))
+        log.add(img["id"], lines_to_coco(boundaries, img["id"]), ms)
 
-    (out / "predictions.json").write_text(json.dumps(predictions))
+    speeds = log.speeds()
+    predictions = log.finish(out / "predictions.json")
 
     import kraken
     meta = {"model": "kraken-blla", "weights": str(args.weights),

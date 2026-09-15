@@ -233,6 +233,7 @@ def cmd_train(args):
 
 def cmd_predict(args):
     from common.resources import reset_gpu_peak, resource_meta
+    from common.resume import PredictionLog
 
     ensure_tmpdir()
 
@@ -244,20 +245,25 @@ def cmd_predict(args):
 
     from tqdm import tqdm
 
-    predictions, speeds = [], []
+    log = PredictionLog(out / "predictions.jsonl")
+    if len(log):
+        print(f"resuming: {len(log)} of {len(coco['images'])} images already done")
     for img in tqdm(coco["images"], desc="predict"):
+        if log.done(img["id"]):
+            continue
         path = Path(args.images_root) / img["file_name"]
         result = model.predict(str(path), conf=args.conf, imgsz=args.imgsz,
                                max_det=args.max_det, device=args.device,
                                verbose=False)[0]
-        speeds.append(sum(result.speed.values()))      # pre+infer+post [ms]
-        for box, score in zip(result.boxes.xyxy.tolist(),
-                              result.boxes.conf.tolist()):
-            predictions.append({"image_id": img["id"], "category_id": 1,
-                                "bbox": xyxy_to_coco(box),
-                                "score": float(score)})
+        log.add(img["id"],
+                [{"image_id": img["id"], "category_id": 1,
+                  "bbox": xyxy_to_coco(box), "score": float(score)}
+                 for box, score in zip(result.boxes.xyxy.tolist(),
+                                       result.boxes.conf.tolist())],
+                sum(result.speed.values()))          # pre+infer+post [ms]
 
-    (out / "predictions.json").write_text(json.dumps(predictions))
+    speeds = log.speeds()
+    predictions = log.finish(out / "predictions.json")
 
     import torch
     import ultralytics

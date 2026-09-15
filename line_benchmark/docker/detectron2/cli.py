@@ -242,6 +242,7 @@ def cmd_predict(args):
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
     from common.resources import reset_gpu_peak, resource_meta
+    from common.resume import PredictionLog
     from detectron2.engine import DefaultPredictor
 
     reset_gpu_peak()
@@ -259,19 +260,24 @@ def cmd_predict(args):
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    predictions, speeds = [], []
+    log = PredictionLog(out / "predictions.jsonl")
+    if len(log):
+        print(f"resuming: {len(log)} of {len(coco['images'])} images already done")
     for img in tqdm(coco["images"], desc="detectron2 predict"):
+        if log.done(img["id"]):
+            continue
         im = cv2.imread(str(Path(args.images_root) / img["file_name"]))
         if im is None:
             continue
         t0 = time.perf_counter()
         inst = predictor(im)["instances"].to("cpu")
-        speeds.append((time.perf_counter() - t0) * 1000.0)
-        boxes = inst.pred_boxes.tensor.tolist()    # xyxy
-        scores = inst.scores.tolist()
-        predictions.extend(instances_to_coco(boxes, scores, img["id"]))
+        ms = (time.perf_counter() - t0) * 1000.0
+        log.add(img["id"],
+                instances_to_coco(inst.pred_boxes.tensor.tolist(),  # xyxy
+                                  inst.scores.tolist(), img["id"]), ms)
 
-    (out / "predictions.json").write_text(json.dumps(predictions))
+    speeds = log.speeds()
+    predictions = log.finish(out / "predictions.json")
 
     import detectron2
     import torch
