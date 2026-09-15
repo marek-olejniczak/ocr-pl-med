@@ -13,10 +13,65 @@ Usage:
 """
 
 import argparse
+import hashlib
 import json
+import os
 import platform
 import statistics
+import subprocess
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
+from common.batching import batching_meta, describe  # noqa: E402
+
+
+def dataset_fingerprint(data_yaml):
+    """Which images each split holds, as counts + a hash of their names.
+
+    Every dataset is materialized into the same yolo layout, so the path in
+    the config cannot tell two of them apart; this can."""
+    import yaml
+    root = Path(data_yaml).resolve().parent
+    cfg = yaml.safe_load(Path(data_yaml).read_text())
+    out = {}
+    for split in ("train", "val", "test"):
+        rel = cfg.get(split)
+        d = root / rel if rel else None
+        if d is None or not d.is_dir():
+            continue
+        names = sorted(p.name for p in d.iterdir())
+        out[f"data_{split}_images"] = len(names)
+        out[f"data_{split}_md5"] = hashlib.md5(
+            "\n".join(names).encode()).hexdigest()[:12]
+    return out
+
+
+def git_commit():
+    """Set GIT_COMMIT when running in the container - .git is not mounted."""
+    if os.environ.get("GIT_COMMIT"):
+        return os.environ["GIT_COMMIT"]
+    try:
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+                              capture_output=True, text=True,
+                              timeout=5).stdout.strip() or None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def ensure_tmpdir():
+    """tempfile needs TMPDIR to exist; compose points it into the bind mount."""
+    tmp = os.environ.get("TMPDIR")
+    if tmp:
+        Path(tmp).mkdir(parents=True, exist_ok=True)
+
+
+def guard_out_dir(out, overwrite=False):
+    ckpt = Path(out) / "train" / "weights" / "best.pt"
+    if ckpt.exists() and not overwrite:
+        raise SystemExit(
+            f"{ckpt} already exists - a previous run would be overwritten. "
+            "Use a different --out or pass --overwrite.")
 
 
 def is_rtdetr(weights):
@@ -51,8 +106,8 @@ def _wandb_artifact_logger(path, name):
 
 
 def cmd_train(args):
-    import sys
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
+    ensure_tmpdir()
+    guard_out_dir(args.out, args.overwrite)
 
     # single source of truth for the training hyperparameters: the same dict
     # feeds model.train() and the wandb config, so the config can never drift
@@ -63,10 +118,18 @@ def cmd_train(args):
         epochs=args.epochs,
         imgsz=args.imgsz,
         batch=args.batch,
+        # ultralytics chunks a step into nbs/batch backward passes on its own;
+        # pinning it here keeps the effective batch in run_meta and wandb
+        # instead of resting on a library default
+        nbs=args.nbs,
         optimizer="AdamW",
         lr0=args.lr0,
         lrf=args.lrf,
         warmup_epochs=args.warmup_epochs,
+        # explicit because rtdetr needs it off: its pipeline runs
+        # v8_transforms(stretch=True), which never crops the 2*imgsz mosaic
+        # canvas back, so training silently happens at double the resolution
+        mosaic=args.mosaic,
         cos_lr=True,
         seed=args.seed,
         deterministic=True,
@@ -74,16 +137,39 @@ def cmd_train(args):
         device=args.device,
     )
 
+    # ultralytics derives accumulate from nbs/batch itself and ramps it from 1
+    # during warmup; this is the steady-state number, stated rather than left
+    # to be recomputed from two other fields
+    batching = batching_meta(args.nbs, args.batch)
+    print(describe(args.nbs, args.batch))
+    provenance = {"git_commit": git_commit(), **batching,
+                  **dataset_fingerprint(args.data)}
+    # same record on disk, so a run stays documented without wandb
+    meta = {**vars(args), **train_kwargs, **provenance}
+    Path(args.out).mkdir(parents=True, exist_ok=True)
+    (Path(args.out) / "run_meta.json").write_text(
+        json.dumps(meta, indent=2, default=str))
+
     wandb_run = None
     if args.wandb:
         import wandb
-        wandb_run = wandb.init(project=args.wandb_project,
-                               name=Path(args.out).name,
-                               config={**vars(args), **train_kwargs})
+        wandb_run = wandb.init(
+            project=args.wandb_project,
+            name=Path(args.out).name,
+            group=args.wandb_group,
+            job_type=args.wandb_job_type,
+            notes=args.wandb_notes,
+            tags=[t for t in (args.wandb_tags or "").split(",") if t],
+            config={**vars(args), **train_kwargs, **provenance})
+
+    from training_diagnostics.core import Fanout, JsonlSink
+    from training_diagnostics.timing import EpochTimer
+    timer = EpochTimer(Fanout(
+        JsonlSink(Path(args.out) / "train" / "epoch_times.jsonl"),
+        wandb_run.log if wandb_run else None))
 
     trainer = None
     if args.diagnostics:
-        from training_diagnostics.core import Fanout, JsonlSink
         from training_diagnostics.ultralytics_hooks import pick_trainer
         cls = pick_trainer(args.weights)
         cls.sink = Fanout(
@@ -97,7 +183,6 @@ def cmd_train(args):
     if args.line_val:
         import yaml
         from training_diagnostics.checkpoints import ValLineMetrics
-        from training_diagnostics.core import Fanout, JsonlSink
         data = yaml.safe_load(Path(args.data).read_text())
         root = Path(data.get("path", str(Path(args.data).parent)))
         val_rel = str(data.get("val", "images/val"))
@@ -111,8 +196,12 @@ def cmd_train(args):
                 wandb_run.log if wandb_run else None),
             image_logger=wandb_run.log if wandb_run else None,
             viz_per_source=args.viz_per_source,
-            viz_every=args.viz_every)
+            viz_every=args.viz_every,
+            viz_max=args.viz_max)
         model.add_callback("on_fit_epoch_end", cb)
+
+    # after the line-metrics callback, so an epoch's time covers its validation
+    model.add_callback("on_fit_epoch_end", timer)
 
     model.train(
         trainer=trainer,
@@ -123,6 +212,12 @@ def cmd_train(args):
         exist_ok=True,
         **train_kwargs,
     )
+
+    cost = timer.summary(pages=provenance.get("data_train_images"))
+    (Path(args.out) / "train" / "epoch_cost.json").write_text(
+        json.dumps(cost, indent=2))
+    if wandb_run and cost:
+        wandb_run.summary.update({f"cost/{k}": v for k, v in cost.items()})
 
     weights_dir = Path(args.out).resolve() / "train" / "weights"
     if wandb_run:
@@ -137,10 +232,9 @@ def cmd_train(args):
 
 
 def cmd_predict(args):
-    import sys
-
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
     from common.resources import reset_gpu_peak, resource_meta
+
+    ensure_tmpdir()
 
     reset_gpu_peak()
     model = get_model(args.weights)
@@ -181,8 +275,6 @@ def cmd_predict(args):
 
 
 def cmd_lr_find(args):
-    import sys
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
     from training_diagnostics.lr_finder import pick_lr_finder
 
     cls = pick_lr_finder(args.weights)
@@ -232,9 +324,15 @@ def main(argv=None):
     t.add_argument("--epochs", type=int, default=100)
     t.add_argument("--imgsz", type=int, default=640)
     t.add_argument("--batch", type=int, default=64)
+    t.add_argument("--nbs", type=int, default=64,
+                   help="batch the optimizer sees; --batch is chunked and "
+                        "accumulated up to it. Set it to --batch to step "
+                        "every chunk")
     t.add_argument("--lr0", type=float, default=0.002)
     t.add_argument("--lrf", type=float, default=0.01)
     t.add_argument("--warmup-epochs", type=float, default=3.0)
+    t.add_argument("--mosaic", type=float, default=1.0,
+                   help="ultralytics default is 1.0; set 0 for rtdetr")
     t.add_argument("--seed", type=int, default=0)
     t.add_argument("--device", default=None)
     t.add_argument("--diagnostics", action="store_true",
@@ -249,10 +347,21 @@ def main(argv=None):
     t.add_argument("--line-val-max-images", type=int, default=100)
     t.add_argument("--viz-per-source", type=int, default=2,
                    help="GT-vs-pred overlays logged per source (needs --wandb)")
+    t.add_argument("--viz-max", type=int, default=10,
+                   help="cap on overlays per viz round (media add up)")
     t.add_argument("--viz-every", type=int, default=10,
                    help="log prediction overlays every N epochs")
     t.add_argument("--wandb", action="store_true")
     t.add_argument("--wandb-project", default="line-benchmark")
+    t.add_argument("--wandb-group",
+                   help="groups runs in the UI; one matrix campaign, so a "
+                        "re-run never mixes with the previous one")
+    t.add_argument("--wandb-job-type", default="train")
+    t.add_argument("--wandb-notes",
+                   help="one line on what this campaign changes")
+    t.add_argument("--wandb-tags", help="comma-separated")
+    t.add_argument("--overwrite", action="store_true",
+                   help="replace an --out that already holds a checkpoint")
     t.set_defaults(fn=cmd_train)
 
     p = sub.add_parser("predict")

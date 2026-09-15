@@ -1,18 +1,47 @@
+# Named so experiment ids and the wandb group carry it: the same model gets
+# retrained on other datasets, and every layout lands in the same paths.
+dataset: docs_20k
+# Bump for every full re-run of the matrix. wandb groups on dataset/run, so two
+# campaigns over the same data never land on top of each other - in r1 a repeat
+# produced runs with identical names, separable only by wandb's own id.
+run: r2
+notes: >-
+  r2: effective batch 64 on every model (detectron2 stepped every 8 images in
+  r1), training on raw only now that r1 has settled the preprocessing question,
+  rtdetr 40 epochs after peaking at 17 of 19, kraken fine-tuned on a subsample
+
+# r1 measured the full train x test cross and the photometric variant never
+# won - 2-3 F1 points down, on the reverse diagonal too. Training sits on raw;
+# both variants are still predicted and evaluated, which is what carries the
+# robustness claim, at half the GPU cost.
+train_variants: [raw]
+
 defaults:
-  epochs: 60         # pilot yolov8n: f1 plateaus ~ep20, iou_median ~ep48; 60 + patience captures it
-  imgsz: 640
-  batch: 64
+  # yolo11 raw plateaued around epoch 13 of 30, so 20 with patience is plenty
+  epochs: 20
+  # 1024, not 640: the thinnest lines are ~22 px on a 2338 px page, i.e. 6 px
+  # after downscaling to 640
+  imgsz: 1024
+  # 16 keeps ~11 GB of 24 on the 3090; 32 peaked at 22.2 GB and left nothing for
+  # validation.
+  batch: 16
+  # the batch every model optimizes at. batch is only what fits on the card -
+  # it gets chunked and the gradients summed until nbs images have gone
+  # through, then one step. Keeps the comparison about the architecture.
+  nbs: 64
   conf_thresh: 0.25
   # default LR from yolov8n lr-find (usable band 3e-4..1e-3; ultralytics 0.002
   # default already sits on the rising/unstable side). Per-model override below.
   lr0: 0.0005
-  train_flags: [--line-val, --diagnostics]
+  train_flags: [--line-val, --diagnostics, --wandb]
 
 data:
   raw:
     yolo: dataset/yolo_raw/data.yaml
-    images_root: ../../dataset
-    pagexml: dataset/pagexml_raw      # kraken: generate via to_pagexml before training
+    images_root: dataset/docs_20k/images
+    # kraken only, and a subsample: generate with to_pagexml --per-group 46
+    pagexml: dataset/pagexml_raw_sub46
+  # photometric variant: generate with preprocess_dataset.py before running this
   prep:
     yolo: dataset/yolo_prep/data.yaml
     images_root: dataset/prep
@@ -29,7 +58,14 @@ models:
   # yolo11n + rtdetr-l TODO, fall back to defaults.lr0 for now)
   yolov8:  {service: ultralytics, weights: yolov8n.pt,  finetune: true, zeroshot: false, lr0: 0.0005}
   yolo11:  {service: ultralytics, weights: yolo11n.pt,  finetune: true, zeroshot: false}
-  rtdetr:  {service: ultralytics, weights: rtdetr-l.pt, finetune: true, zeroshot: false}
+  # rtdetr-l is ~12x the parameters of the nano models; 16 would not fit at
+  # 1024 on a 24 GB card (yolo11n alone sits at 11 GB). Confirm with a short run.
+  # mosaic off: ultralytics builds rtdetr batches with stretch=True, which leaves
+  # the 2x imgsz mosaic canvas uncropped - 2048 px, 4x the pixels, ~50 min/epoch.
+  # With it off, batch 8 costs the same memory as 4 did at 2048.
+  # 40 epochs, unlike the nano models: in r1 rtdetr peaked in epoch 17 of 19 and
+  # was still climbing, while yolov8 peaked at 14 and yolo11 at 8.
+  rtdetr:  {service: ultralytics, weights: rtdetr-l.pt, finetune: true, zeroshot: false, batch: 8, mosaic: 0.0, epochs: 40}
   # Faster R-CNN R50-FPN (detection, COCO-native -> data_format: coco). Diagnostics/
   # line-val are ultralytics-only, so train_flags empty; lr0 after lr-find.
   frcnn:
@@ -38,7 +74,18 @@ models:
     finetune: true
     zeroshot: false
     data_format: coco
-    train_flags: []
+    # --line-val/--diagnostics are ultralytics-only. --wandb works without a
+    # rebuild now: the image has no wandb module, so compose puts one on
+    # PYTHONPATH from the bind mount. In r1 frcnn logged nothing at all.
+    train_flags: [--wandb]
+    # batch 2 (the detectron2 default per GPU) left the card at 3 GB of 24 and
+    # took 7 h; 8 fits comfortably. 8 chunks of it make the nominal 64, which
+    # is where this model differed from the ultralytics ones - they had been
+    # accumulating to 64 all along, detectron2 stepped every 8 images.
+    batch: 8
+    # linear scaling from the 0.002 that ran at an effective batch of 8; per
+    # image this is still 5x below detectron2's own 0.02 @ 16 baseline
+    lr0: 0.016
   # Surya: native line detection, predict-only (finetuning unavailable) ->
   # zeroshot=true, finetune=false. Generates only predict+eval (raw and prep).
   surya:
@@ -46,15 +93,24 @@ models:
     weights: surya
     finetune: false
     zeroshot: true
-  # Kraken BLLA: HTR line segmentation. Zero-shot (blla model) + finetuning
-  # (ketos segtrain on PAGE XML from to_pagexml). data_format: pagexml; diagnostics
-  # ultralytics-only -> train_flags empty. NOTE: generate PAGE XML before training:
-  # python data_prep/converters/to_pagexml.py --coco ... --out-dir dataset/pagexml_raw
+  # Kraken BLLA: HTR line segmentation, the only other model that can be tuned
+  # (surya's detection training is not published). segtrain on all 14k pages
+  # would dominate the GPU budget, so it trains on ~46 variants per template
+  # page - 43 layouts, ~2k pages - generated with
+  #   to_pagexml.py --coco instances_train.json --per-group 46 \
+  #       --out-dir dataset/pagexml_raw_sub46
+  # Layout coverage is what transfers, so few variants of every template beat
+  # every variant of a few. Both zeroshot and finetune: the subsample is only
+  # defensible next to the untuned baseline, and epoch_cost.json from the run
+  # is what backs the decision not to train on the full set.
   kraken:
     service: kraken
     weights: blla
     finetune: true
     zeroshot: true
     data_format: pagexml
+    epochs: 10
+    # ketos -r; defaults.lr0 comes from a yolo lr-find and means nothing here
+    lr0: 0.0002
     train_flags: []
   # dbnet (docTR) - last from the design, optional

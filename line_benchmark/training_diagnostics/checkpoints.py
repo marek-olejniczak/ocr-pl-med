@@ -7,6 +7,7 @@ metrics the benchmark evaluator uses and keeps best_<metric>.pt per metric.
 """
 
 import shutil
+import re
 from pathlib import Path
 
 import numpy as np
@@ -31,19 +32,31 @@ class BestTracker:
         return improved
 
 
-def select_viz_images(paths, per_source):
-    """Pick up to per_source images per source for visualisation.
+VARIANT_RE = re.compile(r"_\d+$")
 
-    Source = filename prefix before the first underscore (iam_/auto_/seg_ in
-    the dev dataset). Deterministic: keeps input order, first N per group.
+
+def select_viz_images(paths, per_source, max_total=None):
+    """Pick up to per_source images per template page for visualisation.
+
+    Key = the file name without its trailing index, the same grouping the
+    splits use: a generated set holds hundreds of variants of one page, and
+    overlays of the same layout say nothing new. Deterministic: keeps input
+    order, first N per group.
     """
     groups = {}
     for p in paths:
-        key = Path(p).stem.split("_")[0]
+        key = VARIANT_RE.sub("", Path(p).stem)
         groups.setdefault(key, [])
         if len(groups[key]) < per_source:
             groups[key].append(Path(p))
-    return [(p, key) for key, ps in groups.items() for p in ps]
+    # round-robin, so truncating to max_total thins every group evenly
+    # instead of dropping the last layouts entirely
+    out = []
+    for i in range(per_source):
+        for key, ps in groups.items():
+            if i < len(ps):
+                out.append((ps[i], key))
+    return out[:max_total] if max_total else out
 
 
 def read_yolo_labels(txt_path, img_w, img_h):
@@ -71,7 +84,7 @@ class ValLineMetrics:
 
     def __init__(self, val_images_dir, val_labels_dir, conf=0.25,
                  max_images=100, imgsz=640, sink=None, artifact_logger=None,
-                 image_logger=None, viz_per_source=2, viz_every=10,
+                 image_logger=None, viz_per_source=2, viz_every=10, viz_max=10,
                  viz_max_dim=1024):
         all_val = sorted(p for p in Path(val_images_dir).iterdir()
                          if p.suffix.lower() in {".jpg", ".jpeg", ".png"})
@@ -80,7 +93,8 @@ class ValLineMetrics:
         # sample across all sources.
         step = max(1, len(all_val) // max_images) if max_images else 1
         self.val_images = all_val[::step][:max_images] if max_images else all_val
-        self.viz_images = select_viz_images(all_val, viz_per_source)
+        self.viz_images = select_viz_images(all_val, viz_per_source,
+                                            viz_max)
         self.val_labels = Path(val_labels_dir)
         self.conf, self.imgsz = conf, imgsz
         self.sink, self.artifact_logger = sink, artifact_logger

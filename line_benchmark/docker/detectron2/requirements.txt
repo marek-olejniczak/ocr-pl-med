@@ -2,3 +2,6 @@
 # against the image's torch/CUDA. Pins to verify on the server (nvcc/torch).
 opencv-python-headless
 pycocotools
+# for cli.py --wandb; the image on the server predates this line, so the
+# orchestrator keeps --wandb off for frcnn until it is rebuilt
+wandb

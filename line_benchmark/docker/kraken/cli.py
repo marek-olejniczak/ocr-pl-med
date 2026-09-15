@@ -44,9 +44,33 @@ def speed_stats(speeds_ms):
             "ms_per_image_median": float(statistics.median(speeds_ms))}
 
 
+def run_logged(cmd, log_path):
+    """Run a subprocess, tee its output to log_path with elapsed seconds in
+    front of every line, return the total. ketos prints its own progress in a
+    format that moves between versions, so we timestamp instead of parsing:
+    per-epoch times stay recoverable from the log whatever it prints."""
+    t0 = time.perf_counter()
+    with open(log_path, "w") as log:
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT, text=True, bufsize=1)
+        for line in proc.stdout:
+            log.write(f"{time.perf_counter() - t0:9.2f} {line}")
+            print(line, end="")
+        proc.wait()
+    if proc.returncode:
+        raise SystemExit(f"ketos segtrain failed ({proc.returncode}); "
+                         f"see {log_path}")
+    return time.perf_counter() - t0
+
+
 def cmd_train(args):
     # ketos segtrain is the stable interface (CLI), so we shell out rather than
     # bind to a churning Python API. PAGE XML produced by to_pagexml.py.
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
+    from training_diagnostics.timing import epoch_cost
+
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     xmls = sorted(str(p) for p in Path(args.data).glob("*.xml"))
@@ -59,7 +83,16 @@ def cmd_train(args):
            "--device", args.device or "cuda",
            *xmls]
     print("running:", " ".join(cmd[:8]), f"... ({len(xmls)} xml)")
-    subprocess.run(cmd, check=True)   # writes out/model_best.mlmodel
+    log_path = out / "segtrain.log"
+    total_s = run_logged(cmd, log_path)   # writes out/model_best.mlmodel
+
+    cost = {**epoch_cost(total_s, args.epochs, len(xmls)),
+            "note": "averages over the epochs requested; if ketos stopped "
+                    "early the per-epoch figure is a lower bound - "
+                    f"{log_path.name} carries the real timings"}
+    (out / "epoch_cost.json").write_text(json.dumps(cost, indent=2))
+    print(f"{total_s / 60:.1f} min for {len(xmls)} pages x {args.epochs} epochs "
+          f"({cost['s_per_page_per_epoch'] * 1000:.0f} ms/page/epoch)")
     print(f"best checkpoint: {out / 'model_best.mlmodel'}")
 
 
@@ -132,6 +165,7 @@ def main(argv=None):
     t.add_argument("--lr0", type=float, default=0.0002)   # -> ketos -r
     t.add_argument("--imgsz", type=int, default=640)   # accepted, unused
     t.add_argument("--batch", type=int, default=1)     # accepted, unused
+    t.add_argument("--nbs", type=int, default=64)      # accepted, unused
     t.add_argument("--device", default=None)
     t.set_defaults(fn=cmd_train)
 

@@ -2,8 +2,12 @@
 # bind-mounted /benchmark (checkpoints, predictions, results) is owned by you,
 # not root. Set HUID/HGID once in a local .env file (gitignored), e.g.:
 #   printf 'HUID=%s\nHGID=%s\n' "$(id -u)" "$(id -g)" > .env
-# HOME=/tmp because a non-root user cannot write /root; wandb/torch/ultralytics
-# caches land in /tmp, model downloads go to /benchmark (writable by you).
+# HOME and the cache/tmp dirs point into the bind mount, not /tmp: a non-root
+# user cannot write /root, and /tmp lives on the container layer, which on a
+# host with a full root filesystem means ENOSPC in the middle of a run.
+# torch, ultralytics and matplotlib each pick their own variable.
+# USER/LOGNAME because getpass.getuser() reads them before /etc/passwd, which
+# has no entry for the host uid we run as - torch._inductor calls it and dies.
 services:
   ultralytics:
     build: ./docker/ultralytics
@@ -21,7 +25,13 @@ services:
     working_dir: /benchmark
     environment:
       - WANDB_API_KEY
-      - HOME=/tmp
+      - HOME=/benchmark/results/.home
+      - TMPDIR=/benchmark/results/.home/tmp
+      - YOLO_CONFIG_DIR=/benchmark/results/.home/Ultralytics
+      - MPLCONFIGDIR=/benchmark/results/.home/matplotlib
+      - TORCHINDUCTOR_CACHE_DIR=/benchmark/results/.home/torchinductor
+      - USER=benchmark
+      - LOGNAME=benchmark
     deploy:
       resources:
         reservations:
@@ -38,8 +48,21 @@ services:
       - .:/benchmark
     working_dir: /benchmark
     environment:
+      # wandb is missing from the built image and a rebuild needs room on a
+      # root filesystem that stays full, so it lives in the bind mount:
+      #   docker compose run --rm --entrypoint pip detectron2 install \
+      #     --target /benchmark/results/.pylibs wandb -U typing_extensions
+      # Keep only what the image lacks - a copy of protobuf, yaml or requests
+      # in there shadows the one torch was built against.
+      - PYTHONPATH=/benchmark/results/.pylibs
       - WANDB_API_KEY
-      - HOME=/tmp
+      - HOME=/benchmark/results/.home
+      - TMPDIR=/benchmark/results/.home/tmp
+      - YOLO_CONFIG_DIR=/benchmark/results/.home/Ultralytics
+      - MPLCONFIGDIR=/benchmark/results/.home/matplotlib
+      - TORCHINDUCTOR_CACHE_DIR=/benchmark/results/.home/torchinductor
+      - USER=benchmark
+      - LOGNAME=benchmark
     deploy:
       resources:
         reservations:
@@ -57,7 +80,13 @@ services:
     working_dir: /benchmark
     environment:
       - WANDB_API_KEY
-      - HOME=/tmp
+      - HOME=/benchmark/results/.home
+      - TMPDIR=/benchmark/results/.home/tmp
+      - YOLO_CONFIG_DIR=/benchmark/results/.home/Ultralytics
+      - MPLCONFIGDIR=/benchmark/results/.home/matplotlib
+      - TORCHINDUCTOR_CACHE_DIR=/benchmark/results/.home/torchinductor
+      - USER=benchmark
+      - LOGNAME=benchmark
     deploy:
       resources:
         reservations:
@@ -75,7 +104,13 @@ services:
     working_dir: /benchmark
     environment:
       - WANDB_API_KEY
-      - HOME=/tmp
+      - HOME=/benchmark/results/.home
+      - TMPDIR=/benchmark/results/.home/tmp
+      - YOLO_CONFIG_DIR=/benchmark/results/.home/Ultralytics
+      - MPLCONFIGDIR=/benchmark/results/.home/matplotlib
+      - TORCHINDUCTOR_CACHE_DIR=/benchmark/results/.home/torchinductor
+      - USER=benchmark
+      - LOGNAME=benchmark
     deploy:
       resources:
         reservations:
