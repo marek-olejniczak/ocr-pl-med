@@ -59,35 +59,26 @@ Do zrobienia:
 - osobna flaga rodziny (`--no-neighbour-glyphs` lub podobna) do ablacji;
   stary `bleed_neighbour` zostaje jako wariant „kreski".
 
-## Faza 2 — szybka weryfikacja (ODŁOŻONA decyzją z 2026-09-10; najpierw kolejne zmiany w generatorze)
+## Faza 2 — weryfikacja (ZROBIONE 2026-09-15)
 
-Pełny opis zmian v2 i ich uzasadnienie wynikami: `docs/ocr_generator_v2.md`.
+Generator v2, 800k linii, 40k krokow: **CER 12,9%** wobec 15,9% dla v1
+(przedzialy ufnosci rozlaczne). Exact match 18,6% -> 24,9%. Pelne omowienie:
+`docs/wyniki_ocr_v2.md`, liczby: `docs/wyniki_ablacji.md`.
 
-Jeden zbiór tej samej wielkości i z tym samym budżetem (40 000 kroków × batch 8)
-co `ocr_800k`, jedna LoRA na serwerze, CER na 2160 liniach. Do tego dwa
-treningi baseline z różnym seedem, żeby znać szum. Dopiero gdy jest lepiej niż
-15,9% — faza 3.
+## Faza 3 — ablacja (ZROBIONE 2026-09-15)
 
-## Faza 3 — ablacja (przygotowana 2026-09-10, czeka na serwer)
+Punkt odniesienia `v2_200k` = 12,72%. Wynik:
 
-Ograniczenie od Marka: jeden pełny trening na RTX 3090 to prawie dzień.
-Dlatego: 3 grupy zamiast 9 rodzin, ćwierć budżetu, baseline bez ponownego treningu.
+| Grupa | CER bez grupy | Strata | Istotna? |
+|---|---|---|---|
+| A. Tresc (short_words, caps, arrows_bullets, anatomy_vocab) | 14,7% | +2,02 pkt | tak |
+| B. Kadr i tlo (neighbour_glyphs, grid_paper) | 12,8% | +0,11 pkt | nie |
+| C. Degradacja (morphology, elastic, phone_photo) | 12,8% | +0,06 pkt | nie |
 
-| Grupa | Rodziny | Pytanie |
-|---|---|---|
-| A. Treść | short_words, caps, arrows_bullets, anatomy_vocab | czy ważne jest, CO napisane |
-| B. Kadr i tło | neighbour_glyphs, grid_paper | czy ważne, GDZIE i w jakim otoczeniu |
-| C. Degradacja | morphology, elastic, phone_photo | czy ważne, JAK sfotografowano |
-
-Treningi: 0) baseline v1 = istniejący `surya_lora_ocr800k`; 1) v2_800k, 40k kroków
-(model właściwy = faza 2); 2) v2_200k, 3) noA_200k, 4) noB_200k, 5) noC_200k,
-po 10k kroków. Razem 2 dni serwera. Bez drugiego seeda: niepewność z bootstrapu
-po 2160 liniach + spójność po autorach. Opcjonalnie +1 run `--disable elastic`.
-
-Gotowe narzędzia: `src/build_ablation_sets.py` (generate/pack),
-`scripts/server/run_ablation_queue.sh` (kolejka pod tmux, też na gałęzi `server`),
-`scripts/server/experiments_ablation.yaml`, `src/ablation_report.py`.
-Komendy krok po kroku: `docs/ablacja_runbook.md`.
+Cala poprawa pochodzi z tresci. Augmentacje obrazu, w tym elastic, nie daly
+mierzalnego efektu na tym testsecie. Dodatkowo: `v2_200k` (200k linii, 10k
+krokow) rowny `v2_800k` (800k, 40k), wiec zbior przestal byc czynnikiem
+ograniczajacym.
 
 ## Faza 4 — finalny zbiór i model
 
