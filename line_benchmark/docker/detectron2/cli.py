@@ -18,6 +18,7 @@ Usage:
 
 import argparse
 import json
+import os
 import platform
 import statistics
 import sys
@@ -140,7 +141,9 @@ def cmd_train(args):
                                notes=args.wandb_notes,
                                tags=[t for t in
                                      (args.wandb_tags or "").split(",") if t],
-                               config={**vars(args), **batching})
+                               config={**vars(args), **batching,
+                                       "git_commit":
+                                           os.environ.get("GIT_COMMIT")})
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -175,6 +178,7 @@ def cmd_train(args):
 
     (out / "run_meta.json").write_text(json.dumps(
         {**vars(args), **batching,
+         "git_commit": os.environ.get("GIT_COMMIT"),
          "iters_per_epoch": iters_per_epoch,
          "max_iter": cfg.SOLVER.MAX_ITER,
          "warmup_iters": cfg.SOLVER.WARMUP_ITERS,

@@ -16,6 +16,7 @@ Usage (from line_benchmark/):
 
 import argparse
 import csv
+import os
 import subprocess
 import sys
 from datetime import datetime
@@ -42,6 +43,25 @@ WANDB_SERVICES = {"ultralytics", "detectron2"}
 
 def _ckpt_rel(service):
     return CKPT_REL.get(service, DEFAULT_CKPT)
+
+
+def git_commit():
+    """Containers only get line_benchmark/ bind-mounted, so .git is not visible
+    inside them; the commit has to come in as an environment variable."""
+    try:
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+                              cwd=BENCH_ROOT, capture_output=True, text=True,
+                              timeout=5).stdout.strip() or None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def job_env(base=None):
+    env = dict(os.environ if base is None else base)
+    sha = git_commit()
+    if sha:
+        env["GIT_COMMIT"] = sha
+    return env
 
 
 def load_config(path):
@@ -227,6 +247,7 @@ def main(argv=None):
     if args.stage:
         jobs = [j for j in jobs if j["kind"] == args.stage]
 
+    env = job_env()
     ran = skipped = failed = 0
     for job in jobs:
         cmd = job_command(job, cfg, args.local, args.results_dir)
@@ -242,7 +263,7 @@ def main(argv=None):
         print(f"run   {job['kind']:8s} {job['exp_id']}")
         # cwd pinned to line_benchmark/ so relative script paths resolve no matter
         # where the runner itself was invoked from
-        result = subprocess.run(cmd, cwd=BENCH_ROOT)
+        result = subprocess.run(cmd, cwd=BENCH_ROOT, env=env)
         if result.returncode == 0:
             _log_run(args.results_dir, job, "ok")
             ran += 1

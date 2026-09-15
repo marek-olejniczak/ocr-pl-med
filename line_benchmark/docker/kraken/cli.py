@@ -13,6 +13,7 @@ per-line detection score, so score = 1.0 (note: ECE is degenerate for Kraken).
 
 import argparse
 import json
+import os
 import platform
 import statistics
 import subprocess
@@ -87,6 +88,7 @@ def cmd_train(args):
     total_s = run_logged(cmd, log_path)   # writes out/model_best.mlmodel
 
     cost = {**epoch_cost(total_s, args.epochs, len(xmls)),
+            "git_commit": os.environ.get("GIT_COMMIT"),
             "note": "averages over the epochs requested; if ketos stopped "
                     "early the per-epoch figure is a lower bound - "
                     f"{log_path.name} carries the real timings"}
