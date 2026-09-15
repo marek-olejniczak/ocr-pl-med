@@ -5,6 +5,10 @@ Honors the benchmark contract - predict writes COCO results + meta.json, so the
 shared evaluator treats it like any other model. Single class (line); we use
 detection (Faster R-CNN), not Mask R-CNN, because the GT has no masks.
 
+--batch is what fits on the card, --nbs is the batch the optimizer sees: the
+step is split into nbs/batch chunks that are backwarded without stepping, so
+every model in the matrix optimizes at the same effective batch.
+
 Usage:
     python cli.py train --weights <model_zoo.yaml> --train-coco ... --val-coco ... \
         --images-root <root> --out results/checkpoints/<exp_id>
@@ -16,8 +20,13 @@ import argparse
 import json
 import platform
 import statistics
+import sys
 import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
+from common.batching import (accumulate_steps, batching_meta,  # noqa: E402
+                             describe)
 
 LINE_CATEGORY_ID = 1
 # Faster R-CNN R50-FPN 3x; detection baseline, COCO-pretrained
@@ -48,6 +57,47 @@ def _zoo_id(weights):
     return DEFAULT_ZOO if weights in ("frcnn_r50.yaml", "frcnn", "") else weights
 
 
+def accumulate_backward(model, optimizer, batches, accum):
+    """One optimizer step out of `accum` chunks.
+
+    Each chunk is forwarded and backwarded on its own and scaled by 1/accum, so
+    the gradient that finally gets stepped is the one a batch of accum x chunk
+    would have produced. Returns the averaged losses and the data wait.
+    """
+    optimizer.zero_grad()
+    totals, data_time = {}, 0.0
+    for _ in range(accum):
+        t0 = time.perf_counter()
+        data = next(batches)
+        data_time += time.perf_counter() - t0
+        loss_dict = model(data)
+        (sum(loss_dict.values()) / accum).backward()
+        for k, v in loss_dict.items():
+            totals[k] = totals.get(k, 0.0) + v.detach() / accum
+    optimizer.step()
+    return totals, data_time
+
+
+def build_trainer(cfg, accum):
+    from detectron2.engine import DefaultTrainer, SimpleTrainer
+
+    class _ChunkedStep(SimpleTrainer):
+        def run_step(self):
+            losses, data_time = accumulate_backward(
+                self.model, self.optimizer, self._data_loader_iter, accum)
+            self._write_metrics(losses, data_time)
+
+    class _Trainer(DefaultTrainer):
+        def __init__(self, cfg):
+            super().__init__(cfg)
+            if accum > 1:
+                inner = self._trainer
+                self._trainer = _ChunkedStep(inner.model, inner.data_loader,
+                                             inner.optimizer)
+
+    return _Trainer(cfg)
+
+
 def _base_cfg(args, zoo_config, num_classes=1):
     from detectron2 import model_zoo
     from detectron2.config import get_cfg
@@ -72,14 +122,25 @@ def cmd_train(args):
     from detectron2 import model_zoo
     from detectron2.data import DatasetCatalog
     from detectron2.data.datasets import register_coco_instances
-    from detectron2.engine import DefaultTrainer, HookBase
+    from detectron2.engine import HookBase
     from detectron2.utils.events import get_event_storage
+    from training_diagnostics.core import Fanout, JsonlSink
+    from training_diagnostics.timing import EpochTimer
+
+    batching = batching_meta(args.nbs, args.batch)
+    print(describe(args.nbs, args.batch))
 
     wandb_run = None
     if args.wandb:
         import wandb
         wandb_run = wandb.init(project=args.wandb_project,
-                               name=Path(args.out).name, config=vars(args))
+                               name=Path(args.out).name,
+                               group=args.wandb_group,
+                               job_type=args.wandb_job_type,
+                               notes=args.wandb_notes,
+                               tags=[t for t in
+                                     (args.wandb_tags or "").split(",") if t],
+                               config={**vars(args), **batching})
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -90,7 +151,9 @@ def cmd_train(args):
         register_coco_instances(name, {}, coco, args.images_root)
 
     n_train = len(json.loads(Path(args.train_coco).read_text())["images"])
-    iters_per_epoch = max(1, n_train // args.batch)
+    accum = accumulate_steps(args.nbs, args.batch)
+    # an iteration is one optimizer step now, so it eats accum chunks
+    iters_per_epoch = max(1, n_train // batching["effective_batch"])
 
     zoo = _zoo_id(args.weights)            # for train, --weights is the zoo cfg id
     cfg = _base_cfg(args, zoo)
@@ -102,11 +165,39 @@ def cmd_train(args):
     cfg.SOLVER.BASE_LR = args.lr0
     cfg.SOLVER.MAX_ITER = iters_per_epoch * args.epochs
     cfg.SOLVER.STEPS = []          # no LR step decay; keep it simple/comparable
+    # the zoo warmup is in iterations; divide it so it still covers the same
+    # number of images once an iteration is accum times bigger
+    cfg.SOLVER.WARMUP_ITERS = max(1, cfg.SOLVER.WARMUP_ITERS // accum)
     cfg.TEST.EVAL_PERIOD = iters_per_epoch
     cfg.OUTPUT_DIR = str(out)
+    if accum > 1 and cfg.SOLVER.AMP.ENABLED:
+        raise SystemExit("chunked steps run in fp32; turn AMP off or accum off")
 
-    trainer = DefaultTrainer(cfg)
+    (out / "run_meta.json").write_text(json.dumps(
+        {**vars(args), **batching,
+         "iters_per_epoch": iters_per_epoch,
+         "max_iter": cfg.SOLVER.MAX_ITER,
+         "warmup_iters": cfg.SOLVER.WARMUP_ITERS,
+         "n_train_images": n_train}, indent=2, default=str))
+    print(f"{iters_per_epoch} steps/epoch, {cfg.SOLVER.MAX_ITER} total, "
+          f"warmup {cfg.SOLVER.WARMUP_ITERS}")
+    if wandb_run:
+        wandb_run.config.update({"iters_per_epoch": iters_per_epoch,
+                                 "max_iter": cfg.SOLVER.MAX_ITER})
+
+    trainer = build_trainer(cfg, accum)
     trainer.resume_or_load(resume=False)
+
+    timer = EpochTimer(Fanout(JsonlSink(out / "epoch_times.jsonl"),
+                              wandb_run.log if wandb_run else None))
+
+    class _EpochTimerHook(HookBase):
+        def after_step(self):
+            done = self.trainer.iter + 1
+            if done % iters_per_epoch == 0:
+                timer.tick(done // iters_per_epoch)
+
+    trainer.register_hooks([_EpochTimerHook()])
 
     if wandb_run:
         # push detectron2's EventStorage scalars (losses, lr, and bbox/AP from
@@ -127,8 +218,13 @@ def cmd_train(args):
 
     trainer.train()              # writes OUTPUT_DIR/model_final.pth
 
+    cost = timer.summary(pages=n_train)
+    (out / "epoch_cost.json").write_text(json.dumps(cost, indent=2))
+
     ckpt = out / "model_final.pth"
     if wandb_run:
+        if cost:
+            wandb_run.summary.update({f"cost/{k}": v for k, v in cost.items()})
         if ckpt.exists():
             art = wandb.Artifact(f"{wandb_run.name}-model_final", type="model")
             art.add_file(str(ckpt))
@@ -201,10 +297,21 @@ def main(argv=None):
     t.add_argument("--epochs", type=int, default=60)
     t.add_argument("--imgsz", type=int, default=640)
     t.add_argument("--batch", type=int, default=16)
+    t.add_argument("--nbs", type=int, default=64,
+                   help="batch the optimizer sees; --batch is chunked and "
+                        "accumulated up to it. Set it to --batch to step "
+                        "every chunk")
     t.add_argument("--lr0", type=float, default=0.0005)
     t.add_argument("--device", default=None)
     t.add_argument("--wandb", action="store_true")
     t.add_argument("--wandb-project", default="line-benchmark")
+    t.add_argument("--wandb-group",
+                   help="groups runs in the UI; one matrix campaign, so a "
+                        "re-run never mixes with the previous one")
+    t.add_argument("--wandb-job-type", default="train")
+    t.add_argument("--wandb-notes",
+                   help="one line on what this campaign changes")
+    t.add_argument("--wandb-tags", help="comma-separated")
     t.add_argument("--wandb-period", type=int, default=20,
                    help="log detectron2 metrics to wandb every N iterations")
     t.set_defaults(fn=cmd_train)

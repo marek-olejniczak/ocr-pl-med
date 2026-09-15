@@ -8,16 +8,39 @@ thesis.
 
 Usage (from line_benchmark/):
     python data_prep/converters/to_pagexml.py --coco instances_train.json \
-        --out-dir dataset/pagexml/train
+        --out-dir dataset/pagexml/train [--per-group 46]
 """
 
 import argparse
 import json
+import re
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from pathlib import Path
 
 PAGE_NS = "http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15"
+VARIANT_RE = re.compile(r"_\d+$")
+
+
+def group_key(file_name):
+    return VARIANT_RE.sub("", Path(file_name).stem)
+
+
+def subsample(images, per_group):
+    """At most `per_group` variants of each template page.
+
+    Fewer variants of every layout beats every variant of a few layouts: the
+    test split holds unseen template pages, so layout coverage is what carries
+    over. Deterministic - the first N by file name."""
+    if not per_group:
+        return images
+    groups = defaultdict(list)
+    for img in images:
+        groups[group_key(img["file_name"])].append(img)
+    keep = []
+    for key in sorted(groups):
+        keep += sorted(groups[key], key=lambda i: i["file_name"])[:per_group]
+    return keep
 
 
 def baseline_from_bbox(bbox, frac=0.75):
@@ -62,6 +85,10 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--coco", required=True)
     ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--per-group", type=int, default=0,
+                    help="cap variants per template page (0 = all); kraken "
+                         "trains on a subsample, segtrain is far slower than "
+                         "the detectors")
     args = ap.parse_args(argv)
 
     coco = json.loads(Path(args.coco).read_text())
@@ -69,12 +96,14 @@ def main(argv=None):
     for a in coco["annotations"]:
         anns[a["image_id"]].append(a)
 
+    images = subsample(coco["images"], args.per_group)
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    for img in coco["images"]:
+    for img in images:
         xml = coco_image_to_pagexml(img, anns[img["id"]])
         (out / f"{Path(img['file_name']).stem}.xml").write_text(xml)
-    print(f"{len(coco['images'])} PAGE XML files -> {out}")
+    print(f"{len(images)} PAGE XML files -> {out} "
+          f"({len(coco['images'])} in the source)")
 
 
 if __name__ == "__main__":
