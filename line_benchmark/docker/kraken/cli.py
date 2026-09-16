@@ -15,6 +15,8 @@ import argparse
 import json
 import os
 import platform
+import re
+import shutil
 import statistics
 import subprocess
 import time
@@ -43,6 +45,29 @@ def speed_stats(speeds_ms):
         return {"ms_per_image_mean": 0.0, "ms_per_image_median": 0.0}
     return {"ms_per_image_mean": float(statistics.fmean(speeds_ms)),
             "ms_per_image_median": float(statistics.median(speeds_ms))}
+
+
+EPOCH_CKPT = re.compile(r"^model_(\d+)\.mlmodel$")
+
+
+def resolve_checkpoint(out):
+    """ketos writes model_<epoch>.mlmodel every epoch and model_best.mlmodel
+    only when validation picked a winner - a single-epoch run leaves none. The
+    benchmark contract is model_best, so fall back to the last epoch."""
+    out = Path(out)
+    best = out / "model_best.mlmodel"
+    if best.exists():
+        return best, "best"
+    epochs = []
+    for path in out.glob("model_*.mlmodel"):
+        m = EPOCH_CKPT.match(path.name)
+        if m:
+            epochs.append((int(m.group(1)), path))
+    if not epochs:
+        return None, None
+    last = max(epochs)[1]
+    shutil.copy2(last, best)
+    return best, last.stem
 
 
 def ketos_device(device):
@@ -106,7 +131,13 @@ def cmd_train(args):
     (out / "epoch_cost.json").write_text(json.dumps(cost, indent=2))
     print(f"{total_s / 60:.1f} min for {len(xmls)} pages x {args.epochs} epochs "
           f"({cost['s_per_page_per_epoch'] * 1000:.0f} ms/page/epoch)")
-    print(f"best checkpoint: {out / 'model_best.mlmodel'}")
+
+    ckpt, source = resolve_checkpoint(out)
+    if ckpt is None:
+        raise SystemExit(f"segtrain wrote no checkpoint into {out}")
+    if source != "best":
+        print(f"no model_best.mlmodel from ketos; using {source}")
+    print(f"best checkpoint: {ckpt}")
 
 
 def cmd_predict(args):
