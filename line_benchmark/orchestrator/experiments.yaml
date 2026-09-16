@@ -97,8 +97,11 @@ models:
   # (surya's detection training is not published). segtrain on all 14k pages
   # would dominate the GPU budget, so it trains on ~46 variants per template
   # page - 43 layouts, ~2k pages - generated with
-  #   to_pagexml.py --coco instances_train.json --per-group 46 \
+  #   to_pagexml.py --coco dataset/annotations/instances_train.json \
+  #       --images-root dataset/docs_20k/images --per-group 46 \
   #       --out-dir dataset/pagexml_raw_sub46
+  # --images-root is not optional here: kraken opens imageFilename relative to
+  # the XML, and these XML live in a folder of their own.
   # Layout coverage is what transfers, so few variants of every template beat
   # every variant of a few. Both zeroshot and finetune: the subsample is only
   # defensible next to the untuned baseline, and epoch_cost.json from the run

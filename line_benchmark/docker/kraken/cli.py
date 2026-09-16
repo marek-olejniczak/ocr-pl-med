@@ -45,6 +45,13 @@ def speed_stats(speeds_ms):
             "ms_per_image_median": float(statistics.median(speeds_ms))}
 
 
+def ketos_device(device):
+    """kraken indexes the device string past the colon, so a bare 'cuda' dies
+    with IndexError before training starts."""
+    d = device or "cuda"
+    return f"{d}:0" if d == "cuda" else d
+
+
 def run_logged(cmd, log_path):
     """Run a subprocess, tee its output to log_path with elapsed seconds in
     front of every line, return the total. ketos prints its own progress in a
@@ -77,11 +84,15 @@ def cmd_train(args):
     xmls = sorted(str(p) for p in Path(args.data).glob("*.xml"))
     if not xmls:
         raise SystemExit(f"no PAGE XML in {args.data} (run to_pagexml first)")
-    cmd = ["ketos", "segtrain", "-f", "page",
+    # -v before the subcommand: kraken builds a lightning RichProgressBar only
+    # when not verbose, and the image pairs rich 15 with lightning 2.4, where
+    # clear_live() pops an empty stack. Verbose output is what the timestamped
+    # log wants anyway.
+    cmd = ["ketos", "-v", "segtrain", "-f", "page",
            "-o", str(out / "model"),
            "--epochs", str(args.epochs),
            "-r", str(args.lr0),
-           "--device", args.device or "cuda",
+           "--device", ketos_device(args.device),
            *xmls]
     print("running:", " ".join(cmd[:8]), f"... ({len(xmls)} xml)")
     log_path = out / "segtrain.log"
