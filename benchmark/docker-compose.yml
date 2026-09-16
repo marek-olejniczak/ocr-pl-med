@@ -76,6 +76,9 @@ services:
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     volumes:
       - ./modele/cache/parseq:/app/modele/cache/parseq
+      # nasze fine-tuny PARSeq — eksponuje training/results do kontenera,
+      # żeby parseq_ft / parseq_ft_w512 (experiments.yaml) mogły wczytać checkpoint.
+      - ../training/results:/app/training/results
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s

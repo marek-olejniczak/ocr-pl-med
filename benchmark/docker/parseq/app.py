@@ -42,11 +42,12 @@ def get_model(options: dict) -> PARSeqWrapper:
                 device=options.get("device", "auto"),
                 batch_size=int(options.get("batch_size", 8)),
                 cache_dir=options.get("cache_dir", "modele/cache/parseq"),
-                input_size=options.get("input_size", "32x128"),
+                input_size=options.get("input_size"),
                 use_amp=bool(options.get("use_amp", False)),
                 language=options.get("language", "pl"),
                 model_id=options.get("model_id"),
                 local_files_only=bool(options.get("local_files_only", False)),
+                preprocess=options.get("preprocess"),
             )
         except Exception as exc:
             emit_event(
