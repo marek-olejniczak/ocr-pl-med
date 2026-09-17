@@ -64,6 +64,37 @@ znaczenie na materiale gorszej jakości; tutaj zdjęcia są na tyle czytelne, ż
 ich symulacja nic nie wnosi. Nie ma jednak podstaw, by trzymać je w
 generatorze „na wszelki wypadek" — kosztują czas generacji i komplikują opis.
 
+## 3b. Strata walidacyjna nie przewiduje jakości na prawdziwym materiale
+
+Z `trainer_state.json` każdego przebiegu:
+
+| Trening | Strata walidacyjna (dane syntetyczne) | CER (prawdziwe notatki) |
+|---|---|---|
+| LoRA v1, 800k | **0,0086** | 15,88% |
+| LoRA v2, 800k | 0,0259 | **12,94%** |
+| v2 bez kadru i tła | 0,0288 | 12,83% |
+| v2 bez degradacji | 0,0305 | 12,78% |
+| v2 bez treści | 0,0359 | 14,74% |
+| LoRA v2, 200k | 0,0417 | **12,72%** |
+
+Zależność jest odwrotna do intuicyjnej. Model v1 ma pięciokrotnie niższą stratę
+walidacyjną i czyta prawdziwe notatki wyraźnie gorzej. Wybierając konfigurację po
+stracie na własnym zbiorze walidacyjnym, wybralibyśmy najgorszy model.
+
+Wyjaśnienie jest proste: strata walidacyjna mierzy dopasowanie do **własnego**
+rozkładu danych, a nowe dane są po prostu trudniejsze (krótsze linie, więcej
+wariantów pisma, mocniejsze zaburzenia obrazu). Wniosek metodologiczny do pracy:
+**dane syntetyczne wolno oceniać wyłącznie na prawdziwym materiale**.
+
+## 3c. Ile dały same fonty (wniosek pośredni)
+
+Wariant `noA` ma treść starego generatora, a mimo to wypada 1,2 punktu lepiej od
+v1 (14,74% wobec 15,88%). Ponieważ bloki B i C odpowiadają łącznie za 0,17
+punktu, resztę, czyli około **1 punktu**, można przypisać dwudziestu nowym krojom
+pisma. Wniosek opiera się na założeniu addytywności efektów i wymaga
+potwierdzenia jednym przebiegiem `--disable all` na starym zestawie 15 fontów
+(200k linii, 10k kroków, około 25 minut).
+
 ## 4. Gdzie konkretnie jest poprawa
 
 Wszystkie osiem źródeł (autorów zeszytów) poprawiło się jednocześnie, od 6,6%
