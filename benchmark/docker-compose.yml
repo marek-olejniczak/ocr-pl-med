@@ -85,6 +85,37 @@ services:
       timeout: 10s
       retries: 3
 
+  # Ten sam benchmark PARSeq, ale zbudowany na obrazie treningowym
+  # (docker/parseq/Dockerfile.trainbase) — obejście zapchanego / na serwerze:
+  # delta ~150 MB zamiast ~8 GB ściąganej bazy pytorch/pytorch:2.5.1.
+  # Korzysta z niego benchmark/experiments.parseq.yaml (service_name:
+  # parseq-trainbase), więc kanoniczny serwis `parseq` i experiments.yaml
+  # zostają bez zmian. Port 8014 (8001-8012 zajęte przez pozostałe serwisy).
+  # Wymaga obrazu training-parseq-training:latest — na czystej maszynie
+  # zbuduj go najpierw: docker compose -f training/docker-compose.yml build parseq-training
+  parseq-trainbase:
+    build:
+      context: .
+      dockerfile: docker/parseq/Dockerfile.trainbase
+    gpus: all
+    ports:
+      - "8014:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - ./modele/cache/parseq:/app/modele/cache/parseq
+      # nasze fine-tuny PARSeq — eksponuje training/results do kontenera,
+      # żeby parseq_ft / parseq_ft_w512 mogły wczytać checkpoint.
+      - ../training/results:/app/training/results
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   calamari:
     build:
       context: .
