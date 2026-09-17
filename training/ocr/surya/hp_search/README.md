@@ -75,7 +75,76 @@ Sprawdzone lokalnie testem parity (metryki na 2004 parach, agregacja „line” 
 `eval_cer.py` czyta `benchmark/dane/handlabeled/` wprost z bind-mountu (`..:/app`), więc **nie
 potrzeba przebudowy obrazu** ani wpisu w `experiments.yaml` dla każdego wariantu.
 
-## Runda 1b (jeśli zostanie budżet)
+## Wyniki rundy 1a (odpalonej 2026-09-16/17)
 
-Wokół najlepszej komórki z 1a: `dropout {0.1, 0.2}` × `alpha/rank {1, 2}`; jeśli wygra `lr 2e-4`,
-dorzucić `3e-4`. Round 1a + 1b ≈ 6,5 h, czyli w budżecie 12 h zostaje zapas na wpadki.
+**Smoke parity zdał co do cyfry**: `SMOKE-baseline` = CER **0.127243** / WER 0.479250 / EMA 0.262500,
+czyli dokładnie to, co zapisał benchmark `ocr-ablacja-v2`. Ścieżka ewaluacji (`eval_cer.py`) liczy
+tak samo jak benchmark, więc liczby z kolejki są porównywalne z baseline'em.
+
+**Żadna komórka siatki nie pobiła baseline'u** (CER 0.127243):
+
+| run | CER | Δ vs baseline |
+| --- | --- | --- |
+| baseline `v2_200k-lora-r64` (lr 2e-5 / r64 / a64 / d0.2) | 0.127243 | — |
+| `hp_lr5e-5_r64` (najlepsza) | 0.129512 | +0.23 p.p. |
+| `hp_lr5e-5_r32` | 0.129725 | +0.25 p.p. |
+| `hp_lr2e-4_r128` | 0.129796 | +0.26 p.p. |
+| `hp_lr2e-4_r32` | 0.130434 | +0.32 p.p. |
+| `hp_lr1e-4_r64` | 0.131781 | +0.45 p.p. |
+| `hp_lr2e-4_r64` | 0.132608 | +0.54 p.p. |
+| `hp_lr1e-4_r32` | 0.132679 | +0.54 p.p. |
+| `hp_lr1e-4_r128` | 0.133247 | +0.60 p.p. |
+| `hp_lr5e-5_r128` (najgorsza) | 0.133365 | +0.61 p.p. |
+
+Trzy rzeczy każą czytać to ostrożnie:
+
+1. **Cała siatka zmieniła naraz trzy parametry.** Każdy run 1a miał `alpha = 2·rank` (baseline
+   `alpha = rank`) i `dropout 0.1` (baseline `0.2`) — więc degradacji **nie da się przypisać ani
+   lr, ani rankowi**: równie dobrze odpowiada za nią alpha albo dropout. To był błąd projektu siatki.
+2. **Różnice są w granicach szumu.** Trzy runy o tym samym lr, a różnych rankach to przy braku
+   efektu ranku quasi-replikaty: rozrzut wewnątrz-lr daje pooled sd **0,157 p.p.**, czyli SE różnicy
+   dwóch pojedynczych runów **0,22 p.p.** Najlepsza komórka (+0,23 p.p.) to ~1σ, średnia siatki
+   (+0,42 p.p.) ~1,9σ. Rank nie ma przy tym żadnego monotonicznego efektu przy żadnym lr
+   (przy lr 2e-4 najlepszy jest r128, przy 1e-4 — r64, przy 5e-5 — r64), co samo w sobie wygląda
+   na szum. Bez replikatu z innym seedem nie wiemy, czy „baseline lepszy o 0,23 p.p." to sygnał.
+3. **`eval_loss` nie tylko nie śledzi CER — jest z nim odwrotnie skorelowany.** Baseline ma przy
+   10k kroków `eval_loss` **0,0417**, a wszystkie runy siatki **0,0147–0,0307** (2–3× niżej), mimo że
+   baseline ma najlepszy CER. Przy ustalonym r64: lr 5e-5 → 1e-4 → 2e-4 obniża `eval_loss`
+   0,0259 → 0,0202 → 0,0164 (−37%), a CER **rośnie** 0,129512 → 0,131781 → 0,132608. Walidacja jest
+   z tego samego generatora co trening, więc niższy loss znaczy „lepiej wpasował się w syntetyczne
+   artefakty", nie „lepiej czyta pismo". **Selekcja checkpointu po `eval_loss`**
+   (`cli.py: metric_for_best_model="eval_loss"`) jest więc w tym zadaniu zawodna — w tej kolejce
+   wyszło nieszkodliwie tylko dlatego, że wszystkie krzywe były monotoniczne i „najlepszy" wypadł
+   na ostatnim kroku.
+
+Przy okazji wyszło, że `cli.py` **nie seedował niczego przed założeniem LoRA** (`set_seed` odpalał
+się dopiero w konstruktorze Trainera, czyli po inicjalizacji macierzy A), więc każdy dotychczasowy
+run — łącznie z baseline'em — startował z innego losowego init. Commit z kolejką 1b to naprawia
+(flaga `--seed`, domyślnie 42).
+
+## Runda 1b: baseline + jedna zmiana na run
+
+Skoro 1a zmieniła trzy parametry naraz, 1b zmienia **dokładnie jeden** względem baseline'u
+(`lr 2e-5 / r64 / a64 / d0.2`), żeby różnica w CER miała jednoznaczne przypisanie:
+
+| run | co zmienione vs baseline | po co |
+| --- | --- | --- |
+| `hp1b_seed1234` | seed 1234 | **miara szumu** — ten sam config, inny seed |
+| `hp1b_d0.1` | dropout 0.1 | izoluje dropout (podejrzany nr 1 z 1a) |
+| `hp1b_d0.3` | dropout 0.3 | strona przeciwna — jedyny strzał w górę po stronie regularyzacji |
+| `hp1b_a128` | alpha 128 | izoluje `alpha = 2·rank` |
+| `hp1b_lr5e-5` | lr 5e-5 | izoluje lr (najlepszy lr z 1a, ale z baseline'owymi alpha i dropoutem) |
+| `hp1b_steps20k` | 20 000 kroków | jedyna nietknięta dźwignia (10k = 0,42 epoki, nigdy nie strojone) |
+
+6 runów ≈ **3,1 h** (5 × ~28 min + 20k kroków ≈ 1 h). Razem z 1a ≈ 7,8 h z budżetu 12 h.
+`hp1b_steps20k` to jedyny zakład w górę — można go pominąć (`ONLY=` bez tej nazwy), reszta to
+diagnostyka, która rozstrzyga, czy 1a w ogóle coś zmierzyła. Uwaga: przy 20k kroków cosine rozciąga
+się na cały run, więc to nie jest czyste „więcej kroków przy tym samym schedule".
+
+Wiersze 1a zostają w `RUNS` (kolejka je pomija — adaptery istnieją), więc jeden przebieg skryptu
+dolicza tylko 1b. Po zakończeniu `summarize.py` sam dopisze linię o szumie i powie, czy zwycięzca
+jest poza nim.
+
+Opcjonalnie (linia zakomentowana w `RUNS`): `hp1b_seed42` — baseline z seedem 42, czyli druga noga
+pary replikatów w tym samym reżimie seedowania. Daje czystszy pomiar szumu niż porównanie
+`hp1b_seed1234` ze starym baseline'em (trenowanym jeszcze bez seeda).

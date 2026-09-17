@@ -294,6 +294,32 @@ def _resolve_adapter_path(raw: str) -> Path:
     )
 
 
+TRAIN_CONFIG_KEYS = (
+    "run_name", "learning_rate", "lora_rank", "lora_alpha", "lora_dropout",
+    "lora_target_modules", "max_steps", "batch_size", "weight_decay",
+    "warmup_ratio", "lr_scheduler_type", "seed",
+)
+
+
+def _read_train_config(adapter_path: Path) -> dict:
+    """Konfiguracja treningu z `adapter/meta.json` (zapisuje ją cli.py).
+
+    Trafia do wyniku tylko po to, żeby tabela i archiwum wyników niosły
+    parametry runu (nazwa runu nie zawsze je koduje). Metryki jej nie używają,
+    więc brak pliku (albo brak klucza w starszym adapterze, np. `seed`) jest
+    niegroźny — po prostu pomijamy.
+    """
+    meta_path = adapter_path / "meta.json"
+    if not meta_path.is_file():
+        return {}
+    try:
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    config = meta.get("config") or {}
+    return {key: config[key] for key in TRAIN_CONFIG_KEYS if key in config}
+
+
 def _build_state(adapter_path: Path, device: str, batch_size: int, cache_dir: str):
     """Buduje RecognitionPredictor z adapterem LoRA.
 
@@ -439,6 +465,7 @@ def main(argv: list[str] | None = None) -> int:
 
     payload = {
         "adapter": str(adapter_path),
+        "train_config": _read_train_config(adapter_path),
         "labels_csv": args.labels_csv,
         "images_dir": args.images_dir,
         "task_name": args.task_name,
