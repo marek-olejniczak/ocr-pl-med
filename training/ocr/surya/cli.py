@@ -317,6 +317,13 @@ def cmd_train(args):
         save_strategy = "steps"
     save_steps = args.eval_steps
 
+    # Wybór checkpointu: po CER na handlabeled (jeśli włączone), inaczej po
+    # eval_loss (zawodne — patrz cer_callback.py / hp_search/README.md).
+    use_cer = bool(args.cer_callback) and eval_dataset is not None
+    if args.cer_callback and eval_dataset is None:
+        print("UWAGA: --cer-callback bez zbioru walidacyjnego — ewaluacja i tak "
+              "się nie odpali, więc callback jest bezużyteczny.")
+
     training_args = TrainingArguments(
         output_dir=args.output_dir,
         run_name=args.run_name,
@@ -335,7 +342,8 @@ def cmd_train(args):
         eval_steps=args.eval_steps,
         save_total_limit=args.save_total_limit,
         load_best_model_at_end=bool(eval_dataset),
-        metric_for_best_model="eval_loss" if eval_dataset else None,
+        metric_for_best_model=("eval_cer" if use_cer
+                               else ("eval_loss" if eval_dataset else None)),
         greater_is_better=False,
         bf16=args.bf16,
         gradient_checkpointing=args.gradient_checkpointing,
@@ -353,6 +361,31 @@ def cmd_train(args):
         eval_dataset=eval_dataset,
         data_collator=collator,
     )
+
+    if use_cer:
+        # Import po ścieżce (cli.py bywa wołany jako skrypt, nie moduł).
+        import importlib.util
+        cb_path = Path(__file__).resolve().parent / "cer_callback.py"
+        spec = importlib.util.spec_from_file_location("surya_cer_callback", cb_path)
+        cb_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cb_module)
+        missing = [p for p in (args.cer_labels_csv, args.cer_images_dir)
+                   if not Path(p).exists()]
+        if missing:
+            raise FileNotFoundError(
+                "Ewaluacja CER: brak " + ", ".join(missing) +
+                " (benchmark/dane/ jest w .gitignore — trzeba je dostarczyć)"
+            )
+        cer_callback = cb_module.CERCallback(
+            labels_csv=args.cer_labels_csv,
+            images_dir=args.cer_images_dir,
+            eval_gpu=args.cer_eval_gpu,
+            batch_size=args.cer_eval_batch_size,
+            max_samples=args.cer_max_samples,
+        )
+        cer_callback.trainer = trainer
+        trainer.add_callback(cer_callback)
+        print(f"Wybór checkpointu: eval_cer (handlabeled), eval GPU {args.cer_eval_gpu}")
 
     trainer.train()
 
@@ -435,6 +468,22 @@ def main(argv=None):
     ap.add_argument("--seed", type=int, default=42,
                    help="Seed initu LoRA + kolejności próbek + masek dropoutu "
                         "(domyślnie 42; inny seed = replikat do pomiaru szumu)")
+    # Ewaluacja CER na handlabeled (wybór checkpointu po CER, nie po eval_loss).
+    # Patrz training/ocr/surya/cer_callback.py oraz hp_search/README.md.
+    ap.add_argument("--cer-callback", action="store_true", default=False,
+                   help="Po każdej ewaluacji policz CER na handlabeled i wybieraj "
+                        "checkpoint po 'eval_cer' zamiast po 'eval_loss'")
+    ap.add_argument("--cer-labels-csv", default="benchmark/dane/handlabeled/labels.csv",
+                   help="labels.csv zbioru handlabeled (benchmark/dane/handlabeled)")
+    ap.add_argument("--cer-images-dir", default="benchmark/dane/handlabeled/images",
+                   help="Katalog obrazów zbioru handlabeled")
+    ap.add_argument("--cer-eval-gpu", type=int, default=1,
+                   help="Fizyczny indeks GPU dla eval CER (CUDA_VISIBLE_DEVICES "
+                        "subprocessu); -1 = ta sama karta co trening")
+    ap.add_argument("--cer-eval-batch-size", type=int, default=16,
+                   help="Batch predykcji w evaluacji CER")
+    ap.add_argument("--cer-max-samples", type=int, default=None,
+                   help="Ogranicz liczbę próbek w trakcie treningu (pełny eval po treningu)")
 
     args = ap.parse_args(argv)
 
