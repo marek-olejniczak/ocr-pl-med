@@ -2,3 +2,4 @@ numpy
 pycocotools
 opencv-python
 noteshrink
+optuna==5.0.0
