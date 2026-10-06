@@ -58,6 +58,26 @@ def _zoo_id(weights):
     return DEFAULT_ZOO if weights in ("frcnn_r50.yaml", "frcnn", "") else weights
 
 
+FPN_LEVELS = 5  # P2-P6 in the R50-FPN zoo configs, one anchor size each
+# ultralytics' max_det; the zoo's 100 cuts val pages that have up to 158 lines
+MAX_DETS = 300
+
+
+def parse_anchor_sizes(text):
+    """'16,32,64,128,256' -> [[16], [32], ...], one size per FPN level."""
+    sizes = [int(x) for x in text.split(",")]
+    if len(sizes) != FPN_LEVELS:
+        raise SystemExit(f"--anchor-sizes needs {FPN_LEVELS} values, one per "
+                         f"FPN level; got {len(sizes)}")
+    return [[s] for s in sizes]
+
+
+def parse_anchor_ratios(text):
+    """'0.07,0.13,0.25' -> [[0.07, 0.13, 0.25]]. detectron2 means height/width,
+    so a text line 8x wider than tall is 0.125."""
+    return [[float(x) for x in text.split(",")]]
+
+
 def lr_schedule(lr0, lrf, warmup_epochs, iters_per_epoch, max_iter):
     """The ultralytics schedule in detectron2 terms: warmup for the same number
     of epochs, then cosine from lr0 down to lr0 * lrf.
@@ -103,6 +123,15 @@ def build_trainer(cfg, accum):
             self._write_metrics(losses, data_time)
 
     class _Trainer(DefaultTrainer):
+        # DefaultTrainer.build_evaluator raises NotImplementedError and test()
+        # swallows it with a warning, so EVAL_PERIOD silently evaluated nothing
+        @classmethod
+        def build_evaluator(cls, cfg, dataset_name, output_folder=None):
+            from detectron2.evaluation import COCOEvaluator
+            return COCOEvaluator(
+                dataset_name, output_dir=str(Path(cfg.OUTPUT_DIR) / "eval"),
+                max_dets_per_image=MAX_DETS)
+
         def __init__(self, cfg):
             super().__init__(cfg)
             if accum > 1:
@@ -130,6 +159,10 @@ def _base_cfg(args, zoo_config, num_classes=1):
     cfg.INPUT.MIN_SIZE_TEST = args.imgsz
     cfg.INPUT.MAX_SIZE_TEST = args.imgsz
     cfg.MODEL.DEVICE = args.device or "cuda"
+    cfg.TEST.DETECTIONS_PER_IMAGE = MAX_DETS
+    cfg.MODEL.ANCHOR_GENERATOR.SIZES = parse_anchor_sizes(args.anchor_sizes)
+    cfg.MODEL.ANCHOR_GENERATOR.ASPECT_RATIOS = parse_anchor_ratios(
+        args.anchor_ratios)
     return cfg
 
 
@@ -188,8 +221,12 @@ def cmd_train(args):
     for key, value in lr_schedule(args.lr0, args.lrf, args.warmup_epochs,
                                   iters_per_epoch, cfg.SOLVER.MAX_ITER).items():
         cfg.SOLVER[key] = value
+    cfg.SOLVER.WEIGHT_DECAY = args.weight_decay
     cfg.TEST.EVAL_PERIOD = iters_per_epoch
     cfg.OUTPUT_DIR = str(out)
+    # predict rebuilds the model from this, so anchors and anything else the
+    # trained head depends on cannot drift from what it was trained with
+    (out / "config.yaml").write_text(cfg.dump())
     if accum > 1 and cfg.SOLVER.AMP.ENABLED:
         raise SystemExit("chunked steps run in fp32; turn AMP off or accum off")
 
@@ -260,6 +297,22 @@ def cmd_train(args):
     print(f"best checkpoint: {ckpt}")
 
 
+def predict_cfg(args):
+    """The config the weights were trained with, if training left one; the zoo
+    default otherwise (checkpoints from before config.yaml was written). A head
+    trained on other anchors decodes against the wrong boxes without it."""
+    trained = Path(args.weights).parent / "config.yaml"
+    if not trained.exists():
+        return _base_cfg(args, DEFAULT_ZOO)
+    from detectron2.config import get_cfg
+    cfg = get_cfg()
+    cfg.merge_from_file(str(trained))
+    cfg.INPUT.MIN_SIZE_TEST = args.imgsz
+    cfg.INPUT.MAX_SIZE_TEST = args.imgsz
+    cfg.MODEL.DEVICE = args.device or "cuda"
+    return cfg
+
+
 def cmd_predict(args):
     import sys
 
@@ -269,9 +322,7 @@ def cmd_predict(args):
     from detectron2.engine import DefaultPredictor
 
     reset_gpu_peak()
-    # architecture is fixed (frcnn R50-FPN); --weights is the trained .pth, not
-    # a config, so the config comes from DEFAULT_ZOO, weights are set separately
-    cfg = _base_cfg(args, DEFAULT_ZOO)
+    cfg = predict_cfg(args)
     cfg.MODEL.WEIGHTS = args.weights
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.conf
     predictor = DefaultPredictor(cfg)
@@ -317,6 +368,15 @@ def cmd_predict(args):
     print(f"{len(predictions)} predictions for {len(coco['images'])} images")
 
 
+def _anchor_args(parser):
+    # zoo defaults; text lines are far flatter than these, see experiments.yaml
+    parser.add_argument("--anchor-sizes", default="32,64,128,256,512",
+                        help="one per FPN level, P2-P6")
+    parser.add_argument("--anchor-ratios", default="0.5,1.0,2.0",
+                        help="height/width; keep three or the RPN head's COCO "
+                             "weights no longer fit its outputs")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -335,11 +395,14 @@ def main(argv=None):
                         "accumulated up to it. Set it to --batch to step "
                         "every chunk")
     t.add_argument("--lr0", type=float, default=0.0005)
+    t.add_argument("--weight-decay", type=float, default=0.0001,
+                   help="zoo default for SGD")
     # same defaults as the ultralytics CLI, so both decay the same way
     t.add_argument("--lrf", type=float, default=0.01,
                    help="final LR as a fraction of lr0, end of the cosine")
     t.add_argument("--warmup-epochs", type=float, default=3.0)
     t.add_argument("--device", default=None)
+    _anchor_args(t)
     t.add_argument("--wandb", action="store_true")
     t.add_argument("--wandb-project", default="line-benchmark")
     t.add_argument("--wandb-group",
@@ -361,6 +424,7 @@ def main(argv=None):
     p.add_argument("--conf", type=float, default=0.001)
     p.add_argument("--imgsz", type=int, default=640)
     p.add_argument("--device", default=None)
+    _anchor_args(p)
     p.set_defaults(fn=cmd_predict)
 
     args = ap.parse_args(argv)

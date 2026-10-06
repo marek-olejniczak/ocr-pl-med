@@ -38,9 +38,13 @@ def dataset_fingerprint(data_yaml):
     for split in ("train", "val", "test"):
         rel = cfg.get(split)
         d = root / rel if rel else None
-        if d is None or not d.is_dir():
+        if d is not None and d.is_dir():
+            names = sorted(p.name for p in d.iterdir())
+        elif d is not None and d.is_file():     # a subsample listed in a .txt
+            names = sorted(Path(ln.strip()).name
+                           for ln in d.read_text().splitlines() if ln.strip())
+        else:
             continue
-        names = sorted(p.name for p in d.iterdir())
         out[f"data_{split}_images"] = len(names)
         out[f"data_{split}_md5"] = hashlib.md5(
             "\n".join(names).encode()).hexdigest()[:12]
@@ -130,6 +134,9 @@ def cmd_train(args):
         # v8_transforms(stretch=True), which never crops the 2*imgsz mosaic
         # canvas back, so training silently happens at double the resolution
         mosaic=args.mosaic,
+        weight_decay=args.weight_decay,
+        scale=args.scale,
+        fliplr=args.fliplr,
         cos_lr=True,
         seed=args.seed,
         deterministic=True,
@@ -337,6 +344,12 @@ def main(argv=None):
     t.add_argument("--lr0", type=float, default=0.002)
     t.add_argument("--lrf", type=float, default=0.01)
     t.add_argument("--warmup-epochs", type=float, default=3.0)
+    # defaults are ultralytics' own, so runs that do not pass them are unchanged
+    t.add_argument("--weight-decay", type=float, default=0.0005)
+    t.add_argument("--scale", type=float, default=0.5,
+                   help="random rescale gain, +/- fraction of imgsz")
+    t.add_argument("--fliplr", type=float, default=0.5,
+                   help="probability of a horizontal flip - mirrors the text")
     t.add_argument("--mosaic", type=float, default=1.0,
                    help="ultralytics default is 1.0; set 0 for rtdetr")
     t.add_argument("--seed", type=int, default=0)
