@@ -276,10 +276,16 @@ def _save_adapter(trainer, output_dir: Path, meta: dict) -> Path:
 
 def cmd_train(args):
     """Fine-tuning Surya OCR — LoRA (lub pełny, jeśli --lora nie podane)."""
-    from transformers import Trainer, TrainingArguments
+    from transformers import Trainer, TrainingArguments, set_seed
 
     if not (args.train_metadata and args.train_images_dir):
         raise ValueError("Podaj --train-metadata i --train-images-dir (dane lokalne)")
+
+    # Seed MUSI być ustawiony przed budową modelu: inicjalizacja macierzy A LoRA
+    # losuje z domyślnego RNG, a Trainer.set_seed odpala się dopiero później
+    # (w konstruktorze Trainera, czyli już po założeniu adaptera). Bez tego
+    # każde uruchomienie startuje z innego init i runy nie są powtarzalne.
+    set_seed(args.seed)
 
     model, processor = load_model_and_processor(args.pretrained_checkpoint)
 
@@ -336,6 +342,8 @@ def cmd_train(args):
         dataloader_num_workers=args.dataloader_num_workers,
         remove_unused_columns=False,
         report_to=report_to,
+        # Ten sam seed co set_seed() wyżej — stąd kolejność próbek i maski dropoutu.
+        seed=args.seed,
     )
 
     trainer = Trainer(
@@ -424,6 +432,9 @@ def main(argv=None):
     ap.add_argument("--report-to", default="",
                    help="Backend logowania, np. 'wandb' (pusty = brak)")
     ap.add_argument("--run-name", default=None, help="Nazwa runu (dla W&B)")
+    ap.add_argument("--seed", type=int, default=42,
+                   help="Seed initu LoRA + kolejności próbek + masek dropoutu "
+                        "(domyślnie 42; inny seed = replikat do pomiaru szumu)")
 
     args = ap.parse_args(argv)
 

@@ -173,6 +173,39 @@ models:
       model_id: null
       local_files_only: false
 
+  # Nasze fine-tuny docTR PARSeq na liniach ocr_800k. Rozmiar wejscia, vocab i
+  # preprocessing biora sie z meta.json checkpointu (input_size NIE jest podawany —
+  # przy lokalnym checkpointcie i tak wygrywa rozmiar z treningu), wiec oba wpisy
+  # roznia sie tylko sciezka.
+  - id: "parseq_ft" # 32x128, 40k krokow (run 2026-09-07)
+    service_name: "parseq"
+    base_url: "http://localhost:8004"
+    enabled: true
+    timeout: 240
+    options:
+      # sciezka WEWNATRZ kontenera (mount: benchmark/../training/results -> /app/training/results)
+      model_id: "/app/training/results/ocr/parseq/ocr800k-full"
+      device: "cuda"
+      batch_size: 8
+      cache_dir: "modele/cache/parseq"
+      use_amp: true
+      language: "pl"
+      local_files_only: false
+
+  - id: "parseq_ft_w512" # 32x512, 40k krokow (run 2026-09-13) — szersze wejście
+    service_name: "parseq"
+    base_url: "http://localhost:8004"
+    enabled: true
+    timeout: 240
+    options:
+      model_id: "/app/training/results/ocr/parseq/ocr800k-full-w512"
+      device: "cuda"
+      batch_size: 8
+      cache_dir: "modele/cache/parseq"
+      use_amp: true
+      language: "pl"
+      local_files_only: false
+
   - id: "calamari" # nie dziala poprawnie
     service_name: "calamari"
     base_url: "http://localhost:8005"

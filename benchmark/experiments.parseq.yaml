@@ -1,0 +1,163 @@
+# Benchmark PARSeq (docTR) na rękopisach + pełna tabela porównawcza architektur.
+#
+# OSOBNY plik, a nie edycja experiments.yaml. Powód: na serwerze
+# experiments.yaml jest lokalnie zmodyfikowany (ręcznie doklejona sekcja ablacji
+# surya_lora_*), więc każdy pull z commitem, który go dotyka, kończy się
+# konfliktem. Ten plik jest w repo i modyfikujemy go tylko my.
+#
+# Uruchomienie (z katalogu benchmark/):
+#   .venv/bin/python -c "from autorunner import AutoRunner; AutoRunner('experiments.parseq.yaml').run()"
+#
+# UWAGA: nie używać flagi --build — buduje obrazy WSZYSTKICH włączonych modeli
+# (czyli też surya i trocr), a na serwerze brakuje miejsca na ich bazy.
+# Budujemy tylko parseq:  docker compose build parseq-trainbase
+#
+# Włączone są też surya i trocr (już zmierzone w ablacji) celowo: chcemy, żeby
+# CAŁA tabela porównawcza pochodziła z jednego przebiegu — ten sam harness, ten
+# sam zbiór, ten sam dzień — a przy okazji liczby z ablacji dają się zweryfikować
+# (surya_lora_v2_200k powinno wyjść ~0.1272; deterministyczny checkpoint, więc
+# rozjazd >0.1 p.p. oznaczałby, że benchmark sam wprowadza wariancję).
+
+experiment:
+  name: "ocr-parseq-ft-handlabeled"
+  project_name: "ocr-benchmark"
+  wandb_entity: "ocr-pl-med"
+  tags: ["autorun", "http", "sequential", "parseq", "surya", "trocr", "handlabeled", "server"]
+  hardware_note: "Nvidia RTX 3090, 24GB VRAM"
+
+settings:
+  output_dir: "wyniki"
+  # Tabela LaTeX (overleaf_tables.tex) w katalogu runu — gotowa do Overleafa.
+  export_overleaf_table: true
+  auto_start_services: true
+  stop_service_after_run: true
+  sequential: true
+  warmup_samples: 1
+  cooldown_seconds: 5
+  restart_docker_per_dataset: false
+  http_timeout_default: 120
+  wandb_log: false
+
+datasets:
+  - id: "handlabeled"
+    enabled: true
+    labels_csv: "dane/handlabeled/labels.csv"
+    images_dir: "dane/handlabeled/images"
+    limit: null
+    single_words: false
+
+models:
+  # ---------- PARSeq: nasze fine-tuny (docTR, 40k kroków na ocr_800k) ----------
+  # Kolejność: najważniejsze wiersze najpierw, żeby przerwanie runu nie zabrało
+  # tego, po co przyszliśmy.
+  - id: "parseq_ft" # 32x128, run 2026-09-07
+    service_name: "parseq-trainbase"
+    base_url: "http://localhost:8014"
+    enabled: true
+    timeout: 600
+    options:
+      # ścieżka WEWNĄTRZ kontenera (mount: ../training/results -> /app/training/results)
+      model_id: "/app/training/results/ocr/parseq/ocr800k-full"
+      device: "cuda"
+      batch_size: 8
+      cache_dir: "modele/cache/parseq"
+      use_amp: true
+      language: "pl"
+      local_files_only: false
+
+  - id: "parseq_ft_w512" # 32x512, run 2026-09-13 — szersze wejście
+    service_name: "parseq-trainbase"
+    base_url: "http://localhost:8014"
+    enabled: true
+    timeout: 600
+    options:
+      model_id: "/app/training/results/ocr/parseq/ocr800k-full-w512"
+      device: "cuda"
+      batch_size: 8
+      cache_dir: "modele/cache/parseq"
+      use_amp: true
+      language: "pl"
+      local_files_only: false
+
+  - id: "parseq" # docTR PARSeq bez fine-tuningu — wiersz odniesienia dla architektury
+    service_name: "parseq-trainbase"
+    base_url: "http://localhost:8014"
+    enabled: true
+    timeout: 600
+    options:
+      model_id: null
+      device: "cuda"
+      batch_size: 8
+      cache_dir: "modele/cache/parseq"
+      input_size: "32x128"
+      use_amp: true
+      language: "pl"
+      local_files_only: false
+
+  # ---------- Surya (te same adaptery co w ablacji) ----------
+  - id: "surya_lora_v2_200k" # nasz najlepszy model: CER 0.127243 w ablacji
+    service_name: "surya"
+    base_url: "http://localhost:8008"
+    enabled: true
+    timeout: 600
+    options:
+      device: "cuda"
+      batch_size: 8
+      task_name: "ocr_without_boxes"
+      disable_math: false
+      cache_dir: "modele/cache/surya"
+      lora_adapter_path: "/app/training/results/ocr/surya/v2_200k-lora-r64/adapter"
+
+  - id: "surya_lora_ocr800k" # wcześniejszy adapter (r64, 40k kroków)
+    service_name: "surya"
+    base_url: "http://localhost:8008"
+    enabled: true
+    timeout: 600
+    options:
+      device: "cuda"
+      batch_size: 8
+      task_name: "ocr_without_boxes"
+      disable_math: false
+      cache_dir: "modele/cache/surya"
+      lora_adapter_path: "/app/training/results/ocr/surya/ocr800k-lora-r64/adapter"
+
+  - id: "surya" # baza bez adaptera
+    service_name: "surya"
+    base_url: "http://localhost:8008"
+    enabled: true
+    timeout: 600
+    options:
+      device: "cuda"
+      batch_size: 8
+      task_name: "ocr_without_boxes"
+      disable_math: false
+      cache_dir: "modele/cache/surya"
+
+  # ---------- TrOCR ----------
+  - id: "trocr_polish_ft" # pełny fine-tune na ocr_800k (40k kroków)
+    service_name: "trocr"
+    base_url: "http://localhost:8002"
+    enabled: true
+    timeout: 3600
+    options:
+      model_id: "/app/training/results/ocr/trocr/ocr800k-full"
+      max_new_tokens: 256
+      device: "cuda"
+      local_files_only: false
+      batch_size: 8
+      use_amp: true
+      cache_dir: "modele/cache/trocr"
+
+  - id: "trocr_polish" # baza: PET3R12/trocr-base-polish-handwriting
+    service_name: "trocr"
+    base_url: "http://localhost:8002"
+    enabled: true
+    timeout: 3600
+    options:
+      model_id: "PET3R12/trocr-base-polish-handwriting"
+      max_new_tokens: 256
+      device: "cuda"
+      local_files_only: false
+      batch_size: 8
+      use_amp: true
+      cache_dir: "modele/cache/trocr"
