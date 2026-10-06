@@ -58,6 +58,20 @@ def _zoo_id(weights):
     return DEFAULT_ZOO if weights in ("frcnn_r50.yaml", "frcnn", "") else weights
 
 
+def lr_schedule(lr0, lrf, warmup_epochs, iters_per_epoch, max_iter):
+    """The ultralytics schedule in detectron2 terms: warmup for the same number
+    of epochs, then cosine from lr0 down to lr0 * lrf.
+
+    The zoo default (WarmupMultiStepLR) with no steps holds lr0 flat for the
+    whole run, so frcnn never got the annealing phase the other models had."""
+    warmup = int(round(warmup_epochs * iters_per_epoch))
+    return {"LR_SCHEDULER_NAME": "WarmupCosineLR",
+            "BASE_LR": lr0,
+            "BASE_LR_END": lr0 * lrf,
+            "WARMUP_ITERS": max(1, min(warmup, max_iter)),
+            "STEPS": []}
+
+
 def accumulate_backward(model, optimizer, batches, accum):
     """One optimizer step out of `accum` chunks.
 
@@ -165,12 +179,15 @@ def cmd_train(args):
     cfg.DATASETS.TEST = ("bench_val",)
     cfg.DATALOADER.NUM_WORKERS = 8
     cfg.SOLVER.IMS_PER_BATCH = args.batch
-    cfg.SOLVER.BASE_LR = args.lr0
     cfg.SOLVER.MAX_ITER = iters_per_epoch * args.epochs
-    cfg.SOLVER.STEPS = []          # no LR step decay; keep it simple/comparable
-    # the zoo warmup is in iterations; divide it so it still covers the same
-    # number of images once an iteration is accum times bigger
-    cfg.SOLVER.WARMUP_ITERS = max(1, cfg.SOLVER.WARMUP_ITERS // accum)
+    # yacs adds unknown keys silently, so an older detectron2 without
+    # BASE_LR_END would train on a cosine to zero and say nothing
+    if "BASE_LR_END" not in cfg.SOLVER:
+        raise SystemExit("this detectron2 has no SOLVER.BASE_LR_END; the cosine "
+                         "schedule cannot end at lr0 * lrf")
+    for key, value in lr_schedule(args.lr0, args.lrf, args.warmup_epochs,
+                                  iters_per_epoch, cfg.SOLVER.MAX_ITER).items():
+        cfg.SOLVER[key] = value
     cfg.TEST.EVAL_PERIOD = iters_per_epoch
     cfg.OUTPUT_DIR = str(out)
     if accum > 1 and cfg.SOLVER.AMP.ENABLED:
@@ -182,12 +199,18 @@ def cmd_train(args):
          "iters_per_epoch": iters_per_epoch,
          "max_iter": cfg.SOLVER.MAX_ITER,
          "warmup_iters": cfg.SOLVER.WARMUP_ITERS,
+         "lr_scheduler": cfg.SOLVER.LR_SCHEDULER_NAME,
+         "lr_end": cfg.SOLVER.BASE_LR_END,
          "n_train_images": n_train}, indent=2, default=str))
     print(f"{iters_per_epoch} steps/epoch, {cfg.SOLVER.MAX_ITER} total, "
-          f"warmup {cfg.SOLVER.WARMUP_ITERS}")
+          f"warmup {cfg.SOLVER.WARMUP_ITERS}, cosine {cfg.SOLVER.BASE_LR:g} -> "
+          f"{cfg.SOLVER.BASE_LR_END:g}")
     if wandb_run:
         wandb_run.config.update({"iters_per_epoch": iters_per_epoch,
-                                 "max_iter": cfg.SOLVER.MAX_ITER})
+                                 "max_iter": cfg.SOLVER.MAX_ITER,
+                                 "warmup_iters": cfg.SOLVER.WARMUP_ITERS,
+                                 "lr_scheduler": cfg.SOLVER.LR_SCHEDULER_NAME,
+                                 "lr_end": cfg.SOLVER.BASE_LR_END})
 
     trainer = build_trainer(cfg, accum)
     trainer.resume_or_load(resume=False)
@@ -312,6 +335,10 @@ def main(argv=None):
                         "accumulated up to it. Set it to --batch to step "
                         "every chunk")
     t.add_argument("--lr0", type=float, default=0.0005)
+    # same defaults as the ultralytics CLI, so both decay the same way
+    t.add_argument("--lrf", type=float, default=0.01,
+                   help="final LR as a fraction of lr0, end of the cosine")
+    t.add_argument("--warmup-epochs", type=float, default=3.0)
     t.add_argument("--device", default=None)
     t.add_argument("--wandb", action="store_true")
     t.add_argument("--wandb-project", default="line-benchmark")
