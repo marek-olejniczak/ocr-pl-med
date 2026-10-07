@@ -14,3 +14,12 @@ zbioru jako `dataset_card.json` (foldery z danymi nie są w repo).
 | 2026-09-11 | noC_200k | df73563* | 2030 | 200000 | 190016 | ablacja: bez grupy C (degradacja: morphology, elastic, phone_photo) |
 | 2026-09-11 | v2_200k | df73563* | 2030 | 200000 | 189809 | ablacja: punkt odniesienia, wszystko wlaczone |
 | 2026-09-11 | v2_800k | df73563 | 2029 | 800000 | 759910 | generator v2, wszystko wlaczone; model wlasciwy (faza 2) |
+| 2026-10-07 | no_anatomy_vocab_200k | aa87419* | 2030 | 200000 | 190121 | ablacja rodzin: bez anatomy_vocab |
+| 2026-10-07 | no_arrows_bullets_200k | aa87419* | 2030 | 200000 | 190086 | ablacja rodzin: bez arrows_bullets |
+| 2026-10-07 | no_caps_200k | aa87419* | 2030 | 200000 | 189871 | ablacja rodzin: bez caps |
+| 2026-10-07 | no_elastic_200k | aa87419* | 2030 | 200000 | 189943 | ablacja rodzin: bez elastic |
+| 2026-10-07 | no_grid_paper_200k | aa87419* | 2030 | 200000 | 190114 | ablacja rodzin: bez grid_paper |
+| 2026-10-07 | no_morphology_200k | aa87419* | 2030 | 200000 | 189842 | ablacja rodzin: bez morphology |
+| 2026-10-07 | no_neighbour_glyphs_200k | aa87419 | 2030 | 200000 | 189963 | ablacja rodzin: bez neighbour_glyphs |
+| 2026-10-07 | no_phone_photo_200k | aa87419* | 2030 | 200000 | 189922 | ablacja rodzin: bez phone_photo |
+| 2026-10-07 | no_short_words_200k | aa87419* | 2030 | 200000 | 190020 | ablacja rodzin: bez short_words |
