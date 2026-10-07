@@ -42,6 +42,9 @@ def suggest(model, trial):
     args = {"warmup-epochs": trial.suggest_float("warmup_epochs", 0.5, 3.0)}
     if model == "frcnn":
         lr0 = trial.suggest_float("lr0", 2e-3, 4e-2, log=True)
+        # 1.0 is a flat schedule after warmup: in r2 the flat 0.016 beat the
+        # cosine to 1% by 3.6 mAP50 points, so the shape is left to the search
+        args["lrf"] = trial.suggest_float("lrf", 0.01, 1.0, log=True)
         args["weight-decay"] = trial.suggest_float("weight_decay", 1e-5, 1e-3,
                                                    log=True)
         args["anchor-ratios"] = trial.suggest_categorical("anchor_ratios",
