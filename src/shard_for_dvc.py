@@ -97,16 +97,42 @@ def main() -> None:
         print(f"  UWAGA: {path.name} sam w sobie przekracza limit "
               f"({path.stat().st_size / 1024**3:.2f} GB)", file=sys.stderr)
 
-    for index, shard in enumerate(shards):
-        name = f"{prefix}_{index:03d}.tar"
-        written = 0
+    # The plan above is only an estimate for the summary line. Each shard is
+    # written in GNU format (Python's default PAX adds a 1 KiB header per
+    # member, which pushed 200k-file shards past 1 GiB and got them
+    # truncated by DagsHub) and its real size is checked before every
+    # member, so no shard can end up over the limit whatever the estimate.
+    record = 20 * TAR_BLOCK  # a closed archive is padded to a full record
+    state = {"index": 0, "archive": None, "members": 0}
+
+    def close() -> None:
+        if state["archive"] is None:
+            return
+        state["archive"].close()
+        path = output_dir / f"{prefix}_{state['index']:03d}.tar"
+        size = path.stat().st_size
+        print(f"  {path.name}  {state['members']:>7,} plikow  {size / 1024**3:6.3f} GiB")
+        if size > limit:
+            print(f"  BLAD: {path.name} przekracza limit", file=sys.stderr)
+            sys.exit(1)
+        state["archive"] = None
+        state["index"] += 1
+
+    for path in files:
+        archive = state["archive"]
+        cost = tar_cost(path.stat().st_size)
+        if archive is not None and archive.fileobj.tell() + cost + record > limit:
+            close()
+        if state["archive"] is None:
+            state["archive"] = tarfile.open(
+                output_dir / f"{prefix}_{state['index']:03d}.tar", "w",
+                format=tarfile.GNU_FORMAT)
+            state["members"] = 0
         # Files are stored relative to the source directory, so extracting
         # every shard into one folder rebuilds the original layout.
-        with tarfile.open(output_dir / name, "w") as archive:
-            for path in shard:
-                archive.add(path, arcname=str(path.relative_to(source)))
-                written += path.stat().st_size
-        print(f"  {name}  {len(shard):>7,} plikow  {written / 1024**3:6.2f} GB")
+        state["archive"].add(path, arcname=str(path.relative_to(source)))
+        state["members"] += 1
+    close()
 
     print(f"\nGotowe: {output_dir}")
     print("Rozpakowanie u odbiorcy (kazdy kawalek do tego samego folderu):")
