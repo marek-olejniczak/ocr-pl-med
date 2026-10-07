@@ -80,6 +80,15 @@ mierzalnego efektu na tym testsecie. Dodatkowo: `v2_200k` (200k linii, 10k
 krokow) rowny `v2_800k` (800k, 40k), wiec zbior przestal byc czynnikiem
 ograniczajacym.
 
+## Faza 3b — ablacja, runda 2: każda augmentacja osobno (w toku, 2026-10-07)
+
+Dwa pytania o każdą rodzinę z osobna: czy przeszkadza czytać (zbiór kontrolny
+`robustness`, 1500 linii × 31 warunków, pary, bez treningu) i czy pomaga
+w treningu (9 zbiorów `no_<rodzina>_200k`, porównanie z `v2_200k`).
+Generator zapisuje teraz wszystkie parametry każdej augmentacji i jest w pełni
+deterministyczny (wcześniej albumentations losowało poza `--seed`).
+Instrukcja: `docs/ablacja_runda2.md`.
+
 ## Faza 4 — finalny zbiór i model
 
 Zwycięska konfiguracja → duży zbiór (pełna epoka, obecny model widział ~0,4
