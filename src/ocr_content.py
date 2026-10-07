@@ -114,14 +114,18 @@ class LinePools:
                         counts[word.lower()] = counts.get(word.lower(), 0) + 1
         self.words = list(counts.keys())
         self.word_weights = [counts[w] for w in self.words]
+        # Pools drawn from since the last reset; read into line metadata.
+        self.used: list[str] = []
 
     def phrase(self) -> str:
         pools = [p for p in _POOL_WEIGHTS if self.phrases.get(p)]
         weights = [_POOL_WEIGHTS[p] for p in pools]
         pool = random.choices(pools, weights=weights, k=1)[0]
+        self.used.append(pool)
         return random.choice(self.phrases[pool])
 
     def word(self) -> str:
+        self.used.append("words")
         return random.choices(self.words, weights=self.word_weights, k=1)[0]
 
 
@@ -143,7 +147,8 @@ def _capitalise(text: str) -> str:
 
 
 def _compose(kind: str, pools: LinePools, enabled: set[str],
-             charset: Optional[frozenset[int]] = None) -> str:
+             charset: Optional[frozenset[int]] = None,
+             info: Optional[dict] = None) -> str:
     """Raw text for one line of the given kind (not yet fitted to width)."""
     if kind == "word":
         text = pools.word()
@@ -169,6 +174,8 @@ def _compose(kind: str, pools: LinePools, enabled: set[str],
     if "caps" in enabled and kind in ("phrase", "bullet", "arrow", "word"):
         if random.random() < CAPITALISE_PROB:
             text = _capitalise(text)
+            if info is not None:
+                info["capitalised"] = True
     return text
 
 
@@ -187,15 +194,25 @@ def generate_line_content(
     target_width: int,
     font_path: str,
     enabled: set[str],
+    info: Optional[dict] = None,
 ) -> tuple[str, str]:
     """Return (text, kind) for one line, fitted to `target_width` pixels.
 
     With anatomy_vocab disabled (or no pools) this falls back to the old
     form-style generators, so an ablation compares like with like.
+
+    `info`, when given, is filled with how the text was made: the pools it
+    was drawn from, whether the caps family capitalised it, and whether an
+    arrow line had to fall back to a plain phrase. Recording draws nothing,
+    so the random stream is the same with or without it.
     """
+    if info is None:
+        info = {}
+    info.update({"pools": [], "capitalised": False, "arrow_fallback": False})
     if pools is None or "anatomy_vocab" not in enabled:
         kinds, weights = zip(*FORM_CONTENT_KINDS)
         kind = random.choices(kinds, weights=weights, k=1)[0]
+        info["pools"] = ["form:" + kind]
         return generate_field_content(kind, vocab, measure, target_width, font_path=font_path), kind
 
     kind = pick_line_kind(enabled)
@@ -203,13 +220,18 @@ def generate_line_content(
     # line cannot be written in them; it becomes a plain phrase instead.
     if kind == "arrow" and font_path and ord(">") not in font_charset(font_path):
         kind = "phrase"
+        info["arrow_fallback"] = True
     if kind in ("form_text", "number", "mix"):
         field_kind = {"form_text": "t", "number": "n", "mix": "mix"}[kind]
+        info["pools"] = ["form:" + field_kind]
         return generate_field_content(field_kind, vocab, measure, target_width, font_path=font_path), kind
 
     for _ in range(6):
+        pools.used = []
+        info["capitalised"] = False
         raw = _compose(kind, pools, enabled,
-                       font_charset(font_path) if font_path else None)
+                       font_charset(font_path) if font_path else None, info)
+        info["pools"] = list(pools.used)
         text = sanitize(raw, font_path) if font_path else normalize_for_handwriting(raw)
         text = " ".join(text.split())
         if not text:

@@ -203,6 +203,97 @@ def bleed_neighbour(canvas: Image.Image, ink: tuple[int, int, int]) -> None:
                   fill=faded, width=random.randint(1, 2))
 
 
+def prepare_line(
+    vocab: Vocabulary,
+    fonts: list[str],
+    config: AugmentConfig,
+    pools: LinePools | None,
+    enabled: set[str],
+) -> dict | None:
+    """Pick the hand, ink and words for one line and render the ink.
+
+    Everything up to, but not including, the paper: the result can be laid
+    onto any number of canvases. The robustness set uses that to show one
+    line under many conditions; render_line lays it down once.
+    Returns None when no text fits.
+    """
+    font_path = random.choice(fonts)
+    font_size = random.randint(*FORM_FONT_SIZE_RANGE)
+    style = WordStyle.random(config.char)
+    style.do_thicken = False
+
+    base_ink = random.choice([INK_BLACK, INK_BLUE])
+    ink = tuple(max(0, min(255, c + random.randint(-8, 8))) for c in base_ink)
+
+    target_width = random.randint(*TARGET_WIDTH_RANGE)
+    measure = make_measure(font_path, font_size, style)
+    content: dict = {}
+    text, kind = generate_line_content(
+        pools, vocab, measure, target_width, font_path, enabled, info=content
+    )
+    if not text:
+        return None
+
+    from char_renderer import render_text_per_char
+
+    text_img, _ = render_text_per_char(
+        text, font_path, font_size, padding=2, config=config, word_style=style
+    )
+    pen_fade = random.random() < PEN_FADE_PROB
+    if pen_fade:
+        text_img = apply_pen_fade(text_img)
+
+    mask = _make_ink_mask(text_img)
+    ink_box = mask.getbbox()
+    if ink_box is None:
+        return None
+    text_img = text_img.crop(ink_box)
+    mask = mask.crop(ink_box)
+
+    # Framing: a detector's box is never tight, and sometimes it clips.
+    margins = [
+        int(text_img.height * random.uniform(*MARGIN_FRAC_RANGE)) for _ in range(4)
+    ]
+    left, top, right, bottom = margins
+    return {
+        "font_path": font_path, "font_size": font_size, "style": style, "ink": ink,
+        "text": text, "kind": kind, "content": content, "pen_fade": pen_fade,
+        "text_img": text_img, "mask": mask, "margins": margins,
+        "left": left, "top": top,
+        "width": max(8, text_img.width + left + right),
+        "height": max(8, text_img.height + top + bottom),
+        "baseline": top + text_img.height + max(1, int(text_img.height * 0.10)),
+        "target_width": target_width,
+    }
+
+
+def paste_ink(canvas: Image.Image, base: dict) -> None:
+    """Write the prepared line's ink onto a canvas."""
+    ink_layer = Image.new("RGB", base["text_img"].size, base["ink"])
+    canvas.paste(ink_layer, (base["left"], base["top"]), base["mask"])
+
+
+def line_meta(base: dict) -> dict:
+    """The per-line fields that do not depend on the effects applied."""
+    style = base["style"]
+    return {
+        "font": Path(base["font_path"]).name,
+        "font_size": base["font_size"],
+        "kind": base["kind"],
+        "content": base["content"],
+        "ink": list(base["ink"]),
+        "pen_fade": base["pen_fade"],
+        "margins": base["margins"],
+        "target_width": base["target_width"],
+        "style": {
+            "rotation": round(style.base_rotation, 3),
+            "scale": round(style.base_scale, 3),
+            "x_stretch": round(style.x_stretch, 3),
+            "tracking": round(style.tracking_ratio, 4),
+        },
+    }
+
+
 def render_line(
     vocab: Vocabulary,
     fonts: list[str],
@@ -216,91 +307,70 @@ def render_line(
     `enabled` names the augmentation families in play (see ALL_FAMILIES);
     None means all of them. With every family off this is the pre-phase-1
     renderer: form-style content, plain paper, scanner profiles only.
+
+    Metadata records every setting each effect used (the *_params fields), so
+    a dataset can be analysed per augmentation and per strength. The short
+    fields (rule, neighbours, morphology, elastic, scan_profile) keep their
+    earlier format for code that already reads them.
     """
     if enabled is None:
         enabled = set(ALL_FAMILIES)
-    font_path = random.choice(fonts)
-    font_size = random.randint(*FORM_FONT_SIZE_RANGE)
-    style = WordStyle.random(config.char)
-    style.do_thicken = False
-
-    base_ink = random.choice([INK_BLACK, INK_BLUE])
-    ink = tuple(max(0, min(255, c + random.randint(-8, 8))) for c in base_ink)
-
-    target_width = random.randint(*TARGET_WIDTH_RANGE)
-    measure = make_measure(font_path, font_size, style)
-    text, kind = generate_line_content(
-        pools, vocab, measure, target_width, font_path, enabled
-    )
-    if not text:
+    base = prepare_line(vocab, fonts, config, pools, enabled)
+    if base is None:
         return None, "", {}
+    ink, height, baseline = base["ink"], base["height"], base["baseline"]
 
-    from char_renderer import render_text_per_char
-
-    text_img, _ = render_text_per_char(
-        text, font_path, font_size, padding=2, config=config, word_style=style
-    )
-    if random.random() < PEN_FADE_PROB:
-        text_img = apply_pen_fade(text_img)
-
-    mask = _make_ink_mask(text_img)
-    ink_box = mask.getbbox()
-    if ink_box is None:
-        return None, "", {}
-    text_img = text_img.crop(ink_box)
-    mask = mask.crop(ink_box)
-
-    # Framing: a detector's box is never tight, and sometimes it clips.
-    margins = [
-        int(text_img.height * random.uniform(*MARGIN_FRAC_RANGE)) for _ in range(4)
-    ]
-    left, top, right, bottom = margins
-    width = max(8, text_img.width + left + right)
-    height = max(8, text_img.height + top + bottom)
-
-    canvas = paper_canvas(width, height)
-    baseline = top + text_img.height + max(1, int(text_img.height * 0.10))
+    canvas = paper_canvas(base["width"], height)
     rule = None
+    grid_params = None
     if "grid_paper" in enabled and random.random() < GRID_PAPER_PROB:
-        rule = draw_grid_paper(canvas, text_img.height, baseline)
+        grid_params = {}
+        rule = draw_grid_paper(canvas, base["text_img"].height, baseline, record=grid_params)
     elif random.random() < RULE_PROB and 0 < baseline < height:
         rule = draw_rule(canvas, baseline, ink)
 
     neighbours: list[str] = []
+    neighbour_params: list[dict] = []
     if "neighbour_glyphs" in enabled:
         if random.random() < NEIGHBOUR_GLYPH_PROB:
             word_source = pools.word if pools else (lambda: random.choice(["kość", "staw", "mięsień"]))
             neighbours = intrude_neighbour_glyphs(
-                canvas, ink, font_path, font_size, config, style, word_source)
+                canvas, ink, base["font_path"], base["font_size"], config, base["style"],
+                word_source, record=neighbour_params)
     elif random.random() < NEIGHBOUR_BLEED_PROB:
         bleed_neighbour(canvas, ink)
         neighbours = ["strokes"]
 
-    ink_layer = Image.new("RGB", text_img.size, ink)
-    canvas.paste(ink_layer, (left, top), mask)
+    paste_ink(canvas, base)
 
     morphology = None
+    morphology_params = None
     if "morphology" in enabled and random.random() < MORPHOLOGY_PROB:
-        canvas, morphology = apply_morphology(canvas)
+        morphology_params = {}
+        canvas, morphology = apply_morphology(canvas, record=morphology_params)
     elastic = None
+    elastic_params = None
     if "elastic" in enabled and random.random() < ELASTIC_PROB:
-        canvas, elastic = apply_elastic(canvas)
+        elastic_params = {}
+        canvas, elastic = apply_elastic(canvas, record=elastic_params)
 
     canvas, scan_meta = finish_capture(canvas, enabled, apply_scan)
 
-    meta = {
-        "font": Path(font_path).name,
-        "font_size": font_size,
-        "kind": kind,
-        "ink": list(ink),
+    meta = line_meta(base)
+    meta.update({
         "rule": rule,
         "neighbours": neighbours,
         "morphology": morphology,
         "elastic": elastic,
         "size": list(canvas.size),
         "scan_profile": scan_meta["profile"] if scan_meta else None,
-    }
-    return canvas, text, meta
+        "grid_params": grid_params,
+        "neighbour_params": neighbour_params,
+        "morphology_params": morphology_params,
+        "elastic_params": elastic_params,
+        "scan": scan_meta,
+    })
+    return canvas, base["text"], meta
 
 
 def main() -> None:

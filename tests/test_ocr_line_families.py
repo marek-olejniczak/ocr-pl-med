@@ -178,3 +178,57 @@ def test_arrow_kind_degrades_to_phrase_without_gt_glyph(pools, vocab, fonts):
     finally:
         ocr_content.LINE_KINDS = saved
     assert kinds == {"phrase"}
+
+
+def test_same_seed_same_pixels(vocab, pools, fonts):
+    """Two renders from one seed must match byte for byte.
+
+    Albumentations used to draw from its own unseeded generator, so elastic
+    and motion-blurred lines changed from run to run even with --seed set.
+    """
+    import hashlib
+    cfg = gol.build_line_config()
+
+    def run():
+        random.seed(2030)
+        np.random.seed(2030)
+        out = []
+        for _ in range(25):
+            img, text, meta = gol.render_line(vocab, fonts, cfg, True, pools=pools)
+            if img is not None:
+                out.append((text, hashlib.md5(img.tobytes()).hexdigest()))
+        return out
+
+    assert run() == run()
+
+
+def test_effects_record_their_parameters():
+    random.seed(8)
+    np.random.seed(8)
+    img = Image.new("RGB", (300, 50), (250, 250, 250))
+    img.paste((0, 0, 0), (100, 20, 200, 30))
+
+    rec = {}
+    line_effects.apply_elastic(img.copy(), record=rec)
+    assert rec["kind"] in ("elastic", "grid_distortion") and "seed" in rec
+
+    rec = {}
+    line_effects.apply_morphology(img.copy(), record=rec)
+    assert rec["op"] in ("erosion", "dilation")
+
+    rec = {}
+    line_effects.draw_grid_paper(img.copy(), 30, 40, record=rec)
+    assert {"kind", "alpha", "pitch_frac", "pitch_px", "colour"} <= set(rec)
+
+    _, meta = line_effects.apply_phone_photo(img.copy())
+    assert {"shadow", "cast", "exposure", "noise", "blur", "motion_blur", "downscale", "jpeg"} <= set(meta)
+
+
+def test_forced_parameters_are_used():
+    img = Image.new("RGB", (300, 50), (250, 250, 250))
+    img.paste((0, 0, 0), (100, 20, 200, 30))
+    rec = {}
+    line_effects.apply_morphology(img.copy(), params={"op": "erosion", "mix": 0.75}, record=rec)
+    assert rec == {"op": "erosion", "mix": 0.75}
+    _, meta = line_effects.apply_phone_photo(img.copy(), params=line_effects.PHONE_PRESETS[3])
+    assert meta["blur"] == 1.3 and meta["downscale"] == 0.45 and meta["jpeg"] == 55
