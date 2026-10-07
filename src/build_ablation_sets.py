@@ -15,6 +15,7 @@ is skipped, so a crashed run can simply be started again.
 Usage:
     python src/build_ablation_sets.py generate                 # all five, in order
     python src/build_ablation_sets.py generate --only noA_200k
+    python src/build_ablation_sets.py generate --only rodziny   # the 9 per-family sets
     python src/build_ablation_sets.py pack --dvc-repo "C:/Users/tomek/Desktop/dane/inzynierka"
     python src/build_ablation_sets.py list
 """
@@ -43,6 +44,19 @@ VARIANTS: dict[str, tuple[int, int, str, str]] = {
                  "ablacja: bez grupy B (kadr i tlo: neighbour_glyphs, grid_paper)"),
     "noC_200k": (200_000, 2030, GROUP_C,
                  "ablacja: bez grupy C (degradacja: morphology, elastic, phone_photo)"),
+}
+
+# Leave-one-out per family (second ablation round, 2026-10). Same seed and
+# size as v2_200k, which stays their reference: the generator change that
+# added parameter logging reproduces v2_200k's text and metadata exactly.
+FAMILIES = ("short_words", "caps", "arrows_bullets", "anatomy_vocab",
+            "neighbour_glyphs", "grid_paper", "morphology", "elastic", "phone_photo")
+for _fam in FAMILIES:
+    VARIANTS[f"no_{_fam}_200k"] = (200_000, 2030, _fam, f"ablacja rodzin: bez {_fam}")
+# --only accepts these names as shorthands for a whole round.
+SETS = {
+    "grupy": ["v2_800k", "v2_200k", "noA_200k", "noB_200k", "noC_200k"],
+    "rodziny": [f"no_{f}_200k" for f in FAMILIES],
 }
 # Files convert_data.py (branch `server`) reads next to images_shards/.
 LABEL_FILES = ("labels.jsonl", "labels.txt", "labels_train.txt", "labels_val.txt", "dataset_card.json")
@@ -77,7 +91,7 @@ def run(cmd: list[str]) -> None:
 
 
 def selected(only) -> list[str]:
-    names = list(VARIANTS) if not only else list(only)
+    names = list(VARIANTS) if not only else [n for o in only for n in SETS.get(o, [o])]
     unknown = set(names) - set(VARIANTS)
     if unknown:
         sys.exit(f"unknown variants: {sorted(unknown)}; choose from {list(VARIANTS)}")
