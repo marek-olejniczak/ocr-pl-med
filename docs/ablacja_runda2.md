@@ -50,6 +50,10 @@ cd ~/ocr-pl-med
 git checkout server && git pull
 source .venv/bin/activate
 
+# DVC domyślnie nie sprawdza sum po pobraniu; w pierwszej rundzie przez to
+# przeszły ucięte archiwa. Z tym ustawieniem ucięty plik zostanie wykryty.
+dvc remote modify --local origin verify true
+
 # dane: tylko nowe katalogi, nie cały dataset/
 dvc pull dataset/robustness dataset/v2_val10k \
   dataset/no_short_words_200k dataset/no_caps_200k dataset/no_arrows_bullets_200k \
@@ -143,3 +147,13 @@ losuje generator treningowy.
 | zniekształcenie | `elastic_s1..s3`: alfa 0,6 / 1,1 / 1,6 wysokości; `griddist_s1..s3`: limit 0,08 / 0,15 / 0,22 |
 | telefon | `phone_s1..s3`: wszystkie składowe razem; `phone_shadow`, `_noise`, `_blur`, `_motion`, `_downscale`, `_jpeg`: każda składowa osobno na najostrzejszym poziomie |
 | skaner (v1) | `scan_clean_color`, `scan_grayscale`, `scan_photocopy` |
+
+## Uwaga o ucinaniu plików (sprawdzone 2026-10-07)
+
+DagsHub przechowuje pełne archiwa, także te po 1,4 GB z pierwszej rundy
+(rozmiar zdalny równy lokalnemu co do bajta). Pliki ucinały się przy
+pobieraniu na serwer, w okolicy 1,09 GB, a DVC tego nie zauważył, bo bez
+`verify true` nie liczy sum po pobraniu. Od rundy 2 archiwa mają najwyżej
+0,9 GiB (`shard_for_dvc.py` pilnuje rzeczywistego rozmiaru przy każdym
+pliku), a kolejka i `prepare_eval_data.sh` dodatkowo sprawdzają, czy każde
+archiwum otwiera się do końca.
