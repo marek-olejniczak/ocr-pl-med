@@ -31,6 +31,16 @@ RUNS=(
   "noA_200k  10000 2500"
   "noB_200k  10000 2500"
   "noC_200k  10000 2500"
+  # second round (2026-10): leave one family out, reference v2_200k
+  "no_short_words_200k 10000 2500"
+  "no_caps_200k 10000 2500"
+  "no_arrows_bullets_200k 10000 2500"
+  "no_anatomy_vocab_200k 10000 2500"
+  "no_neighbour_glyphs_200k 10000 2500"
+  "no_grid_paper_200k 10000 2500"
+  "no_morphology_200k 10000 2500"
+  "no_elastic_200k 10000 2500"
+  "no_phone_photo_200k 10000 2500"
 )
 # Restrict with: ONLY="noA_200k noB_200k" bash training/ocr/surya/ablation/run_ablation_queue.sh
 ONLY="${ONLY:-}"
@@ -53,12 +63,34 @@ for spec in "${RUNS[@]}"; do
     continue
   fi
 
+  # A tar cut short in transit makes convert_data.py skip the whole shard
+  # ("Pominieto niekompletny shard") and train on a fraction of the data
+  # without ever failing. Check the archives before spending a day on them.
+  bad=0
+  for archive in "$DATA_ROOT/$name/images_shards/"*.tar; do
+    tar -tf "$archive" >/dev/null 2>&1 || { echo "== $name: USZKODZONY shard $archive"; bad=1; }
+  done
+  if [[ $bad -eq 1 ]]; then
+    echo "== $name: skipping, re-copy the shards first"
+    continue
+  fi
+
   echo "== $name: convert $(date -Is)"
   if [[ ! -f "$PROCESSED/$name/train/metadata.jsonl" ]]; then
     "${COMPOSE[@]}" python training/ocr/surya/convert_data.py ocr800k \
         --input "$DATA_ROOT/$name" --output "$PROCESSED/$name" \
         || { echo "== $name: convert FAILED"; continue; }
   fi
+
+  # Converted data left over from an earlier, broken run is reused silently,
+  # so compare what landed on disk with what the labels promise.
+  want=$(wc -l < "$DATA_ROOT/$name/labels.jsonl")
+  got=$(( $(wc -l < "$PROCESSED/$name/train/metadata.jsonl") + $(wc -l < "$PROCESSED/$name/val/metadata.jsonl") ))
+  if (( got < want * 99 / 100 )); then
+    echo "== $name: NIEPELNE dane - $got z $want probek; usun $PROCESSED/$name i powtorz"
+    continue
+  fi
+  echo "== $name: probek gotowych: $got/$want"
 
   echo "== $name: train $steps steps $(date -Is)"
   extra=()
