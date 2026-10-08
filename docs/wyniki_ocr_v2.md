@@ -112,7 +112,13 @@ Najmocniej zadziałało tam, gdzie celowaliśmy — na krótkich liniach:
 | 46+ znaków | 155 linii | 13,7% | 11,3% | −2,4 pkt |
 
 Krótkie linie, czyli 39% testu, zyskały ponad dwa razy więcej niż długie.
-To bezpośrednio potwierdza hipotezę, która stała za rodziną `short_words`.
+
+Poprawka po rundzie 2 (2026-10-08): zysku na krótkich liniach nie należy
+przypisywać rodzinie `short_words`. Jej wyłączenie nie zmienia wyniku
+(−0,13 pkt, w szumie), a pomaga tylko liniom do 5 znaków o około 2 punkty.
+Zysk pochodzi głównie ze słownictwa anatomicznego i wersalików, bo krótkie
+linie testu to często nagłówki i pojedyncze terminy. Szczegóły:
+`docs/wyniki_runda2.md`.
 
 ## 5. Co nadal nie działa
 
@@ -142,7 +148,8 @@ pętla w `k` i brzuszek w `a` mogą się zwyczajnie zlewać.
 3. Powyżej 200 tys. przykładów zbiór przestał być czynnikiem ograniczającym.
 4. Analiza błędów poprzedniego modelu okazała się trafnym narzędziem
    projektowania danych: największy zysk przyszedł dokładnie w kategorii,
-   którą wskazała (linie do 12 znaków).
+   którą wskazała (linie do 12 znaków). Runda 2 pokazała, że te linie
+   poprawiły słownictwo i wersaliki, a nie sama rodzina krótkich słów.
 
 ## 7. Stan i co dalej
 

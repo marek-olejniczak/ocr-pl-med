@@ -110,6 +110,47 @@ def substitutions(rows: list[dict], top: int = 8) -> list[tuple[str, int]]:
     return counts.most_common(top)
 
 
+def paired_vs_reference(models: dict, ref: str, n_boot: int, seed: int = 0) -> None:
+    """CER change against a reference model on the same lines.
+
+    Both models read the identical 2160 lines, so most of the line-to-line
+    difficulty cancels out; resampling lines and recomputing the difference
+    gives a far tighter interval than comparing two separate intervals.
+    """
+    if ref not in models:
+        sys.exit(f"--reference {ref} is not among the runs")
+    base = {r["id"]: r for r in models[ref]}
+    rng = random.Random(seed)
+    print(f"## Zmiana wzgledem {ref} (pary linia po linii)")
+    print()
+    print("Dodatnia = gorzej niz punkt odniesienia. `*` = 95% przedzial nie obejmuje zera.")
+    print()
+    print("| model | CER | zmiana | 95% CI zmiany | linii lepiej / gorzej |")
+    print("|---|---|---|---|---|")
+    out = []
+    for name, rows in models.items():
+        if name == ref:
+            continue
+        pairs = [(r["dist"], base[r["id"]]["dist"], r["len"]) for r in rows if r["id"] in base]
+        n = len(pairs)
+        total = sum(p[2] for p in pairs)
+        delta = (sum(p[0] for p in pairs) - sum(p[1] for p in pairs)) / total
+        boots = []
+        for _ in range(n_boot):
+            pick = [pairs[rng.randrange(n)] for _ in range(n)]
+            t = sum(p[2] for p in pick)
+            boots.append((sum(p[0] for p in pick) - sum(p[1] for p in pick)) / t)
+        boots.sort()
+        lo, hi = boots[int(.025 * n_boot)], boots[int(.975 * n_boot)]
+        better = sum(p[0] < p[1] for p in pairs)
+        worse = sum(p[0] > p[1] for p in pairs)
+        out.append((delta, name, cer(rows), lo, hi, better, worse))
+    for delta, name, c, lo, hi, better, worse in sorted(out, reverse=True):
+        sig = " *" if lo > 0 or hi < 0 else ""
+        print(f"| {name} | {c:.1%} | {100 * delta:+.2f} pkt{sig} | {100 * lo:+.2f} .. {100 * hi:+.2f} | {better} / {worse} |")
+    print()
+
+
 class _Tee:
     def __init__(self, *streams):
         self.streams = streams
@@ -128,6 +169,8 @@ def main() -> None:
     ap.add_argument("runs", nargs="+", help="name=path/to/raw_predictions.csv")
     ap.add_argument("--bootstrap", type=int, default=2000)
     ap.add_argument("--output", default=None, help="Also write the report to this .md file")
+    ap.add_argument("--reference", default=None,
+                    help="Model to compare every other model against, line by line")
     args = ap.parse_args()
     # Windows consoles default to cp1250, which cannot print every character
     # that appears in the substitution table.
@@ -157,6 +200,9 @@ def main() -> None:
         lo, hi = bootstrap_ci(rows, args.bootstrap)
         exact = sum(r["dist"] == 0 for r in rows) / len(rows)
         print(f"| {name} | {len(rows)} | {cer(rows):.1%} | {lo:.1%} - {hi:.1%} | {exact:.1%} |")
+
+    if args.reference:
+        paired_vs_reference(models, args.reference, args.bootstrap)
 
     sources = sorted({r["source"] for rows in models.values() for r in rows})
     print("\n## CER wg zrodla (autora)\n")

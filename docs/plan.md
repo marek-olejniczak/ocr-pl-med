@@ -80,7 +80,7 @@ mierzalnego efektu na tym testsecie. Dodatkowo: `v2_200k` (200k linii, 10k
 krokow) rowny `v2_800k` (800k, 40k), wiec zbior przestal byc czynnikiem
 ograniczajacym.
 
-## Faza 3b — ablacja, runda 2: każda augmentacja osobno (w toku, 2026-10-07)
+## Faza 3b — ablacja, runda 2: każda augmentacja osobno (ZROBIONE 2026-10-08, wyniki: `docs/wyniki_runda2.md`)
 
 Dwa pytania o każdą rodzinę z osobna: czy przeszkadza czytać (zbiór kontrolny
 `robustness`, 1500 linii × 31 warunków, pary, bez treningu) i czy pomaga
