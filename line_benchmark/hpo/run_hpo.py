@@ -64,21 +64,42 @@ def suggest(model, trial):
     return out
 
 
-def trial_setup(cfg, model, number, override, data, epochs):
+def baseline(cfg, model):
+    """The r2 settings as trial params, so the study has the untuned run on
+    the same subsample to compare against."""
+    lr0 = cfg["models"][model].get("lr0", cfg["defaults"]["lr0"])
+    params = {"warmup_epochs": 3.0, "lr0": lr0}
+    if model == "frcnn":
+        return {**params, "lrf": 0.01, "weight_decay": 1e-4,
+                "anchor_ratios": FRCNN_RATIOS[0],
+                "anchor_sizes": FRCNN_SIZES[0]}
+    params.update(weight_decay=0.0005, scale=0.5, fliplr=0.5)
+    if model != "rtdetr":
+        params["mosaic"] = 1.0
+    return params
+
+
+def trial_setup(cfg, model, number, override, data, epochs, tag=""):
     """(cfg, job) for one trial: the matrix config narrowed to this model and
     the subsamples, with the trial's values on top."""
     cfg = copy.deepcopy(cfg)
     mc = {**cfg["models"][model], **override, "epochs": epochs,
           "train_flags": ["--wandb"]}
+    if mc["service"] == "ultralytics":
+        # ultralytics closes mosaic for the last 10 epochs, which in a
+        # 10-epoch trial is all of them; the full runs close it halfway
+        mc["train_args"] = {**mc.get("train_args", {}),
+                            "close-mosaic": epochs // 2}
+    label = f"hpo-{tag}" if tag else "hpo"
     cfg["models"] = {model: mc}
-    cfg["run"] = f"hpo-{model}"
+    cfg["run"] = f"{label}-{model}"
     cfg["notes"] = (f"HPO trial {number}: "
                     + json.dumps(override, sort_keys=True, default=str))
     if mc.get("data_format") == "coco":
         cfg["train_coco"], cfg["val_coco"] = data["train_coco"], data["val_coco"]
     variant = (cfg.get("train_variants") or list(cfg["data"]))[0]
     dc = cfg["data"][variant]
-    exp_id = f"{cfg.get('dataset', 'data')}_{model}_hpo-t{number:03d}"
+    exp_id = f"{cfg.get('dataset', 'data')}_{model}_{label}-t{number:03d}"
     job = {"kind": "train", "exp_id": exp_id, "model": model,
            "service": mc["service"], "variant": variant,
            "weights": mc["weights"], "data_yaml": data["data_yaml"],
@@ -171,7 +192,7 @@ def make_objective(cfg, model, data, args):
     def objective(trial):
         override = suggest(model, trial)
         tcfg, job = trial_setup(cfg, model, trial.number, override, data,
-                                args.epochs)
+                                args.epochs, args.tag)
         out_dir = BENCH_ROOT / args.results_dir / "checkpoints" / job["exp_id"]
         if out_dir.exists():
             shutil.rmtree(out_dir)       # a retried trial starts clean
@@ -194,14 +215,17 @@ def make_objective(cfg, model, data, args):
                 for epoch, value in curve[reported:]:
                     trial.report(value, epoch)
                     reported += 1
-                    if trial.should_prune():
+                    # the reference point for the whole study, so it runs out
+                    if (trial.should_prune()
+                            and not trial.user_attrs.get("baseline")):
                         print(f"--- trial {trial.number} pruned at epoch "
                               f"{epoch} (mAP50-95 {value:.4f})", flush=True)
                         stop(proc, name, args.local)
                         raise optuna.TrialPruned()
         except KeyboardInterrupt:
             stop(proc, name, args.local)
-            trial.study.enqueue_trial(trial.params)
+            trial.study.enqueue_trial(trial.params, user_attrs={
+                k: v for k, v in trial.user_attrs.items() if k == "baseline"})
             raise
         finally:
             if not args.keep_weights:
@@ -252,6 +276,9 @@ def main(argv=None):
     ap.add_argument("--poll", type=float, default=30.0, help="seconds")
     ap.add_argument("--local", action="store_true")
     ap.add_argument("--keep-weights", action="store_true")
+    ap.add_argument("--tag", default="",
+                    help="a separate study, e.g. v2 after a fix: its own "
+                         "SQLite study, exp_ids and wandb group")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the first trial's command and stop")
     args = ap.parse_args(argv)
@@ -274,13 +301,15 @@ def main(argv=None):
         t = optuna.create_study(sampler=optuna.samplers.RandomSampler(
             seed=args.seed)).ask()
         override = suggest(args.model, t)
-        tcfg, job = trial_setup(cfg, args.model, 0, override, data, args.epochs)
+        tcfg, job = trial_setup(cfg, args.model, 0, override, data,
+                                args.epochs, args.tag)
         cmd = with_container_name(
             job_command(job, tcfg, args.local, args.results_dir),
             container_name(job["exp_id"]))
         print(" ".join(cmd))
         return
 
+    name = f"{args.model}-{args.tag}" if args.tag else args.model
     results = BENCH_ROOT / args.results_dir
     results.mkdir(parents=True, exist_ok=True)
     storage = RDBStorage(
@@ -288,21 +317,25 @@ def main(argv=None):
         grace_period=180,
         failed_trial_callback=RetryFailedTrialCallback(max_retry=1))
     study = optuna.create_study(
-        study_name=f"{cfg.get('dataset', 'data')}-{args.model}",
+        study_name=f"{cfg.get('dataset', 'data')}-{name}",
         storage=storage, direction="maximize", load_if_exists=True,
         sampler=optuna.samplers.TPESampler(seed=args.seed),
         pruner=optuna.pruners.MedianPruner(n_startup_trials=5,
                                            n_warmup_steps=3))
+    if not any(t.user_attrs.get("baseline") for t in study.trials):
+        study.enqueue_trial(baseline(cfg, args.model),
+                            user_attrs={"baseline": True})
     if not args.local:
+        label = f"hpo-{args.tag}" if args.tag else "hpo"
         stop_orphans(container_name(f"{cfg.get('dataset', 'data')}_"
-                                    f"{args.model}_hpo-t"))
+                                    f"{args.model}_{label}-t"))
     study.optimize(
         make_objective(cfg, args.model, data, args),
         callbacks=[MaxTrialsCallback(
             args.trials, states=(TrialState.COMPLETE, TrialState.PRUNED))],
         catch=(RuntimeError,))
 
-    write_trials(study, results / f"{args.model}_trials.csv")
+    write_trials(study, results / f"{name}_trials.csv")
     done = [t for t in study.trials if t.state == TrialState.COMPLETE]
     print(f"\n{len(done)} complete, "
           f"{sum(t.state == TrialState.PRUNED for t in study.trials)} pruned")

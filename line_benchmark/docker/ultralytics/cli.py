@@ -134,6 +134,7 @@ def cmd_train(args):
         # v8_transforms(stretch=True), which never crops the 2*imgsz mosaic
         # canvas back, so training silently happens at double the resolution
         mosaic=args.mosaic,
+        close_mosaic=args.close_mosaic,
         weight_decay=args.weight_decay,
         scale=args.scale,
         fliplr=args.fliplr,
@@ -352,6 +353,9 @@ def main(argv=None):
                    help="probability of a horizontal flip - mirrors the text")
     t.add_argument("--mosaic", type=float, default=1.0,
                    help="ultralytics default is 1.0; set 0 for rtdetr")
+    t.add_argument("--close-mosaic", type=int, default=10,
+                   help="mosaic is switched off for this many final epochs; "
+                        "at or above --epochs it is never on")
     t.add_argument("--seed", type=int, default=0)
     t.add_argument("--device", default=None)
     t.add_argument("--diagnostics", action="store_true",
