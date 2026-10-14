@@ -186,6 +186,19 @@ def stop_orphans(prefix):
                        capture_output=True, check=False)
 
 
+def hpo_data(cfg, full, train_per_group, val_per_group):
+    """Training/validation data for the trials: the hpo/prepare.py subsamples,
+    or the matrix's own full split."""
+    if full:
+        variant = (cfg.get("train_variants") or list(cfg["data"]))[0]
+        return {"train_coco": cfg["train_coco"], "val_coco": cfg["val_coco"],
+                "data_yaml": cfg["data"][variant]["yolo"]}
+    tag_t, tag_v = f"g{train_per_group}", f"g{val_per_group}"
+    return {"train_coco": f"dataset/hpo/instances_train_{tag_t}.json",
+            "val_coco": f"dataset/hpo/instances_val_{tag_v}.json",
+            "data_yaml": f"dataset/yolo_raw/data_hpo_{tag_t}_{tag_v}.yaml"}
+
+
 def make_objective(cfg, model, data, args):
     import optuna
 
@@ -276,6 +289,10 @@ def main(argv=None):
     ap.add_argument("--poll", type=float, default=30.0, help="seconds")
     ap.add_argument("--local", action="store_true")
     ap.add_argument("--keep-weights", action="store_true")
+    ap.add_argument("--full-data", action="store_true",
+                    help="trials on the full split instead of the subsamples")
+    ap.add_argument("--prune-after", type=int, default=3,
+                    help="epochs every trial runs before it can be pruned")
     ap.add_argument("--tag", default="",
                     help="a separate study, e.g. v2 after a fix: its own "
                          "SQLite study, exp_ids and wandb group")
@@ -284,10 +301,8 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     cfg = load_config(BENCH_ROOT / args.config)
-    tag_t, tag_v = f"g{args.train_per_group}", f"g{args.val_per_group}"
-    data = {"train_coco": f"dataset/hpo/instances_train_{tag_t}.json",
-            "val_coco": f"dataset/hpo/instances_val_{tag_v}.json",
-            "data_yaml": f"dataset/yolo_raw/data_hpo_{tag_t}_{tag_v}.yaml"}
+    data = hpo_data(cfg, args.full_data, args.train_per_group,
+                    args.val_per_group)
     missing = [p for p in data.values() if not (BENCH_ROOT / p).exists()]
     if missing and not args.dry_run:
         raise SystemExit(f"missing {missing[0]} - run hpo/prepare.py first")
@@ -321,7 +336,7 @@ def main(argv=None):
         storage=storage, direction="maximize", load_if_exists=True,
         sampler=optuna.samplers.TPESampler(seed=args.seed),
         pruner=optuna.pruners.MedianPruner(n_startup_trials=5,
-                                           n_warmup_steps=3))
+                                           n_warmup_steps=args.prune_after))
     if not any(t.user_attrs.get("baseline") for t in study.trials):
         study.enqueue_trial(baseline(cfg, args.model),
                             user_attrs={"baseline": True})
