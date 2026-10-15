@@ -16,22 +16,29 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from evaluation.evaluate import _aggregate, _per_source  # noqa: E402
+from evaluation.merge_fragments import merge_predictions  # noqa: E402
 
 DEFAULT_GRID = [round(t, 2) for t in np.arange(0.05, 0.951, 0.05)]
 
 
-def sweep(gt_json_path, predictions, thresholds):
+def sweep(gt_json_path, predictions, thresholds, merges=(None,)):
+    """merges: None for the raw boxes, or (min_v_overlap, max_gap) to join
+    line fragments after thresholding."""
     gt = json.loads(Path(gt_json_path).read_text())
     ids = [i["id"] for i in gt["images"]]
     rows = []
     for t in thresholds:
-        op = [p for p in predictions if p["score"] >= t]
-        row = {"conf_thresh": t,
-               **_aggregate(gt, op, predictions, gt_json_path, ids,
-                            with_map=False)}
-        for src, st in _per_source(gt, op, ids).items():
-            row[f"recall_{src}"] = st["recall"]
-        rows.append(row)
+        kept = [p for p in predictions if p["score"] >= t]
+        for merge in merges:
+            op = merge_predictions(kept, *merge) if merge else kept
+            row = {"conf_thresh": t,
+                   "merge_v": merge[0] if merge else None,
+                   "merge_gap": merge[1] if merge else None,
+                   **_aggregate(gt, op, predictions, gt_json_path, ids,
+                                with_map=False)}
+            for src, st in _per_source(gt, op, ids).items():
+                row[f"recall_{src}"] = st["recall"]
+            rows.append(row)
     return rows
 
 
@@ -46,11 +53,20 @@ def main(argv=None):
     ap.add_argument("--out", required=True)
     ap.add_argument("--thresholds",
                     help="comma-separated; default 0.05..0.95 step 0.05")
+    ap.add_argument("--merge-v", help="comma-separated min vertical overlaps")
+    ap.add_argument("--merge-gaps",
+                    help="comma-separated max gaps in line heights; with "
+                         "--merge-v adds every pair next to the raw boxes")
     args = ap.parse_args(argv)
 
     grid = ([float(t) for t in args.thresholds.split(",")]
             if args.thresholds else DEFAULT_GRID)
-    rows = sweep(args.gt, json.loads(Path(args.pred).read_text()), grid)
+    merges = [None]
+    if args.merge_v and args.merge_gaps:
+        merges += [(float(v), float(g)) for v in args.merge_v.split(",")
+                   for g in args.merge_gaps.split(",")]
+    rows = sweep(args.gt, json.loads(Path(args.pred).read_text()), grid,
+                 merges)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     keys = list(dict.fromkeys(k for r in rows for k in r))
@@ -60,6 +76,7 @@ def main(argv=None):
         w.writerows(rows)
     b = best_row(rows)
     print(f"{out.stem}: best F1 {b['f1']:.3f} at {b['conf_thresh']} "
+          f"merge {b['merge_v']}/{b['merge_gap']} "
           f"(P={b['precision']:.3f} R={b['recall']:.3f} "
           f"split={b['split_rate']:.3f})")
 
