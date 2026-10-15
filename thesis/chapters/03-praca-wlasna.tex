@@ -34,3 +34,77 @@ sprecyzowaną treść i znaczenie.
 Niedopuszczalne jest pisanie pracy metodą \emph{cut\&paste}, bo jest to plagiat i dowód intelektualnej indolencji autora.
 Dane zagadnienie należy opisać własnymi słowami. Zawsze trzeba powołać się na zewnętrzne źródła. 
 
+\section{Wkład Jakuba Górniaka --- szkic}
+
+Roboczy zakres własnych prac do późniejszego rozwinięcia. Wyniki pomiarów
+dotyczą opisanych poniżej prób, a nie końcowej oceny modeli na niezależnym
+zbiorze testowym.
+
+\begin{itemize}
+	\item \textbf{Przygotowanie zbioru danych:} zebranie i ręczne oznaczenie
+	ok. 2700 linii na 194 stronach notatek anatomicznych i dokumentów medycznych.
+	Przygotowanie transkrypcji i ramek pisma odręcznego, również na formularzach
+	zawierających druk. Charakterystyka trudności: tekst wokół rysunków,
+	kratka, nieregularne i nachodzące linie oraz polskie znaki.
+
+	\item \textbf{Stworzenie narzędzia do labelowania:} autorska aplikacja
+	webowa do oznaczania ramek i transkrypcji, oparta na Flask i HTML5 Canvas.
+	Obsługa obrazów i wielostronicowych PDF, obracanie stron z przeliczaniem
+	współrzędnych, edycja ramek, zoom, przesuwanie, cofanie i skróty klawiszowe.
+	Zapis stron, wycinków i etykiet oraz ponowne wczytywanie anotacji.
+
+	\item \textbf{Automatyczne wspomaganie anotacji:} propozycje ramek
+	i tekstu do ręcznej weryfikacji, przetwarzanie dokumentów w tle,
+	monitorowanie postępu i anulowanie oraz ponowny odczyt po poprawieniu
+	ramki. Wymienne moduły detekcji i OCR, zbiorcze zatwierdzanie propozycji
+	oraz rejestrowanie pochodzenia anotacji jako ręcznych, automatycznych,
+	zatwierdzonych lub poprawionych.
+
+	\item \textbf{Wersjonowanie i udostępnianie danych:} migracja obrazów
+	z Gita do DVC, początkowo z Google Drive, następnie DagsHub. Scalanie
+	rozproszonych partii z zachowaniem istniejących anotacji i kopiami
+	bezpieczeństwa. Automatyzacja publikowania skryptem oraz obejście
+	problemu dużych obrazów w historii Gita przez oddzielne publikowanie
+	wskaźnika danych.
+
+	\item \textbf{Porównanie detektorów:} implementacja heurystyki
+	morfologicznej z usuwaniem kratki, scalaniem fragmentów i ustalaniem
+	kolejności czytania oraz porównanie jej z CRAFT, Surya i YOLO.
+	Przygotowanie benchmarku, strojenie progów CRAFT i sprawdzenie ustawień
+	na innych stronach. Porównanie metryk pokrycia i dopasowania IoU 1:1.
+
+	\item \textbf{Wyniki detekcji:} wspólny test na 30 stronach i 571 liniach
+	referencyjnych, z ziarnem losowania 0 i wyłączeniem kart pacjenta.
+	Przy progu pokrycia 0.5 CRAFT z domyślnymi progami uzyskał F1 0.722,
+	Surya 0.656, YOLO 0.649, a heurystyka morfologiczna 0.204.
+	Przy dopasowaniu 1:1 z progiem IoU 0.5 najlepszy wynik uzyskał YOLO
+	(F1 0.296 wobec 0.195 dla domyślnego CRAFT).
+	Orientacyjny czas wynosił 0.6 s na stronę dla YOLO i 3.7 s dla CRAFT.
+	Analiza wpływu metryki na ranking i kompromisu między jakością a czasem.
+
+	\item \textbf{Eksperymenty i dostrajanie OCR:} sprawdzenie Qwen3-VL
+	przez Ollama i odrzucenie tej konfiguracji z powodu pustych odpowiedzi
+	i opóźnienia. Przygotowanie eksportu danych treningowych i skryptu
+	dostrajania TrOCR z monitorowaniem CER i wczesnym zatrzymaniem.
+	Dwa warianty treningu uzyskały walidacyjny CER 0.112 i 0.047;
+	różniły się bazą językową oraz ustawieniami treningu, dlatego poprawy
+	nie można przypisać wyłącznie polskiej bazie modelu.
+
+	\item \textbf{Analiza błędów kadrowania:} porównanie rozpoznawania
+	wycinków z ramek ręcznych i automatycznych oraz zależności CER
+	od dopasowania ramki. Zaobserwowanie znacznie lepszych wyników dla
+	dobrze dopasowanych wycinków i wprowadzenie augmentacji kadrowania,
+	aby przybliżyć trening do warunków użycia.
+
+	\item \textbf{Integracja i sprawdzenie modeli zespołu:} podłączenie
+	dostarczonego YOLO do wykrywania linii oraz Surya z adapterem LoRA
+	do odczytu wycinków, bez przypisywania sobie treningu tych modeli.
+	Sprawdzenie rozmiaru wejścia, progu pewności, tłumienia nakładających
+	się detekcji i preprocessingu. F1 pokrycia YOLO wzrosło z 0.304
+	dla 1024 px bez preprocessingu do 0.649 dla 512 px z preprocessingiem.
+	Na 40 losowych wycinkach średni CER liczony po liniach spadł z 0.237
+	dla bazowej Surya do 0.175 z adapterem. Sprawdzenie całego przepływu:
+	detekcja, wycinanie linii i OCR. Przygotowanie dokumentacji rozwiązania
+	i eksperymentów do późniejszego opisu w pracy.
+\end{itemize}
+
