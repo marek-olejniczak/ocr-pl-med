@@ -1,0 +1,5 @@
+# Dane testsetu (GT w predykcjach) i artefakty z wycinkami linii — tylko lokalnie,
+# benchmark/dane jest poza gitem. Zagregowane wyniki: results/.
+data/
+out/
+out_ngram/
