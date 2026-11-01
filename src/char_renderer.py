@@ -7,7 +7,7 @@ them onto a single canvas with baseline wander and spacing jitter.
 
 import math
 import random
-from typing import Optional
+from typing import Callable, Optional
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -103,6 +103,8 @@ def render_text_per_char(
     padding: int = 15,
     config: Optional[AugmentConfig] = None,
     word_style: Optional[WordStyle] = None,
+    glyph_hook: Optional[Callable] = None,
+    kern_hook: Optional[Callable[[int], float]] = None,
 ) -> tuple[Image.Image, list[int]]:
     """Render text character-by-character with per-character transforms.
 
@@ -118,6 +120,10 @@ def render_text_per_char(
         word_style: Optional pre-existing WordStyle to reuse across calls.
             When provided, all renders share the same base rotation/scale/thicken
             decision (e.g. for filling a whole form with one handwriter's style).
+        glyph_hook: Optional f(index, char, font) -> (RGBA image, advance) or
+            None; replaces the plain glyph of that character (line_glyphs.py).
+        kern_hook: Optional f(index) -> extra pixels before that character
+            (negative pulls it onto the previous one).
 
     Returns:
         Tuple of (image, bbox) where bbox is [x_min, y_min, x_max, y_max].
@@ -156,7 +162,7 @@ def render_text_per_char(
 
     # Render each character individually
     char_entries: list[tuple[Image.Image, int]] = []  # (image, advance_width)
-    for char in text:
+    for index, char in enumerate(text):
         if char == " ":
             # For spaces, use font's space advance width
             space_w = max(1, int(font.getlength(" ")))
@@ -164,7 +170,8 @@ def render_text_per_char(
             char_entries.append((space_img, space_w))
             continue
 
-        char_img, advance_w = _render_single_char(char, font)
+        hooked = glyph_hook(index, char, font) if glyph_hook is not None else None
+        char_img, advance_w = hooked if hooked is not None else _render_single_char(char, font)
 
         # Apply character-level transforms with word-consistent style
         if char_cfg.enabled and word_style is not None:
@@ -225,6 +232,9 @@ def render_text_per_char(
             y_offset = _baseline_offset(i, n_chars, line_cfg.baseline_wander_amplitude)
         else:
             y_offset = 0
+
+        if kern_hook is not None and i > 0:
+            x_cursor += int(kern_hook(i))
 
         # Linear drift: 0 at the first character, full drift at the last
         if drift_total:

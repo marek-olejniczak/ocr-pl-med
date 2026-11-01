@@ -190,7 +190,7 @@ def cmd_robustness(args) -> None:
     pools = LinePools(args.resource_dir)
     fonts = [f for f in find_fonts(args.font_dir) if Path(f).name not in fill_form.EXCLUDED_FONTS]
     config = gol.build_line_config()
-    enabled = set(gol.ALL_FAMILIES)
+    enabled = set(gol.V2_FAMILIES)  # built with generator v2; v3 glyph families stay off
 
     n_cond = len(CONDITIONS)
     print(f"{args.base_lines} linii bazowych x {n_cond} warunkow = {args.base_lines * n_cond} obrazow")

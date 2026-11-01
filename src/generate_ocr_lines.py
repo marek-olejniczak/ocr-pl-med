@@ -24,9 +24,11 @@ Usage:
 """
 
 import argparse
+import copy
 import json
 import random
 import sys
+import zlib
 from pathlib import Path
 
 import numpy as np
@@ -57,6 +59,15 @@ from line_effects import (
     finish_capture,
     intrude_neighbour_glyphs,
 )
+import line_glyphs
+from line_glyphs import (
+    GLYPH_FAMILIES,
+    family_rng,
+    make_glyph_hook,
+    plan_diacritics,
+    plan_joins,
+    plan_variants,
+)
 from ocr_content import CONTENT_FAMILIES, LinePools, generate_line_content
 from renderer import find_fonts
 from transforms import AugmentConfig, WordStyle
@@ -64,7 +75,10 @@ from vocabulary import Vocabulary
 
 # Every switchable behaviour, by name. `--disable` takes any subset; the
 # ablation study turns them off one at a time.
-ALL_FAMILIES = CONTENT_FAMILIES + IMAGE_FAMILIES
+ALL_FAMILIES = CONTENT_FAMILIES + IMAGE_FAMILIES + GLYPH_FAMILIES
+# The generator v2 families. The robustness and validation sets were built
+# from these and stay reproducible by passing them as `enabled`.
+V2_FAMILIES = CONTENT_FAMILIES + IMAGE_FAMILIES
 
 # Width the line is asked to fill, in pixels. Spans a short date to a full
 # diagnosis running the width of a form field.
@@ -102,6 +116,19 @@ def parse_args() -> argparse.Namespace:
              + ", ".join(ALL_FAMILIES) + ". 'all' disables every family "
              "(the pre-phase-1 renderer).",
     )
+    parser.add_argument(
+        "--line-seeds", action="store_true",
+        help="Reseed the generators before every line from (seed, line). A "
+             "line then never shifts the random stream of the next one, so "
+             "sets that differ in one family share everything else line for "
+             "line (generator v3 ablation). Off reproduces the older sets.",
+    )
+    parser.add_argument(
+        "--start-index", type=int, default=0,
+        help="First line number (image name). With --line-seeds a set can be "
+             "rendered in pieces by parallel runs and joined; the lines come "
+             "out the same as in one run.",
+    )
     parser.add_argument("--dataset-name", type=str, default=None)
     parser.add_argument("--note", type=str, default="")
     parser.add_argument(
@@ -113,6 +140,19 @@ def parse_args() -> argparse.Namespace:
              "which should not append rows to the repo's registry.",
     )
     return parser.parse_args()
+
+
+def line_seed(seed: int, index: int, attempt: int) -> int:
+    """The seed of one line under --line-seeds."""
+    return zlib.crc32(f"{seed}|{index}|{attempt}".encode())
+
+
+def seed_line(seed: int, index: int, attempt: int) -> int:
+    """Reseed `random` and numpy for one line; returns the seed used."""
+    s = line_seed(seed, index, attempt)
+    random.seed(s)
+    np.random.seed(s)
+    return s
 
 
 def resolve_families(disable: str) -> set[str]:
@@ -234,10 +274,36 @@ def prepare_line(
     if not text:
         return None
 
+    # Generator v3 glyph families. Each draws from its own generator keyed by
+    # the line, so the global stream (and with it everything else about the
+    # line) is the same whichever of them are on.
+    key = f"{text}|{Path(font_path).name}|{font_size}|{target_width}"
+    render_style, kern = style, None
+    glyphs: dict = {"joins": None, "variants": None, "diacritics": None}
+    if "cursive_joins" in enabled:
+        record: dict = {}
+        plan = plan_joins(text, font_size, family_rng("cursive_joins", key), record)
+        if plan is not None:
+            render_style = copy.copy(style)
+            render_style.tracking_ratio, render_style.x_stretch, kern = plan
+            glyphs["joins"] = record
+    variants: dict = {}
+    if "glyph_variants" in enabled:
+        record = {}
+        variants = plan_variants(text, font_path, fonts, family_rng("glyph_variants", key), record)
+        glyphs["variants"] = record or None
+    diacritics: dict = {}
+    if "diacritic_placement" in enabled:
+        ops: list = []
+        diacritics = plan_diacritics(text, family_rng("diacritic_placement", key), ops)
+        glyphs["diacritics"] = ops or None
+
     from char_renderer import render_text_per_char
 
     text_img, _ = render_text_per_char(
-        text, font_path, font_size, padding=2, config=config, word_style=style
+        text, font_path, font_size, padding=2, config=config, word_style=render_style,
+        glyph_hook=make_glyph_hook(font_path, font_size, variants, diacritics),
+        kern_hook=kern,
     )
     pen_fade = random.random() < PEN_FADE_PROB
     if pen_fade:
@@ -264,6 +330,7 @@ def prepare_line(
         "height": max(8, text_img.height + top + bottom),
         "baseline": top + text_img.height + max(1, int(text_img.height * 0.10)),
         "target_width": target_width,
+        "glyphs": glyphs,
     }
 
 
@@ -291,6 +358,9 @@ def line_meta(base: dict) -> dict:
             "x_stretch": round(style.x_stretch, 3),
             "tracking": round(style.tracking_ratio, 4),
         },
+        "joins_params": base["glyphs"]["joins"],
+        "variant_params": base["glyphs"]["variants"],
+        "diacritic_params": base["glyphs"]["diacritics"],
     }
 
 
@@ -301,6 +371,7 @@ def render_line(
     apply_scan: bool,
     pools: LinePools | None = None,
     enabled: set[str] | None = None,
+    line_seed: int | None = None,
 ) -> tuple[Image.Image, str, dict]:
     """Render one handwritten line on paper. Returns (image, text, metadata).
 
@@ -315,9 +386,20 @@ def render_line(
     """
     if enabled is None:
         enabled = set(ALL_FAMILIES)
+
+    def stage(name: str) -> None:
+        # Under --line-seeds every stage starts from its own seed: how many
+        # numbers one stage draws (more grid lines on a wider line) never
+        # changes what the next stage picks.
+        if line_seed is not None:
+            seed_stage = zlib.crc32(f"{line_seed}|{name}".encode())
+            random.seed(seed_stage)
+            np.random.seed(seed_stage)
+
     base = prepare_line(vocab, fonts, config, pools, enabled)
     if base is None:
         return None, "", {}
+    stage("paper")
     ink, height, baseline = base["ink"], base["height"], base["baseline"]
 
     canvas = paper_canvas(base["width"], height)
@@ -331,6 +413,7 @@ def render_line(
 
     neighbours: list[str] = []
     neighbour_params: list[dict] = []
+    stage("neighbours")
     if "neighbour_glyphs" in enabled:
         if random.random() < NEIGHBOUR_GLYPH_PROB:
             word_source = pools.word if pools else (lambda: random.choice(["kość", "staw", "mięsień"]))
@@ -345,15 +428,18 @@ def render_line(
 
     morphology = None
     morphology_params = None
+    stage("morphology")
     if "morphology" in enabled and random.random() < MORPHOLOGY_PROB:
         morphology_params = {}
         canvas, morphology = apply_morphology(canvas, record=morphology_params)
     elastic = None
     elastic_params = None
+    stage("elastic")
     if "elastic" in enabled and random.random() < ELASTIC_PROB:
         elastic_params = {}
         canvas, elastic = apply_elastic(canvas, record=elastic_params)
 
+    stage("capture")
     canvas, scan_meta = finish_capture(canvas, enabled, apply_scan)
 
     meta = line_meta(base)
@@ -419,11 +505,25 @@ def main() -> None:
         "val": open(output_dir / "labels_val.txt", "w", encoding="utf-8"),
         "jsonl": open(output_dir / "labels.jsonl", "w", encoding="utf-8"),
     }
+    line_seeds = args.line_seeds
+    if line_seeds and args.seed is None:
+        sys.exit("--line-seeds needs --seed")
+    if args.start_index and not line_seeds:
+        sys.exit("--start-index needs --line-seeds (otherwise pieces repeat lines)")
+    index = args.start_index
+    end = args.start_index + args.count
+    attempt = 0
     try:
-        while index < args.count:
+        while index < end:
+            if line_seeds:
+                s = seed_line(args.seed, index, attempt)
+                # Drawn apart from the line, whose draws depend on the families.
+                is_val = random.Random(s ^ 0x5EED).random() < args.val_frac
             image, text, meta = render_line(
-                vocab, fonts, config, apply_scan, pools=pools, enabled=enabled)
+                vocab, fonts, config, apply_scan, pools=pools, enabled=enabled,
+                line_seed=s if line_seeds else None)
             if image is None:
+                attempt += 1
                 skipped += 1
                 if skipped > args.count:
                     print("ERROR: content generation kept coming back empty",
@@ -433,7 +533,10 @@ def main() -> None:
 
             name = f"{index:07d}.jpg"
             image.save(images_dir / name, quality=93)
-            split = "val" if random.random() < args.val_frac else "train"
+            if not line_seeds:
+                is_val = random.random() < args.val_frac
+            split = "val" if is_val else "train"
+            attempt = 0
             path = f"images/{name}"
 
             handles["all"].write(f"{path}\t{text}\n")
@@ -462,7 +565,7 @@ def main() -> None:
         for handle in handles.values():
             handle.close()
 
-    n_lines = index
+    n_lines = index - args.start_index
     repo_root = Path(__file__).resolve().parent.parent
     card = build_card(
         name=args.dataset_name or output_dir.name,
@@ -488,12 +591,16 @@ def main() -> None:
     card["augmentations"]["neighbour_bleed_prob"] = NEIGHBOUR_BLEED_PROB
     card["augmentations"]["content_kinds"] = [list(k) for k in CONTENT_KINDS]
     card["augmentations"]["families_enabled"] = sorted(enabled)
+    card["augmentations"]["line_seeds"] = line_seeds
     card["augmentations"]["families_disabled"] = disabled
     card["augmentations"]["neighbour_glyph_prob"] = NEIGHBOUR_GLYPH_PROB
     card["augmentations"]["grid_paper_prob"] = GRID_PAPER_PROB
     card["augmentations"]["morphology_prob"] = MORPHOLOGY_PROB
     card["augmentations"]["elastic_prob"] = ELASTIC_PROB
     card["augmentations"]["phone_photo_prob"] = PHONE_PHOTO_PROB
+    card["augmentations"]["join_prob"] = line_glyphs.JOIN_PROB
+    card["augmentations"]["variant_prob"] = line_glyphs.VARIANT_PROB
+    card["augmentations"]["diacritic_prob"] = line_glyphs.DIACRITIC_PROB
     card_path = write_card(output_dir, card)
     if args.registry != "none":
         registry_path = (
