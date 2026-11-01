@@ -89,6 +89,16 @@ Generator zapisuje teraz wszystkie parametry każdej augmentacji i jest w pełni
 deterministyczny (wcześniej albumentations losowało poza `--seed`).
 Instrukcja: `docs/ablacja_runda2.md`.
 
+## Faza 3c — generator v3: kształty liter (kod i dane 2026-11-01, treningi czekają)
+
+Analiza pomyłek (Marek, `error-analysis`) sprawdzona na 17 modelach: zostały
+błędy kształtu (zlepione pary kursywy, `k` podobne do `h`, przesunięte
+diakrytyki), a nie ekspozycji, więc naiwny upsampling odpada. Trzy nowe rodziny
+(`cursive_joins`, `glyph_variants`, `diacritic_placement`), zbiory parowane
+linia w linię (`--line-seeds`), pilot 5 zbiorów i 7 treningów.
+Testset `handlabeled` podzielony po zeszytach na część roboczą i zamrożoną.
+Opis: `docs/ocr_generator_v3.md`, uruchomienie: `docs/v3_runbook.md`.
+
 ## Faza 4 — finalny zbiór i model
 
 Zwycięska konfiguracja → duży zbiór (pełna epoka, obecny model widział ~0,4
