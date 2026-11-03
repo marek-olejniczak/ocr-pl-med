@@ -2,3 +2,16 @@ Pillow
 Flask
 PyMuPDF
 dvc
+
+# Auto-anotacja (HTR): detekcja linii + klient modelu
+opencv-python-headless
+numpy
+requests
+
+# Detektor YOLO (models/yolo_lines_best_iou_median.pt) + preprocessing.py
+ultralytics
+noteshrink
+
+# Rozpoznawanie Surya+LoRA działa w osobnym venv (Python >=3.10):
+#   python3.13 -m venv .venv-surya17 && .venv-surya17/bin/pip install surya-ocr==0.17.1 peft transformers==4.56.1 flask
+# i włącza się przez HTR_BACKEND=surya_lora

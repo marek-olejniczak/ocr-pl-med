@@ -420,6 +420,70 @@ canvas { display: block; }
   color: var(--text-secondary);
 }
 .label-bar .btn-cancel:hover { background: var(--bg-hover); }
+
+/* ── Auto-annotation (HTR) ────────────────────── */
+.btn-auto { background: var(--warning); color: #1a1a1a; font-weight: 600; }
+.btn-auto:hover { background: #f5a833; color: #1a1a1a; }
+.btn-auto:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.badge {
+  display: inline-block;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-right: 5px;
+  vertical-align: 1px;
+}
+.badge-auto { background: var(--warning); color: #1a1a1a; }
+.badge-fixed { background: var(--accent); color: #fff; }
+.badge-ok { background: var(--success); color: #10381f; }
+
+.ann-item.is-auto { border-left: 2px solid var(--warning); }
+.ann-item .info .name .empty { color: var(--text-muted); font-size: 12px; }
+.ann-item .edit-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all var(--transition);
+}
+.ann-item:hover .edit-btn { opacity: 1; }
+.ann-item .edit-btn:hover { background: var(--accent); color: #fff; opacity: 1; }
+
+/* Floating progress panel */
+.auto-progress {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-16px);
+  min-width: 300px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 12px 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+.auto-progress.visible { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+.auto-progress .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.auto-progress .title { font-size: 12.5px; font-weight: 600; }
+.auto-progress .count { font-size: 11px; color: var(--text-muted); font-family: 'Consolas', monospace; }
+.auto-progress .track { height: 4px; background: var(--bg-tertiary); border-radius: 2px; overflow: hidden; }
+.auto-progress .fill { height: 100%; background: var(--warning); border-radius: 2px; width: 0%; transition: width 0.3s ease; }
+.auto-progress .cancel {
+  background: none; border: none; color: var(--text-muted);
+  cursor: pointer; font-size: 11px; padding: 2px 6px; border-radius: 4px;
+}
+.auto-progress .cancel:hover { background: var(--danger); color: #fff; }
 </style>
 </head>
 <body>
@@ -462,7 +526,26 @@ canvas { display: block; }
     <button class="btn" onclick="zoomFit()">Fit</button>
   </div>
 
+  <div class="btn-group">
+    <button class="btn" onclick="rotatePage(-90)" title="Obróć stronę w lewo (Shift+R)">
+      <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+    </button>
+    <button class="btn" onclick="rotatePage(90)" title="Obróć stronę w prawo (R)">
+      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    </button>
+  </div>
+
   <div class="spacer"></div>
+
+  <button class="btn btn-auto" id="autoBtn" onclick="autoAnnotate()" title="Automatycznie wykryj linie i odczytaj tekst na tej stronie (A)">
+    <svg viewBox="0 0 24 24"><path d="M15 4V2m0 20v-2M8.5 8.5L7 7m10 10l1.5 1.5M4 15H2m20 0h-2"/><path d="M9.5 14.5L3 21l2 2 6.5-6.5"/><path d="M15 4a4 4 0 100 8 4 4 0 000-8z"/></svg>
+    Auto
+  </button>
+
+  <button class="btn" id="autoAllBtn" onclick="autoAnnotateAll()" title="Przetwarzaj wszystkie strony w tle — możesz labelować w trakcie">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 17.5h7M17.5 14v7"/></svg>
+    Auto wszystkie
+  </button>
 
   <button class="btn btn-accent" onclick="saveAnnotations()">
     <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -498,6 +581,14 @@ canvas { display: block; }
       <button class="btn-confirm" onclick="confirmLabel()">Add</button>
       <button class="btn-cancel" onclick="cancelLabel()">Cancel</button>
     </div>
+    <div class="auto-progress" id="autoProgress">
+      <div class="row">
+        <span class="title" id="autoTitle">Rozpoznawanie tekstu…</span>
+        <span class="count" id="autoCount">0 / 0</span>
+        <button class="cancel" onclick="cancelAutoAnnotate()">Przerwij</button>
+      </div>
+      <div class="track"><div class="fill" id="autoFill"></div></div>
+    </div>
   </div>
 
   <!-- Sidebar -->
@@ -508,6 +599,10 @@ canvas { display: block; }
     </div>
     <div class="ann-list" id="annList"></div>
     <div class="sidebar-footer">
+      <button class="btn" onclick="acceptAllAuto()" title="Oznacz wszystkie propozycje jako zweryfikowane">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Accept all
+      </button>
       <button class="btn" onclick="undoLast()">
         <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 105.64-8.36L1 10"/></svg>
         Undo
@@ -555,12 +650,19 @@ let ctrlHeld = false;
 
 // Pending box awaiting label
 let pendingBox = null;  // {x_min, y_min, x_max, y_max}
+let editingIdx = -1;    // index of annotation being edited (-1 = adding new)
+let autoJob = null;     // id of running auto-annotation job
+let resizing = null;    // {idx, handle} while dragging a box edge/corner
+let hoverHandle = null; // handle under the cursor, for the resize cursor
+
+const HANDLE_PX = 9;    // handle hit area, in screen pixels
 
 const COLORS = [
   "#6c5ce7","#00cec9","#e17055","#fdcb6e","#a29bfe",
   "#55efc4","#fab1a0","#74b9ff","#ff7675","#81ecec",
 ];
 const var_accent = "#6c5ce7";
+const AUTO_COLOR = "#f39c12";   // unverified model proposals
 
 // ── File handling ──────────────────────────────────────────────
 document.getElementById("fileInput").addEventListener("change", (e) => uploadFiles(e.target.files));
@@ -590,8 +692,15 @@ async function uploadFiles(fileList) {
   }
   if (count === 0) { toast("No valid image or PDF files found", "error"); return; }
 
-  const res = await fetch("/api/upload", { method: "POST", body: form });
-  const data = await res.json();
+  toast("Wczytywanie… duży PDF może potrwać kilka minut");
+  let data;
+  try {
+    const res = await fetch("/api/upload", { method: "POST", body: form });
+    data = await res.json();
+  } catch (e) {
+    toast("Upload nie powiódł się (błąd połączenia lub serwera)", "error");
+    return;
+  }
   if (!data.ok) { toast(data.error || "Upload failed", "error"); return; }
 
   images = data.images;
@@ -652,6 +761,68 @@ function navigateImage(dir) {
   switchToImage(next);
 }
 
+// ── Page rotation ──────────────────────────────────────────────
+// Rotates the current page by 90° (clockwise for +90). Existing boxes are
+// rotated together with the page, so no annotation work is lost.
+async function rotatePage(deg) {
+  if (!img || currentIdx < 0) return;
+  if (autoJob || batchRunning) { toast("Poczekaj na koniec auto-anotacji", "error"); return; }
+  if (pendingBox || editingIdx >= 0) cancelLabel();
+
+  const info = images[currentIdx];
+  const W = info.width, H = info.height;
+  let data;
+  try {
+    const res = await fetch("/api/rotate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: info.id, degrees: deg }),
+    });
+    data = await res.json();
+  } catch (e) {
+    toast("Błąd połączenia", "error"); return;
+  }
+  if (!data.ok) { toast(data.error || "Nie udało się obrócić", "error"); return; }
+
+  rotateBoxes(annCache[info.id] || [], deg, W, H);
+  info.width = data.width;
+  info.height = data.height;
+
+  const src = `/api/image/${info.id}?t=${Date.now()}`;
+  const thumb = document.querySelector(`.thumb[data-idx="${images.indexOf(info)}"] img`);
+  if (thumb) thumb.src = src;
+
+  // The user may have switched pages while the request was in flight
+  if (images[currentIdx] !== info) return;
+  if (annotations !== annCache[info.id]) rotateBoxes(annotations, deg, W, H);
+  imgW = info.width;
+  imgH = info.height;
+  selectedIdx = -1;
+  unsaved = true;
+
+  const newImg = new window.Image();
+  newImg.onload = () => {
+    img = newImg;
+    resizeCanvas(); zoomFit(); updateList(); updateThumbs();
+    toast("Obrócono — zapisz stronę, żeby zachować orientację");
+  };
+  newImg.src = src;
+}
+
+// Map box coordinates from a W×H image to the same image rotated by `deg`
+function rotateBoxes(list, deg, W, H) {
+  for (const a of list) {
+    const { x_min, y_min, x_max, y_max } = a;
+    if (deg === 90) {
+      a.x_min = H - y_max; a.x_max = H - y_min; a.y_min = x_min; a.y_max = x_max;
+    } else if (deg === -90) {
+      a.x_min = y_min; a.x_max = y_max; a.y_min = W - x_max; a.y_max = W - x_min;
+    } else {
+      a.x_min = W - x_max; a.x_max = W - x_min; a.y_min = H - y_max; a.y_max = H - y_min;
+    }
+  }
+}
+
 // ── Thumbnails ─────────────────────────────────────────────────
 function buildThumbs() {
   const strip = document.getElementById("thumbStrip");
@@ -700,7 +871,8 @@ function render() {
 
   // Annotations
   annotations.forEach((ann, i) => {
-    const color = COLORS[i % COLORS.length];
+    const isAuto = ann.source === "auto";
+    const color = isAuto ? AUTO_COLOR : COLORS[i % COLORS.length];
     const w = ann.x_max - ann.x_min, h = ann.y_max - ann.y_min;
     // Fixed screen-space sizes so labels stay readable at any zoom
     const lw = (i === selectedIdx ? 3 : 2) / zoom;
@@ -709,15 +881,18 @@ function render() {
     ctx.fillStyle = color + (i === selectedIdx ? "55" : "40");
     ctx.fillRect(ann.x_min, ann.y_min, w, h);
 
-    // Border
+    // Border — dashed while the proposal is still unverified
     ctx.strokeStyle = color;
     ctx.lineWidth = lw;
+    if (isAuto) ctx.setLineDash([8 / zoom, 4 / zoom]);
     ctx.strokeRect(ann.x_min, ann.y_min, w, h);
+    ctx.setLineDash([]);
 
     // Label tag — fixed 14px on screen regardless of zoom
     const fs = 14 / zoom;
     ctx.font = `700 ${fs}px 'Segoe UI', sans-serif`;
-    const tw = ctx.measureText(ann.label).width;
+    const tagText = ann.label || "(puste)";
+    const tw = ctx.measureText(tagText).width;
     const padX = 6 / zoom;
     const padY = 4 / zoom;
     const tagH = fs + padY * 2;
@@ -731,8 +906,21 @@ function render() {
     roundRect(ctx, ann.x_min, tagY, tw + padX * 2, tagH, 4 / zoom);
     ctx.fill();
     ctx.fillStyle = "#fff";
-    ctx.fillText(ann.label, ann.x_min + padX, ann.y_min - padY);
+    ctx.fillText(tagText, ann.x_min + padX, ann.y_min - padY);
   });
+
+  // Resize handles on the selected box
+  if (selectedIdx >= 0 && annotations[selectedIdx]) {
+    const a = annotations[selectedIdx];
+    const s = HANDLE_PX / zoom;
+    ctx.fillStyle = "#fff";
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = 1 / zoom;
+    for (const [hx, hy] of handlePoints(a)) {
+      ctx.fillRect(hx - s / 2, hy - s / 2, s, s);
+      ctx.strokeRect(hx - s / 2, hy - s / 2, s, s);
+    }
+  }
 
   // Active drawing
   if (drawing) {
@@ -772,6 +960,80 @@ function render() {
 
   ctx.restore();
   updateStatus();
+}
+
+// Handle positions: 4 corners + 4 edge midpoints
+function handlePoints(a) {
+  const cx = (a.x_min + a.x_max) / 2, cy = (a.y_min + a.y_max) / 2;
+  return [
+    [a.x_min, a.y_min], [cx, a.y_min], [a.x_max, a.y_min],
+    [a.x_min, cy],                     [a.x_max, cy],
+    [a.x_min, a.y_max], [cx, a.y_max], [a.x_max, a.y_max],
+  ];
+}
+
+const HANDLE_NAMES = ["nw", "n", "ne", "w", "e", "sw", "s", "se"];
+const HANDLE_CURSORS = {
+  nw: "nwse-resize", se: "nwse-resize",
+  ne: "nesw-resize", sw: "nesw-resize",
+  n: "ns-resize", s: "ns-resize",
+  w: "ew-resize", e: "ew-resize",
+};
+
+// Which handle (if any) lies under the given image-space point
+function hitHandle(ann, ix, iy) {
+  const tol = HANDLE_PX / zoom;
+  const points = handlePoints(ann);
+  for (let i = 0; i < points.length; i++) {
+    if (Math.abs(ix - points[i][0]) <= tol && Math.abs(iy - points[i][1]) <= tol) {
+      return HANDLE_NAMES[i];
+    }
+  }
+  return null;
+}
+
+// Apply a drag on the given handle to the box coordinates
+function applyResize(ann, handle, ix, iy) {
+  if (handle.includes("n")) ann.y_min = Math.min(iy, ann.y_max - 4);
+  if (handle.includes("s")) ann.y_max = Math.max(iy, ann.y_min + 4);
+  if (handle.includes("w")) ann.x_min = Math.min(ix, ann.x_max - 4);
+  if (handle.includes("e")) ann.x_max = Math.max(ix, ann.x_min + 4);
+  ann.x_min = Math.round(Math.max(0, ann.x_min));
+  ann.y_min = Math.round(Math.max(0, ann.y_min));
+  ann.x_max = Math.round(Math.min(imgW, ann.x_max));
+  ann.y_max = Math.round(Math.min(imgH, ann.y_max));
+}
+
+// After a box is corrected, ask the model to read the new crop.
+// Better framing is usually enough for a clean read.
+async function reRecognize(idx) {
+  const ann = annotations[idx];
+  if (!ann || !images[currentIdx]) return;
+
+  const previous = ann.label;
+  ann.label = "…";
+  render(); updateList();
+
+  try {
+    const res = await fetch("/api/recognize-box", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: images[currentIdx].id,
+        box: { x_min: ann.x_min, y_min: ann.y_min, x_max: ann.x_max, y_max: ann.y_max },
+      }),
+    });
+    const data = await res.json();
+    ann.label = data.ok ? (data.label || "") : previous;
+    if (!data.ok) toast(data.error || "Nie udało się odczytać", "error");
+    else ann.source = "auto";   // ponowna propozycja — wymaga zatwierdzenia
+  } catch (e) {
+    ann.label = previous;
+    toast("Błąd połączenia", "error");
+  }
+  unsaved = true;
+  annCache[images[currentIdx].id] = annotations;
+  render(); updateList(); updateThumbs();
 }
 
 function roundRect(ctx, x, y, w, h, r) {
@@ -821,9 +1083,30 @@ canvas.addEventListener("mousedown", (e) => {
     }
     return;
   }
-  // Left click = draw box
+  // Left click = resize handle of the selected box, otherwise draw a new one
   if (e.button === 0) {
     const [ix, iy] = screenToImg(mx, my);
+
+    if (selectedIdx >= 0 && annotations[selectedIdx]) {
+      const handle = hitHandle(annotations[selectedIdx], ix, iy);
+      if (handle) {
+        resizing = { idx: selectedIdx, handle };
+        e.preventDefault();
+        return;
+      }
+    }
+    // Clicking inside a box selects it instead of starting a new one
+    for (let i = annotations.length - 1; i >= 0; i--) {
+      const a = annotations[i];
+      if (ix >= a.x_min && ix <= a.x_max && iy >= a.y_min && iy <= a.y_max) {
+        if (selectedIdx !== i) {
+          selectedIdx = i;
+          render(); updateList();
+          return;
+        }
+        break;
+      }
+    }
     drawing = true; drawSX = ix; drawSY = iy; drawCX = ix; drawCY = iy;
   }
 });
@@ -833,15 +1116,44 @@ canvas.addEventListener("mousemove", (e) => {
     panX += e.clientX - panLX; panY += e.clientY - panLY;
     panLX = e.clientX; panLY = e.clientY; render(); return;
   }
-  if (drawing) {
-    const rect = canvas.getBoundingClientRect();
-    [drawCX, drawCY] = screenToImg(e.clientX - rect.left, e.clientY - rect.top);
+  const rect = canvas.getBoundingClientRect();
+  const [ix, iy] = screenToImg(e.clientX - rect.left, e.clientY - rect.top);
+
+  if (resizing) {
+    applyResize(annotations[resizing.idx], resizing.handle, ix, iy);
     render();
+    return;
+  }
+  if (drawing) {
+    drawCX = ix; drawCY = iy;
+    render();
+    return;
+  }
+  // Cursor feedback when hovering a resize handle
+  if (!ctrlHeld && selectedIdx >= 0 && annotations[selectedIdx]) {
+    const handle = hitHandle(annotations[selectedIdx], ix, iy);
+    if (handle !== hoverHandle) {
+      hoverHandle = handle;
+      canvas.style.cursor = handle ? HANDLE_CURSORS[handle] : "crosshair";
+    }
+  } else if (hoverHandle) {
+    hoverHandle = null;
+    canvas.style.cursor = ctrlHeld ? "grab" : "crosshair";
   }
 });
 
 canvas.addEventListener("mouseup", (e) => {
   if (panning) { panning = false; canvas.style.cursor = ctrlHeld ? "grab" : "crosshair"; return; }
+
+  // Finished correcting a box — let the model read the new crop
+  if (resizing) {
+    const idx = resizing.idx;
+    resizing = null;
+    unsaved = true;
+    reRecognize(idx);
+    return;
+  }
+
   if (!drawing) return;
   drawing = false;
 
@@ -859,6 +1171,20 @@ canvas.addEventListener("mouseup", (e) => {
 
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
+// Double-click an existing box to verify / correct its text
+canvas.addEventListener("dblclick", (e) => {
+  if (!img) return;
+  const rect = canvas.getBoundingClientRect();
+  const [ix, iy] = screenToImg(e.clientX - rect.left, e.clientY - rect.top);
+  for (let i = annotations.length - 1; i >= 0; i--) {
+    const a = annotations[i];
+    if (ix >= a.x_min && ix <= a.x_max && iy >= a.y_min && iy <= a.y_max) {
+      startEdit(i);
+      return;
+    }
+  }
+});
+
 canvas.addEventListener("wheel", (e) => {
   e.preventDefault();
   const rect = canvas.getBoundingClientRect();
@@ -871,33 +1197,77 @@ canvas.addEventListener("wheel", (e) => {
 }, { passive: false });
 
 // ── Label modal ────────────────────────────────────────────────
-function showLabelModal() {
+function showLabelModal(prefill = "") {
   const bar = document.getElementById("labelBar");
   const inp = document.getElementById("modalLabelInput");
   bar.classList.add("visible");
-  inp.value = "";
-  setTimeout(() => inp.focus(), 50);
+  inp.value = prefill;
+  setTimeout(() => { inp.focus(); inp.select(); }, 50);
+}
+
+// Open an existing annotation for verification / correction
+function startEdit(i) {
+  const ann = annotations[i];
+  if (!ann) return;
+  editingIdx = i;
+  selectedIdx = i;
+  pendingBox = null;
+  render(); updateList();
+  document.getElementById("labelBar").querySelector(".label-hint").textContent =
+    ann.source === "auto" ? "Weryfikacja:" : "Label:";
+  document.getElementById("labelBar").querySelector(".btn-confirm").textContent =
+    ann.source === "auto" ? "Zatwierdź" : "Zapisz";
+  showLabelModal(ann.label || "");
 }
 
 function confirmLabel() {
   const inp = document.getElementById("modalLabelInput");
   const label = inp.value.trim();
-  if (!label) { inp.focus(); return; }
 
+  // Editing an existing annotation (verify / correct)
+  if (editingIdx >= 0) {
+    const ann = annotations[editingIdx];
+    if (ann) {
+      if (label !== (ann.label || "")) {
+        // Model proposal that the human changed → "corrected"
+        ann.source = (ann.source === "auto" || ann.source === "corrected") ? "corrected" : "manual";
+        ann.label = label;
+      } else if (ann.source === "auto") {
+        // Accepted exactly as proposed → "verified"
+        ann.source = "verified";
+      }
+      unsaved = true;
+      annCache[images[currentIdx].id] = annotations;
+    }
+    closeLabelBar();
+    render(); updateList(); updateThumbs();
+    return;
+  }
+
+  // Adding a brand-new hand-drawn box
+  if (!label) { inp.focus(); return; }
   if (pendingBox) {
-    annotations.push({ label, ...pendingBox });
+    annotations.push({ label, source: "manual", ...pendingBox });
     unsaved = true;
     annCache[images[currentIdx].id] = annotations;
     pendingBox = null;
     render(); updateList(); updateThumbs();
   }
-  document.getElementById("labelBar").classList.remove("visible");
+  closeLabelBar();
 }
 
 function cancelLabel() {
   pendingBox = null;
-  document.getElementById("labelBar").classList.remove("visible");
+  closeLabelBar();
   render();
+}
+
+function closeLabelBar() {
+  editingIdx = -1;
+  const bar = document.getElementById("labelBar");
+  bar.classList.remove("visible");
+  bar.querySelector(".label-hint").textContent = "Label:";
+  bar.querySelector(".btn-confirm").textContent = "Add";
 }
 
 // Label bar keyboard: Enter = confirm, Escape = cancel
@@ -915,6 +1285,10 @@ document.addEventListener("keydown", (e) => {
 
   if (e.ctrlKey && e.key === "s") { e.preventDefault(); saveAnnotations(); }
   else if (e.ctrlKey && e.key === "z") { e.preventDefault(); undoLast(); }
+  else if (e.key === "a" || e.key === "A") { e.preventDefault(); autoAnnotate(); }
+  else if ((e.key === "r" || e.key === "R") && !e.metaKey && !e.ctrlKey) {
+    e.preventDefault(); rotatePage(e.shiftKey ? -90 : 90);
+  }
   else if (e.key === "Delete") deleteSelected();
   else if (e.key === "ArrowLeft") navigateImage(-1);
   else if (e.key === "ArrowRight") navigateImage(1);
@@ -943,22 +1317,37 @@ function zoomFit() {
 // ── Annotations UI ─────────────────────────────────────────────
 function updateList() {
   const list = document.getElementById("annList");
-  document.getElementById("annCount").textContent = annotations.length;
+  const pending = annotations.filter(a => a.source === "auto").length;
+  document.getElementById("annCount").textContent =
+    pending ? `${annotations.length} · ${pending} do sprawdzenia` : annotations.length;
   list.innerHTML = "";
   annotations.forEach((ann, i) => {
-    const color = COLORS[i % COLORS.length];
+    const isAuto = ann.source === "auto";
+    const color = isAuto ? AUTO_COLOR : COLORS[i % COLORS.length];
     const item = document.createElement("div");
-    item.className = "ann-item" + (i === selectedIdx ? " selected" : "");
+    item.className = "ann-item" + (i === selectedIdx ? " selected" : "") + (isAuto ? " is-auto" : "");
+    const badge = isAuto ? '<span class="badge badge-auto">AUTO</span>'
+      : ann.source === "corrected" ? '<span class="badge badge-fixed">POPR.</span>'
+      : ann.source === "verified" ? '<span class="badge badge-ok">OK</span>' : "";
+    const name = ann.label ? esc(ann.label) : '<span class="empty">(puste)</span>';
     item.innerHTML = `
       <span class="dot" style="background:${color}"></span>
       <div class="info">
-        <div class="name">${esc(ann.label)}</div>
+        <div class="name">${badge}${name}</div>
         <div class="coords">${ann.x_min}, ${ann.y_min} → ${ann.x_max}, ${ann.y_max}</div>
       </div>
+      <button class="edit-btn" title="Edytuj / zatwierdź">&#9998;</button>
       <button class="del-btn" data-i="${i}">&#10005;</button>`;
     item.addEventListener("click", (e) => {
-      if (e.target.classList.contains("del-btn")) return;
+      if (e.target.closest(".del-btn") || e.target.closest(".edit-btn")) return;
       selectedIdx = i; render(); updateList();
+    });
+    item.addEventListener("dblclick", (e) => {
+      if (e.target.closest(".del-btn")) return;
+      startEdit(i);
+    });
+    item.querySelector(".edit-btn").addEventListener("click", (e) => {
+      e.stopPropagation(); startEdit(i);
     });
     item.querySelector(".del-btn").addEventListener("click", () => {
       annotations.splice(i, 1);
@@ -967,6 +1356,207 @@ function updateList() {
     });
     list.appendChild(item);
   });
+}
+
+// ── Auto-annotation (HTR) ──────────────────────────────────────
+async function autoAnnotate() {
+  if (!img || currentIdx < 0) { toast("Najpierw wczytaj obraz", "error"); return; }
+  if (autoJob) { toast("Auto-anotacja już trwa", "error"); return; }
+
+  const fid = images[currentIdx].id;
+  let data;
+  try {
+    const res = await fetch(`/api/auto-annotate/${fid}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    data = await res.json();
+  } catch (e) {
+    toast("Błąd połączenia z serwerem", "error"); return;
+  }
+  if (!data.ok) { toast(data.error || "Nie udało się uruchomić", "error"); return; }
+
+  autoJob = data.job;
+  setAutoRunning(true);
+  pollAuto(fid);
+}
+
+async function pollAuto(fid) {
+  while (autoJob) {
+    await new Promise(r => setTimeout(r, 600));
+    if (!autoJob) break;
+
+    let p;
+    try {
+      const res = await fetch(`/api/auto-annotate/job/${autoJob}`);
+      p = await res.json();
+    } catch (e) { break; }
+    if (!p.ok) break;
+
+    showAutoProgress(p);
+
+    if (p.stage === "finished" || p.stage === "error") {
+      autoJob = null;
+      setAutoRunning(false);
+      if (p.stage === "error") { toast(p.error || "Błąd rozpoznawania", "error"); return; }
+      // Only apply if the user hasn't switched images in the meantime
+      if (images[currentIdx] && images[currentIdx].id === fid) {
+        const added = applyProposals(p.annotations || []);
+        toast(added ? `${added} propozycji — sprawdź i zatwierdź` : "Nie znaleziono nowych linii",
+              added ? "success" : "");
+      } else {
+        toast("Auto-anotacja gotowa (inny obraz jest otwarty)");
+      }
+      return;
+    }
+  }
+  setAutoRunning(false);
+}
+
+// Adds model proposals, skipping ones that overlap existing annotations
+function applyProposals(proposals) {
+  let added = 0;
+  proposals.forEach(p => {
+    if (annotations.some(a => boxOverlap(a, p) > 0.5)) return;
+    annotations.push({
+      label: p.label || "",
+      x_min: p.x_min, y_min: p.y_min, x_max: p.x_max, y_max: p.y_max,
+      source: "auto",
+    });
+    added++;
+  });
+  if (added) {
+    unsaved = true;
+    annCache[images[currentIdx].id] = annotations;
+    render(); updateList(); updateThumbs();
+  }
+  return added;
+}
+
+function boxOverlap(a, b) {
+  const ix = Math.max(0, Math.min(a.x_max, b.x_max) - Math.max(a.x_min, b.x_min));
+  const iy = Math.max(0, Math.min(a.y_max, b.y_max) - Math.max(a.y_min, b.y_min));
+  const inter = ix * iy;
+  if (!inter) return 0;
+  const areaA = (a.x_max - a.x_min) * (a.y_max - a.y_min);
+  const areaB = (b.x_max - b.x_min) * (b.y_max - b.y_min);
+  return inter / Math.min(areaA, areaB);
+}
+
+async function cancelAutoAnnotate() {
+  if (batchRunning) { cancelBatch(); return; }
+  if (!autoJob) return;
+  const job = autoJob;
+  autoJob = null;
+  setAutoRunning(false);
+  try { await fetch(`/api/auto-annotate/job/${job}/cancel`, { method: "POST" }); } catch (e) {}
+  toast("Przerwano");
+}
+
+function setAutoRunning(running) {
+  document.getElementById("autoBtn").disabled = running;
+  const panel = document.getElementById("autoProgress");
+  if (running) panel.classList.add("visible");
+  else panel.classList.remove("visible");
+}
+
+function showAutoProgress(p) {
+  const total = p.total || 0;
+  const done = p.done || 0;
+  document.getElementById("autoTitle").textContent =
+    p.stage === "detecting" ? "Wykrywanie linii…" : "Rozpoznawanie tekstu…";
+  document.getElementById("autoCount").textContent = `${done} / ${total}`;
+  document.getElementById("autoFill").style.width = total ? `${(done / total) * 100}%` : "0%";
+}
+
+// Mark every remaining proposal as verified (use only after a visual check)
+function acceptAllAuto() {
+  const pending = annotations.filter(a => a.source === "auto");
+  if (!pending.length) { toast("Brak propozycji do zatwierdzenia"); return; }
+  if (!confirm(`Zatwierdzić ${pending.length} propozycji bez edycji?`)) return;
+  pending.forEach(a => { a.source = "verified"; });
+  unsaved = true;
+  annCache[images[currentIdx].id] = annotations;
+  render(); updateList();
+  toast(`Zatwierdzono ${pending.length}`, "success");
+}
+
+// ── Batch mode: pre-annotate every page in the background ──────
+// Lets you start labelling page 1 while the rest fills in, so the model
+// latency overlaps with your work instead of blocking it.
+let batchRunning = false;
+let batchCancel = false;
+
+async function autoAnnotateAll() {
+  if (!images.length) { toast("Najpierw wczytaj obrazy", "error"); return; }
+  if (batchRunning) { cancelBatch(); return; }
+
+  const todo = images.filter(info => !(annCache[info.id] || []).length);
+  if (!todo.length) { toast("Wszystkie strony mają już anotacje"); return; }
+  if (!confirm(`Przetworzyć ${todo.length} stron w tle? Możesz labelować w trakcie.`)) return;
+
+  batchRunning = true;
+  batchCancel = false;
+  document.getElementById("autoAllBtn").textContent = "Zatrzymaj";
+  document.getElementById("autoProgress").classList.add("visible");
+
+  let done = 0;
+  for (const info of todo) {
+    if (batchCancel) break;
+    document.getElementById("autoTitle").textContent =
+      `Strona ${done + 1}/${todo.length}: ${info.name}`;
+
+    try {
+      const res = await fetch(`/api/auto-annotate/${info.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const start = await res.json();
+      if (!start.ok) { toast(start.error || "Błąd", "error"); break; }
+
+      // Poll this page to completion
+      let result = null;
+      while (!batchCancel) {
+        await new Promise(r => setTimeout(r, 600));
+        const p = await (await fetch(`/api/auto-annotate/job/${start.job}`)).json();
+        if (!p.ok) break;
+        document.getElementById("autoCount").textContent = `${p.done} / ${p.total}`;
+        document.getElementById("autoFill").style.width =
+          p.total ? `${(p.done / p.total) * 100}%` : "0%";
+        if (p.stage === "finished" || p.stage === "error") { result = p; break; }
+      }
+      if (!result) break;
+
+      // Store proposals; if it's the page on screen, show them immediately
+      const proposals = (result.annotations || []).map(p => ({
+        label: p.label || "",
+        x_min: p.x_min, y_min: p.y_min, x_max: p.x_max, y_max: p.y_max,
+        source: "auto",
+      }));
+      if (images[currentIdx] && images[currentIdx].id === info.id) {
+        applyProposals(result.annotations || []);
+      } else {
+        annCache[info.id] = (annCache[info.id] || []).concat(proposals);
+      }
+      updateThumbs();
+    } catch (e) {
+      toast("Błąd połączenia", "error");
+      break;
+    }
+    done++;
+  }
+
+  batchRunning = false;
+  document.getElementById("autoAllBtn").textContent = "Auto wszystkie";
+  document.getElementById("autoProgress").classList.remove("visible");
+  toast(batchCancel ? `Zatrzymano po ${done} stronach` : `Gotowe: ${done} stron`, "success");
+}
+
+function cancelBatch() {
+  batchCancel = true;
+  toast("Zatrzymywanie…");
 }
 
 function deleteSelected() {
@@ -1005,12 +1595,14 @@ async function saveAnnotations() {
 // ── Status ─────────────────────────────────────────────────────
 function updateStatus() {
   const bar = document.getElementById("statusBar");
-  if (!img) { bar.innerHTML = '<span>Ready</span><span class="shortcut">Hold <kbd>Ctrl</kbd> to pan &nbsp; Scroll to zoom &nbsp; Right-click to delete box</span>'; return; }
+  if (!img) { bar.innerHTML = '<span>Ready</span><span class="shortcut">Hold <kbd>Ctrl</kbd> to pan &nbsp; Scroll to zoom &nbsp; Right-click to delete box &nbsp; <kbd>A</kbd> auto-detect</span>'; return; }
   const name = images[currentIdx]?.name || "";
   const dot = unsaved ? '<span class="dot dot-unsaved"></span>Unsaved' : '<span class="dot dot-saved"></span>Saved';
+  const pending = annotations.filter(a => a.source === "auto").length;
   const parts = [
     `${name}`,
     `${annotations.length} annotation${annotations.length !== 1 ? "s" : ""}`,
+    pending ? `<span style="color:var(--warning)">${pending} do weryfikacji</span>` : "",
     `${Math.round(zoom * 100)}%`,
     images.length > 1 ? `${currentIdx + 1} / ${images.length}` : "",
     dot,

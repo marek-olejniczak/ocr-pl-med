@@ -2,11 +2,25 @@
 
 # Python virtual environment
 .venv/
+.venv-surya/
+.venv-surya17/
 venv/
 
 # Python caches
 __pycache__/
 *.py[cod]
+
+# Wagi modeli i artefakty treningu (duże — nie do gita; ewentualnie do DVC)
+trocr_finetuned*/
+/models/*
+!/models/yolo_lines_best_iou_median.pt
+!/models/surya_lora_adapter/
+/models/surya_lora_adapter/*
+!/models/surya_lora_adapter/adapter_config.json
+!/models/surya_lora_adapter/adapter_model.safetensors
+!/models/surya_lora_adapter/meta.json
+training_data/
+*.log
 
 # OS files
 .DS_Store
