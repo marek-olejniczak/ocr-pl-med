@@ -23,3 +23,8 @@ zbioru jako `dataset_card.json` (foldery z danymi nie są w repo).
 | 2026-10-07 | no_neighbour_glyphs_200k | aa87419 | 2030 | 200000 | 189963 | ablacja rodzin: bez neighbour_glyphs |
 | 2026-10-07 | no_phone_photo_200k | aa87419* | 2030 | 200000 | 189922 | ablacja rodzin: bez phone_photo |
 | 2026-10-07 | no_short_words_200k | aa87419* | 2030 | 200000 | 190020 | ablacja rodzin: bez short_words |
+| 2026-11-01 | v3_base_200k | - | 2031 | 200000 | 189955 | generator v3 pilot: odniesienie, v2 bez rodzin glifow (line seeds) |
+| 2026-11-01 | v3_no_diacritic_placement_200k | - | 2031 | 200000 | 189955 | generator v3 pilot: bez diacritic_placement |
+| 2026-11-03 | v3_200k | 58ecfda* | 2031 | 200000 | 189955 | generator v3 pilot: v2 + cursive_joins, glyph_variants, diacritic_placement |
+| 2026-11-03 | v3_no_cursive_joins_200k | 58ecfda* | 2031 | 200000 | 189955 | generator v3 pilot: bez cursive_joins |
+| 2026-11-03 | v3_no_glyph_variants_200k | 58ecfda* | 2031 | 200000 | 189955 | generator v3 pilot: bez glyph_variants |
