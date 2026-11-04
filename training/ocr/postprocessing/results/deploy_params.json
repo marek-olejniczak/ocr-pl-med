@@ -1,0 +1,17 @@
+{
+ "harm_max": 0.003,
+ "params": {
+  "lam": 1.0,
+  "delta": 1.0,
+  "mu": 3.0,
+  "d_max": 3,
+  "L_min": 3,
+  "f_min": 20
+ },
+ "logo_all_groups": {
+  "d_edits": -929,
+  "harm": 0.002802865151043289,
+  "n_changed": 740
+ },
+ "note": "progi strojone na LOGO wszystkich 8 grup; model kana\u0142u do wdro\u017cenia uczony na ca\u0142o\u015bci"
+}

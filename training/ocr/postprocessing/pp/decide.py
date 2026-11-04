@@ -42,11 +42,12 @@ class Scored:
     keep_ch: float
 
 
-def score_key(key: str, cands: list[tuple[str, int]], model: ErrorModel, lm: UnigramLM) -> Scored:
+def score_key(key: str, cands: list[tuple[str, int]], model: ErrorModel, lm: UnigramLM,
+              forward: bool = False) -> Scored:
     names = [c for c, _ in cands if c != key]
     levs = [d for c, d in cands if c != key]
-    return Scored(key, names, levs, [model.logp(key, c) for c in names], [lm.logp(c) for c in names],
-                  [lm.count(c) for c in names], model.logp(key, key))
+    return Scored(key, names, levs, [model.logp(key, c, forward) for c in names], [lm.logp(c) for c in names],
+                  [lm.count(c) for c in names], model.logp(key, key, forward))
 
 
 def best_two(sc: Scored, lam: float, d_max: int, f_min: int) -> tuple[int, float, float]:

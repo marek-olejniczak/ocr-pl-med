@@ -30,7 +30,7 @@ from fetch_resources import cache_dir
 from pp.candidates import Prefilter
 from pp.decide import DecisionParams, Scored, best_two, decide, score_key
 from pp.error_model import ErrorModel, Params, word_pairs
-from pp.lexicon import Lexicon
+from pp.lexicon import Lexicon, fold
 from pp.lm import UnigramLM
 from pp.protect import protected_class, train_abbreviations, upper_share
 from pp.tokenize import is_word, restore_case, split_token, token_pairs, tokenize
@@ -59,7 +59,7 @@ class Data:
     cands: dict[str, list[tuple[str, int]]]
 
 
-def prepare(lex: Lexicon, split: str) -> Data:
+def prepare(lex: Lexicon, split: str, lex_tag: str = "polimorf", diacritics_only: bool = False) -> Data:
     rows = load_predictions()
     gts = [normalize_ws(r["ground_truth"]) for r in rows]
     prs = [normalize_ws(r["prediction"]) for r in rows]
@@ -71,7 +71,7 @@ def prepare(lex: Lexicon, split: str) -> Data:
         gs, ps = g.split(), p.split()
         gt_of.append({pi: gs[gi] for gi, pi in token_pairs(gs, ps)})
     keys = sorted({t.key for line in toks for t in line if is_word(t.core) and not lex.known(t.key) and len(t.key) >= 3})
-    h = hashlib.sha256("\n".join(keys).encode()).hexdigest()[:12]
+    h = hashlib.sha256((lex_tag + "\n" + "\n".join(keys)).encode()).hexdigest()[:12]
     cp = cache_dir() / f"prefilter_d3_{h}.pkl"
     if cp.exists():
         cands = pickle.loads(cp.read_bytes())
@@ -80,6 +80,8 @@ def prepare(lex: Lexicon, split: str) -> Data:
         cands = Prefilter(lex, d_max=3).batch(keys, 3)
         cp.write_bytes(pickle.dumps(cands))
         print(f"prefiltr: {len(keys)} kluczy w {time.time() - t0:.0f}s -> {cp}")
+    if diacritics_only:  # opcja 2 osobno: tylko warianty różniące się diakrytykami
+        cands = {k: [(c, dd) for c, dd in v if fold(c) == fold(k)] for k, v in cands.items()}
     return Data(gts, prs, groups, toks, ups, gt_of, [Levenshtein.distance(g, p) for g, p in zip(gts, prs)], cands)
 
 
@@ -91,7 +93,8 @@ def eligible(d: Data, i: int, pi: int, abbrev, disabled=()) -> bool:
 class Fold:
     """Model kanału + skróty wyuczone na zbiorze linii `train`; ocenia klucze z linii `evals`."""
 
-    def __init__(self, d: Data, lex: Lexicon, lm: UnigramLM, train: list[int], em: Params):
+    def __init__(self, d: Data, lex: Lexicon, lm: UnigramLM, train: list[int], em: Params, forward: bool = False):
+        self.forward = forward
         self.model = ErrorModel.fit(word_pairs([d.gts[i] for i in train], [d.prs[i] for i in train],
                                                [d.groups[i] for i in train]), em)
         self.abbrev = lex.abbrev | train_abbreviations((d.gts[i] for i in train), lex.known)
@@ -101,7 +104,7 @@ class Fold:
     def scored(self, d: Data, key: str) -> Scored:
         s = self._sc.get(key)
         if s is None:
-            s = self._sc[key] = score_key(key, d.cands[key], self.model, self.lm)
+            s = self._sc[key] = score_key(key, d.cands[key], self.model, self.lm, self.forward)
         return s
 
 
@@ -194,7 +197,7 @@ def lost_paths(d: Data, fold: Fold, lex: Lexicon, lines, p: DecisionParams) -> d
             elif lex.target(gk):
                 c["gt_target_outside"] += 1
                 b, sb, _ = best_two(sc, p.lam, 3, p.f_min)
-                sg = fold.model.logp(t.key, gk) + p.lam * fold.lm.logp(gk)
+                sg = fold.model.logp(t.key, gk, fold.forward) + p.lam * fold.lm.logp(gk)
                 c["gt_outside_would_win"] += sg > sb
     return c
 
@@ -206,29 +209,48 @@ def main() -> None:
     ap.add_argument("--no-multi", action="store_true", help="ablacja: bez jednostek wieloznakowych")
     ap.add_argument("--no-protect", action="store_true", help="ablacja: bez klas chronionych P2–P8 (P1 zostaje)")
     ap.add_argument("--sjp", action="store_true", help="ablacja: + sjp odmiany")
+    ap.add_argument("--forward", action="store_true", help="ablacja: forward (suma po ścieżkach) zamiast Viterbi")
+    ap.add_argument("--diacritics-only", action="store_true", help="ablacja: opcja 2 osobno (tylko warianty diakrytyczne)")
     ap.add_argument("--harm-max", type=float, default=HARM_MAX, help="limit harm na walidacji wewnętrznej")
+    ap.add_argument("--deploy", action="store_true",
+                    help="progi do wdrożenia: LOGO na wszystkich grupach -> results/deploy_params.json (to NIE jest test)")
     ap.add_argument("--dump", type=Path, help="zapisz predykcje out-of-fold (z tekstem linii, poza repo!)")
     a = ap.parse_args()
     t0 = time.time()
     lex = Lexicon(use_sjp=a.sjp)
     lm = UnigramLM(lex.targets())
     lp_unseen = math.log(lm.unseen) - lm.logz
-    d = prepare(lex, a.split)
+    d = prepare(lex, a.split, "polimorf+sjp" if a.sjp else "polimorf", a.diacritics_only)
     em = Params(multi=not a.no_multi)
     disabled = tuple(c for c in ("P2_digits", "P3_num_unit", "P4_abbr_dot", "P5_abbr_list", "P6_short_upper",
                                  "P7_len_le_2", "P8_hyphen")) if a.no_protect else ()
     print(f"przygotowanie {time.time() - t0:.0f}s")
+    if a.deploy:
+        recs, ok = [], 0
+        for g in sorted(set(d.groups)):
+            itest = [i for i, x in enumerate(d.groups) if x == g]
+            itrain = [i for i, x in enumerate(d.groups) if x != g]
+            recs += records(d, Fold(d, lex, lm, itrain, em, a.forward), itest, disabled)
+            ok += n_correct(d, itest)
+        p, info = tune(d, recs, ok, lp_unseen, a.harm_max)
+        RESULTS.mkdir(exist_ok=True)
+        (RESULTS / "deploy_params.json").write_text(json.dumps(
+            {"harm_max": a.harm_max, "params": p.as_dict(), "logo_all_groups": info,
+             "note": "progi strojone na LOGO wszystkich 8 grup; model kanału do wdrożenia uczony na całości"},
+            indent=1), encoding="utf-8")
+        print(f"deploy: {p.as_dict()} {info}")
+        return
     out = list(d.prs)
     folds_info = []
     for g, train, test, inner in nested_logo(d.groups):
         t1 = time.time()
         recs, ok = [], 0
         for h, itrain, itest in inner:
-            f_in = Fold(d, lex, lm, itrain, em)
+            f_in = Fold(d, lex, lm, itrain, em, a.forward)
             recs += records(d, f_in, itest, disabled)
             ok += n_correct(d, itest)
         p, info = tune(d, recs, ok, lp_unseen, a.harm_max)
-        f_out = Fold(d, lex, lm, train, em)
+        f_out = Fold(d, lex, lm, train, em, a.forward)
         apply(d, f_out, test, p, lp_unseen, out, disabled)
         lost = lost_paths(d, f_out, lex, test, p)
         tt = compare([d.gts[i] for i in test], [d.prs[i] for i in test], [out[i] for i in test],
