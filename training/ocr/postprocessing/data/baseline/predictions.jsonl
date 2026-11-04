@@ -1,4 +1,4 @@
-{"file_name": "data11_line1.jpg", "ground_truth": "DROGA DZWIĘKU", "prediction": "DROGA DŹWIĘKU"}
+{"file_name": "data11_line1.jpg", "ground_truth": "DROGA DŹWIĘKU", "prediction": "DROGA DŹWIĘKU"}
 {"file_name": "data11_line2.jpg", "ground_truth": "1) małżowina uszna zbiera fale -> przewód słuchowy zewnętrzny", "prediction": "1) motzocxina uszna zbiera fale -> prewód stuchowy zewnętruny"}
 {"file_name": "data11_line3.jpg", "ground_truth": "2) fale dźwiękowe uderzają w błonę bębenkową powodując jej drgania", "prediction": "2) fałe dzwiąkowe udenogo w słonej beloenkowoć powodującjej drgania"}
 {"file_name": "data11_line4.jpg", "ground_truth": "3) błona bębenkowa młoteczek, kowadełko, strzemiączko", "prediction": "3) błona bębenkowa --> młotewek, kawadełko, stnemiączko"}
@@ -77,7 +77,7 @@
 {"file_name": "data7_line25.jpg", "ground_truth": "krtaniowa", "prediction": "knłaniowa"}
 {"file_name": "data7_line26.jpg", "ground_truth": "nabłonek", "prediction": "nabłonek"}
 {"file_name": "data7_line27.jpg", "ground_truth": "wielorzędowy", "prediction": "bielozdawy"}
-{"file_name": "data7_line28.jpg", "ground_truth": ", mięsniowa", "prediction": "mieśniao"}
+{"file_name": "data7_line28.jpg", "ground_truth": ", mięśniowa", "prediction": "mieśniao"}
 {"file_name": "data7_line29.jpg", "ground_truth": "zew.", "prediction": "2ew."}
 {"file_name": "data7_line30.jpg", "ground_truth": "boczne", "prediction": "bocznie"}
 {"file_name": "data7_line31.jpg", "ground_truth": "(tylno-boczna pow.)", "prediction": "Hylno-boczno pow.)"}
@@ -169,7 +169,7 @@
 {"file_name": "anatomia_zmysly_1_line50.jpg", "ground_truth": "wzrok", "prediction": "w zwk."}
 {"file_name": "anatomia_zmysly_1_line51.jpg", "ground_truth": "bruzda", "prediction": "burroza."}
 {"file_name": "anatomia_zmysly_1_line52.jpg", "ground_truth": "podwzgórkowa", "prediction": "podwzgówowa:"}
-{"file_name": "anatomia_zmysly_1_line53.jpg", "ground_truth": "sciany bocznej", "prediction": "swawy bownej"}
+{"file_name": "anatomia_zmysly_1_line53.jpg", "ground_truth": "ściany bocznej", "prediction": "swawy bownej"}
 {"file_name": "anatomia_zmysly_1_line54.jpg", "ground_truth": "OŚRODKI", "prediction": "OŚRODKI"}
 {"file_name": "anatomia_zmysly_1_line55.jpg", "ground_truth": "wzgórki", "prediction": "wzgórki"}
 {"file_name": "anatomia_zmysly_1_line56.jpg", "ground_truth": "napięcie", "prediction": "nopiecie"}
@@ -191,7 +191,7 @@
 {"file_name": "anatomia_zmysly_1_line72.jpg", "ground_truth": "słuch", "prediction": "słuch"}
 {"file_name": "anatomia_zmysly_1_line73.jpg", "ground_truth": "nadwzgórze", "prediction": "nodwzoóre"}
 {"file_name": "anatomia_zmysly_2_line1.jpg", "ground_truth": "TYŁOMÓZGOWIE WTÓRNE", "prediction": "TYŁOMÓŻGOWIĘ WTÓRNE"}
-{"file_name": "anatomia_zmysly_2_line2.jpg", "ground_truth": "MÓŻDZEK", "prediction": "MÓŻDZEK"}
+{"file_name": "anatomia_zmysly_2_line2.jpg", "ground_truth": "MÓŻDŻEK", "prediction": "MÓŻDZEK"}
 {"file_name": "anatomia_zmysly_2_line3.jpg", "ground_truth": "napięcie mięśniowe", "prediction": "napięcie uceśnowe"}
 {"file_name": "anatomia_zmysly_2_line4.jpg", "ground_truth": "precyzja", "prediction": "pweryzia"}
 {"file_name": "anatomia_zmysly_2_line5.jpg", "ground_truth": "dół tylny czaszki", "prediction": "aół łycny łucseki"}
@@ -222,7 +222,7 @@
 {"file_name": "anatomia_zmysly_2_line30.jpg", "ground_truth": "istota biała", "prediction": "istoto blaka"}
 {"file_name": "anatomia_zmysly_2_line31.jpg", "ground_truth": "spoidłowe", "prediction": "Spoblowe"}
 {"file_name": "anatomia_zmysly_2_line32.jpg", "ground_truth": "zębate", "prediction": "zepote"}
-{"file_name": "anatomia_zmysly_2_line33.jpg", "ground_truth": "3. kuklowate", "prediction": "3. kullowate"}
+{"file_name": "anatomia_zmysly_2_line33.jpg", "ground_truth": "3. kulkowate", "prediction": "3. kullowate"}
 {"file_name": "anatomia_zmysly_2_line34.jpg", "ground_truth": "konar dolny", "prediction": "kowar dolug"}
 {"file_name": "anatomia_zmysly_2_line35.jpg", "ground_truth": "środkowy", "prediction": "ślnoblybuy"}
 {"file_name": "anatomia_zmysly_2_line36.jpg", "ground_truth": "górny", "prediction": "górny"}
@@ -386,7 +386,7 @@
 {"file_name": "anatomia_zmysly_5_line24.jpg", "ground_truth": "10 warstw", "prediction": "10 worstw:"}
 {"file_name": "anatomia_zmysly_5_line25.jpg", "ground_truth": "1. barwnikowa", "prediction": "1. bawwnikowa"}
 {"file_name": "anatomia_zmysly_5_line26.jpg", "ground_truth": "3. graniczna zewn", "prediction": "3. growiczna zewn."}
-{"file_name": "anatomia_zmysly_5_line27.jpg", "ground_truth": "4. jadrzasta zewn,", "prediction": "14. jadnosta zewn."}
+{"file_name": "anatomia_zmysly_5_line27.jpg", "ground_truth": "4. jądrzasta zewn,", "prediction": "14. jadnosta zewn."}
 {"file_name": "anatomia_zmysly_5_line28.jpg", "ground_truth": "ZAWARTOŚĆ", "prediction": "ZAWARTOŚĆ"}
 {"file_name": "anatomia_zmysly_5_line29.jpg", "ground_truth": "KOMORY", "prediction": "KOMORY"}
 {"file_name": "anatomia_zmysly_5_line30.jpg", "ground_truth": "ciecz wodnista", "prediction": "cięci udanista"}
@@ -420,7 +420,7 @@
 {"file_name": "anatomia_zmysly_5_line58.jpg", "ground_truth": "3. cz. ślepa", "prediction": "3. cz. ślepa"}
 {"file_name": "anatomia_zmysly_5_line59.jpg", "ground_truth": "m. rzęskowy", "prediction": "m. reskowy"}
 {"file_name": "anatomia_zmysly_5_line60.jpg", "ground_truth": "bl.", "prediction": "bl."}
-{"file_name": "anatomia_zmysly_5_line61.jpg", "ground_truth": "ZRENICA", "prediction": "ZRENICA"}
+{"file_name": "anatomia_zmysly_5_line61.jpg", "ground_truth": "ŹRENICA", "prediction": "ZRENICA"}
 {"file_name": "anatomia_zmysly_5_line62.jpg", "ground_truth": "(zewn. - barwnikowy", "prediction": "Czwn-barwnikowy"}
 {"file_name": "anatomia_zmysly_6_line1.jpg", "ground_truth": "NARZĄDY DODATKOWE", "prediction": "NARZĄDY DODATKOWE"}
 {"file_name": "anatomia_zmysly_6_line2.jpg", "ground_truth": "POWIEKI", "prediction": "poniekl"}
@@ -478,7 +478,7 @@
 {"file_name": "Zrzut ekranu 2026-05-07 143707_line2.jpg", "ground_truth": "okolice kończyny dolnej -> obręcz miednicza + część wolna", "prediction": "okolice kończyny dolnej -> obięw miednicza + część wolna"}
 {"file_name": "Zrzut ekranu 2026-05-07 143707_line3.jpg", "ground_truth": "OBRĘCZ MIEDNICZA pelciv girdle kości te zrastają się w", "prediction": "OBRĘCZ MIEDNICZA pelvie girdle koświ te kródają oję w"}
 {"file_name": "Zrzut ekranu 2026-05-07 143707_line4.jpg", "ground_truth": "- zbudowana jest z kości miedniczej", "prediction": "- zbudowana jest z kosu miedniczej (hip bone)"}
-{"file_name": "Zrzut ekranu 2026-05-07 143707_line5.jpg", "ground_truth": "kośc kulszowa", "prediction": "kość kulszowa"}
+{"file_name": "Zrzut ekranu 2026-05-07 143707_line5.jpg", "ground_truth": "kość kulszowa", "prediction": "kość kulszowa"}
 {"file_name": "Zrzut ekranu 2026-05-07 143707_line6.jpg", "ground_truth": "kość łonowa", "prediction": "kość łonowa"}
 {"file_name": "Zrzut ekranu 2026-05-07 143707_line7.jpg", "ground_truth": "kość biodrowa", "prediction": "kość biadrowa"}
 {"file_name": "Zrzut ekranu 2026-05-07 143707_line8.jpg", "ground_truth": "KOŚCI CZĘŚCI WOLNEJ KOŃCZYNY DOLNEJ", "prediction": "KOŚCI CZĘŚCI WOLNEJ KOŃCZYNY DOLNEJ"}
@@ -501,7 +501,7 @@
 {"file_name": "Zrzut ekranu 2026-05-07 143733_line6.jpg", "ground_truth": "- dół biodrowy", "prediction": "- dół biodrony"}
 {"file_name": "Zrzut ekranu 2026-05-07 143733_line7.jpg", "ground_truth": "- guzowatość biodrowa", "prediction": "- guzowalość biodrowa"}
 {"file_name": "Zrzut ekranu 2026-05-07 143733_line8.jpg", "ground_truth": "-> powierzchnia poslodlowa talerza kosci biodrowej", "prediction": "-> powienchnia pozladbowa talenza hosú biodrowej"}
-{"file_name": "Zrzut ekranu 2026-05-07 143733_line9.jpg", "ground_truth": "- kresa posladkowa tylna", "prediction": "- kresa posladkowa tylna"}
+{"file_name": "Zrzut ekranu 2026-05-07 143733_line9.jpg", "ground_truth": "- kresa pośladkowa tylna", "prediction": "- kresa posladkowa tylna"}
 {"file_name": "Zrzut ekranu 2026-05-07 143733_line10.jpg", "ground_truth": "- kresa poslodlowa przednia", "prediction": "- kresa pocladlowa przednia"}
 {"file_name": "Zrzut ekranu 2026-05-07 143733_line11.jpg", "ground_truth": "- kresa poslodkowa dolna", "prediction": "- kresa posladkowa dolna"}
 {"file_name": "Zrzut ekranu 2026-05-07 143733_line12.jpg", "ground_truth": "TRZON", "prediction": "TRZON"}
@@ -511,10 +511,10 @@
 {"file_name": "Zrzut ekranu 2026-05-07 143733_line16.jpg", "ground_truth": "warga wewn. grzebienia biodrowego", "prediction": "wardi wewn brnebienio biodrowego"}
 {"file_name": "Zrzut ekranu 2026-05-07 143733_line17.jpg", "ground_truth": "guzek biodrowy", "prediction": "gluzek biodrowy"}
 {"file_name": "Zrzut ekranu 2026-05-07 143801_line1.jpg", "ground_truth": "Kość łonowa", "prediction": "Kość łonowa"}
-{"file_name": "Zrzut ekranu 2026-05-07 143801_line2.jpg", "ground_truth": "gałąż dolna", "prediction": "gałąń dolna"}
+{"file_name": "Zrzut ekranu 2026-05-07 143801_line2.jpg", "ground_truth": "gałąź dolna", "prediction": "gałąń dolna"}
 {"file_name": "Zrzut ekranu 2026-05-07 143801_line3.jpg", "ground_truth": "trzon", "prediction": "trzon"}
 {"file_name": "Zrzut ekranu 2026-05-07 143801_line4.jpg", "ground_truth": "gałąź górna", "prediction": "gałąź gówa"}
-{"file_name": "Zrzut ekranu 2026-05-07 143801_line5.jpg", "ground_truth": "Gałąż górna kości łonowej", "prediction": "Gałąź gówna kości łonowej"}
+{"file_name": "Zrzut ekranu 2026-05-07 143801_line5.jpg", "ground_truth": "Gałąź górna kości łonowej", "prediction": "Gałąź gówna kości łonowej"}
 {"file_name": "Zrzut ekranu 2026-05-07 143801_line6.jpg", "ground_truth": "- od panewki do trzonu", "prediction": "- od panewiu do tozonu"}
 {"file_name": "Zrzut ekranu 2026-05-07 143801_line7.jpg", "ground_truth": "- ogranicza otwór zasłoniony", "prediction": "- ogranieka ołwór zasłoniony"}
 {"file_name": "Zrzut ekranu 2026-05-07 143801_line8.jpg", "ground_truth": "- (brzeg przedni) guzek łonowy", "prediction": "- (brzeg przedni) guzek łonowy"}
@@ -526,7 +526,7 @@
 {"file_name": "Zrzut ekranu 2026-05-07 143801_line14.jpg", "ground_truth": "- spojenie łonowe pubic symphasis", "prediction": "- spojenie łonowe pubić symphysis"}
 {"file_name": "Zrzut ekranu 2026-05-07 143801_line15.jpg", "ground_truth": "- guzek łonowy public tubercle", "prediction": "- guzeh łonowy pubić tuberde"}
 {"file_name": "Zrzut ekranu 2026-05-07 143801_line16.jpg", "ground_truth": "- grzebień łonowy", "prediction": "- griebień łonowy"}
-{"file_name": "Zrzut ekranu 2026-05-07 143801_line17.jpg", "ground_truth": "Gałąż dolna kosci łonowej inferior pubic ramus", "prediction": "Gałąź dolna kosu Tonowej inferior pubić rezmus"}
+{"file_name": "Zrzut ekranu 2026-05-07 143801_line17.jpg", "ground_truth": "Gałąź dolna kosci łonowej inferior pubic ramus", "prediction": "Gałąź dolna kosu Tonowej inferior pubić rezmus"}
 {"file_name": "Zrzut ekranu 2026-05-07 143801_line18.jpg", "ground_truth": "- otwór zasłoniony", "prediction": "- otwór kosłoniony"}
 {"file_name": "Zrzut ekranu 2026-05-07 143810_line1.jpg", "ground_truth": "Kosć kulszowa ischium", "prediction": "Klosić kubzowa jęschium"}
 {"file_name": "Zrzut ekranu 2026-05-07 143810_line2.jpg", "ground_truth": "Trzon kosci kulszowej body of ischium", "prediction": "Trzon hosu hubzowej body of ischium"}
@@ -535,7 +535,7 @@
 {"file_name": "Zrzut ekranu 2026-05-07 143810_line5.jpg", "ground_truth": "- guz kulszowy ischial tuberosity", "prediction": "- guz hubzowy ischial tuberosity"}
 {"file_name": "Zrzut ekranu 2026-05-07 143810_line6.jpg", "ground_truth": "- wcięcie kulszowe mniejsze greater sciatic hoth", "prediction": "- wugue lubrowe mniejsie greater sustic noth"}
 {"file_name": "Zrzut ekranu 2026-05-07 143810_line7.jpg", "ground_truth": "- wcięcie kulszowe większe lesser sciatic noth", "prediction": "- wcięwie hubrowe więkze lewoer sciatie noth"}
-{"file_name": "Zrzut ekranu 2026-05-07 143810_line8.jpg", "ground_truth": "Gałąż kosci kulszowej ramus of ischium", "prediction": "Gałął hosu, hubrowej ramus of ischium"}
+{"file_name": "Zrzut ekranu 2026-05-07 143810_line8.jpg", "ground_truth": "Gałąź kosci kulszowej ramus of ischium", "prediction": "Gałął hosu, hubrowej ramus of ischium"}
 {"file_name": "Zrzut ekranu 2026-05-07 143810_line9.jpg", "ground_truth": "- kresa łonowa pubic line przeczypai się t u odnoga prącia lub", "prediction": "- kresa Tonowa pubić line przywepia siętu odnogo pręwo lub"}
 {"file_name": "Zrzut ekranu 2026-05-07 143810_line10.jpg", "ground_truth": "łechtaczki i m. kulszowa jamistego", "prediction": "Tewntaczku i m. hubrowo jamistego"}
 {"file_name": "Zrzut ekranu 2026-05-07 143819_line1.jpg", "ground_truth": "PANEWKA acetabulium", "prediction": "PANEWKA) ocetabulum"}
@@ -594,7 +594,7 @@
 {"file_name": "Zrzut ekranu 2026-05-07 143847_line7.jpg", "ground_truth": "tylny dolny", "prediction": "tylny drolny"}
 {"file_name": "Zrzut ekranu 2026-05-07 143847_line8.jpg", "ground_truth": "gałąź górna k. łonowej", "prediction": "gałąć gówne k.Towsmy"}
 {"file_name": "Zrzut ekranu 2026-05-07 143847_line9.jpg", "ground_truth": "kolec biodrowy przedni dolny", "prediction": "kolec biodrowy pnedni dolny"}
-{"file_name": "Zrzut ekranu 2026-05-07 143847_line10.jpg", "ground_truth": "talerz kosci biodrowej", "prediction": "talenz kości błodroweg"}
+{"file_name": "Zrzut ekranu 2026-05-07 143847_line10.jpg", "ground_truth": "talerz kości biodrowej", "prediction": "talenz kości błodroweg"}
 {"file_name": "Zrzut ekranu 2026-05-07 143847_line11.jpg", "ground_truth": "gałąź", "prediction": "gołąź"}
 {"file_name": "Zrzut ekranu 2026-05-07 143859_line1.jpg", "ground_truth": "KOŚĆ UDOWA femur", "prediction": "KOŚĆ UDOWA femur"}
 {"file_name": "Zrzut ekranu 2026-05-07 143859_line2.jpg", "ground_truth": "- największa i najmniejsza", "prediction": "- największa i najmowiejsza"}
@@ -630,7 +630,7 @@
 {"file_name": "Zrzut ekranu 2026-05-07 143909_line9.jpg", "ground_truth": "gluteal", "prediction": "gluteal"}
 {"file_name": "Zrzut ekranu 2026-05-07 143909_line10.jpg", "ground_truth": "kresa nadkłykciowa boczna", "prediction": "lurwa nadłujkujowa bazna"}
 {"file_name": "Zrzut ekranu 2026-05-07 143909_line11.jpg", "ground_truth": "staje się", "prediction": "stale się"}
-{"file_name": "Zrzut ekranu 2026-05-07 143909_line12.jpg", "ground_truth": "przysrodkowa", "prediction": "przyśrodkowa"}
+{"file_name": "Zrzut ekranu 2026-05-07 143909_line12.jpg", "ground_truth": "przyśrodkowa", "prediction": "przyśrodkowa"}
 {"file_name": "Zrzut ekranu 2026-05-07 143909_line13.jpg", "ground_truth": "kresa", "prediction": "kresa"}
 {"file_name": "Zrzut ekranu 2026-05-07 143909_line14.jpg", "ground_truth": "medial", "prediction": "medial."}
 {"file_name": "Zrzut ekranu 2026-05-07 143918_line1.jpg", "ground_truth": "Koniec dalszy kości udowej", "prediction": "Koniec dałzcy kosu udowej"}
@@ -702,7 +702,7 @@
 {"file_name": "Zrzut ekranu 2026-05-07 143947_line17.jpg", "ground_truth": "przednie", "prediction": "pnednie"}
 {"file_name": "Zrzut ekranu 2026-05-07 143947_line18.jpg", "ground_truth": "tylne", "prediction": "łylne"}
 {"file_name": "Zrzut ekranu 2026-05-07 143947_line19.jpg", "ground_truth": "guzek międzykłykciowy przyśrodkowy", "prediction": "cuzek międzybłykuowy przysrodkowy"}
-{"file_name": "Zrzut ekranu 2026-05-07 143947_line20.jpg", "ground_truth": "wyniosłośc międzykłykciowa", "prediction": "łujniosłość międzylujykuowa"}
+{"file_name": "Zrzut ekranu 2026-05-07 143947_line20.jpg", "ground_truth": "wyniosłosć międzykłykciowa", "prediction": "łujniosłość międzylujykuowa"}
 {"file_name": "Zrzut ekranu 2026-05-07 143947_line21.jpg", "ground_truth": "guzek międzykłykciowy boczny", "prediction": "ourek międzyliłykuowy boczny"}
 {"file_name": "Zrzut ekranu 2026-05-07 143947_line22.jpg", "ground_truth": "intercondylar area", "prediction": "Interwondylar area"}
 {"file_name": "Zrzut ekranu 2026-05-07 143947_line23.jpg", "ground_truth": "articular surface of medial condyle", "prediction": "articular surfaie of mediał condyle"}
@@ -764,7 +764,7 @@
 {"file_name": "Zrzut ekranu 2026-05-07 144024_line18.jpg", "ground_truth": "podkolanowe łukowate", "prediction": "podbolanowe Tubowate"}
 {"file_name": "Zrzut ekranu 2026-05-07 144024_line19.jpg", "ground_truth": "podkolanowe skośne", "prediction": "podłalanowe słośne"}
 {"file_name": "Zrzut ekranu 2026-05-07 144024_line20.jpg", "ground_truth": "podkolanowo - strzałkowe", "prediction": "bodbolonowo - strzzikowe"}
-{"file_name": "Zrzut ekranu 2026-05-07 144043_line1.jpg", "ground_truth": "Kośc piętowa calcameal bone", "prediction": "Wość piętowa) calcaneal, bone"}
+{"file_name": "Zrzut ekranu 2026-05-07 144043_line1.jpg", "ground_truth": "Kość piętowa calcameal bone", "prediction": "Wość piętowa) calcaneal, bone"}
 {"file_name": "Zrzut ekranu 2026-05-07 144043_line2.jpg", "ground_truth": "pow. stawowa sześcienna", "prediction": "pow oławowa szeswenna"}
 {"file_name": "Zrzut ekranu 2026-05-07 144043_line3.jpg", "ground_truth": "pow. stawowa skokowa", "prediction": "pow sławowa słobwa"}
 {"file_name": "Zrzut ekranu 2026-05-07 144043_line4.jpg", "ground_truth": "przednia", "prediction": "pnednia"}
@@ -815,7 +815,7 @@
 {"file_name": "Zrzut ekranu 2026-05-07 144057_line9.jpg", "ground_truth": "wyrostek tylny", "prediction": "iugrosiek tylny"}
 {"file_name": "Zrzut ekranu 2026-05-07 144057_line10.jpg", "ground_truth": "większy guzek boczny", "prediction": "większy guzek bazny"}
 {"file_name": "Zrzut ekranu 2026-05-07 144057_line11.jpg", "ground_truth": "mniejszy guzek przyśrodkowy", "prediction": "mniejzaj odnek przysrodowy"}
-{"file_name": "Zrzut ekranu 2026-05-07 144057_line12.jpg", "ground_truth": "łączy się z 4 koścmi", "prediction": "łąwy się o 4 kośćmi"}
+{"file_name": "Zrzut ekranu 2026-05-07 144057_line12.jpg", "ground_truth": "łączy się z 4 kośćmi", "prediction": "łąwy się o 4 kośćmi"}
 {"file_name": "Zrzut ekranu 2026-05-07 144057_line13.jpg", "ground_truth": "piszczelowa", "prediction": "pisxwelowa"}
 {"file_name": "Zrzut ekranu 2026-05-07 144057_line14.jpg", "ground_truth": "strzałkowa", "prediction": "strałkowa"}
 {"file_name": "Zrzut ekranu 2026-05-07 144057_line15.jpg", "ground_truth": "piętowa", "prediction": "piętowa"}
@@ -852,14 +852,14 @@
 {"file_name": "Zrzut ekranu 2026-05-12 185252_line5.jpg", "ground_truth": "5) Jakie jest działanie m..biodrowo-lędźwiowego", "prediction": "5) galuie jest dzaałanie m. biodrowo-lędźwiowego"}
 {"file_name": "Zrzut ekranu 2026-05-12 185252_line6.jpg", "ground_truth": "6) M. posladkowy wielki", "prediction": "6) M. poslodkowy wielki"}
 {"file_name": "Zrzut ekranu 2026-05-12 185252_line7.jpg", "ground_truth": "7) M. pośladkowy średni", "prediction": "4) M. pośladkowy średnie"}
-{"file_name": "Zrzut ekranu 2026-05-12 185252_line8.jpg", "ground_truth": "8) M. posladkowy mały", "prediction": "8) M. posladłowy mały"}
+{"file_name": "Zrzut ekranu 2026-05-12 185252_line8.jpg", "ground_truth": "8) M. pośladkowy mały", "prediction": "8) M. posladłowy mały"}
 {"file_name": "Zrzut ekranu 2026-05-12 185252_line9.jpg", "ground_truth": "9) M. naprężacz powięzi szerokiej", "prediction": "9) M. napręziawz powięzi szerokiej"}
 {"file_name": "Zrzut ekranu 2026-05-12 185252_line10.jpg", "ground_truth": "10) M. gruszkowaty", "prediction": "10) M. gruszhowaty"}
 {"file_name": "Zrzut ekranu 2026-05-12 185252_line11.jpg", "ground_truth": "11) M. zasłonowy wewn", "prediction": "14) M. zasłonowy wewn"}
 {"file_name": "Zrzut ekranu 2026-05-12 185252_line12.jpg", "ground_truth": "12) M. bliźniacze", "prediction": "12) H. bluniawe"}
 {"file_name": "Zrzut ekranu 2026-05-12 185252_line13.jpg", "ground_truth": "13) M. zasłonowy zewn", "prediction": "113) H. rastonowy rewn"}
 {"file_name": "Zrzut ekranu 2026-05-12 185252_line14.jpg", "ground_truth": "14) M. czworoboczny", "prediction": "14) H. czworoboczny"}
-{"file_name": "Zrzut ekranu 2026-05-12 185252_line15.jpg", "ground_truth": "15) Jak mozna podzielić mięśnie udo?", "prediction": "15) gak moxna podweluć mięznie udo?"}
+{"file_name": "Zrzut ekranu 2026-05-12 185252_line15.jpg", "ground_truth": "15) Jak można podzielić mięśnie udo?", "prediction": "15) gak moxna podweluć mięznie udo?"}
 {"file_name": "Zrzut ekranu 2026-05-12 185252_line16.jpg", "ground_truth": "16) Jakie mięśnie mozna zaliczyć do mięśni prostowników uda?", "prediction": "16) godnie mięsnie mozna zaliczyć do mięsni, prostowników uda g"}
 {"file_name": "Zrzut ekranu 2026-05-12 185252_line17.jpg", "ground_truth": "17) M. czworogłowy", "prediction": "17) M. czworogłowy"}
 {"file_name": "Zrzut ekranu 2026-05-12 185252_line18.jpg", "ground_truth": "18) M. krawiecki", "prediction": "18) M. krowiecki"}
@@ -867,7 +867,7 @@
 {"file_name": "Zrzut ekranu 2026-05-12 185301_line2.jpg", "ground_truth": "PRZEDNIE", "prediction": "PRZEDNIE"}
 {"file_name": "Zrzut ekranu 2026-05-12 185301_line3.jpg", "ground_truth": "MM. OKOLICY BIODROWEJ", "prediction": "HM. OKOLICY BIODROWEJ"}
 {"file_name": "Zrzut ekranu 2026-05-12 185301_line4.jpg", "ground_truth": "TYLNE", "prediction": "TYLNE"}
-{"file_name": "Zrzut ekranu 2026-05-12 185301_line5.jpg", "ground_truth": "MM. OKOLICY POSLADKOWEJ", "prediction": "HM. OKOLICY POŚLADKOWEJ"}
+{"file_name": "Zrzut ekranu 2026-05-12 185301_line5.jpg", "ground_truth": "MM. OKOLICY POŚLADKOWEJ", "prediction": "HM. OKOLICY POŚLADKOWEJ"}
 {"file_name": "Zrzut ekranu 2026-05-12 185301_line6.jpg", "ground_truth": "M. BIODROWO - LĘDŹWIOWY", "prediction": "M. BioDrowo - LĘDŹWIOWY"}
 {"file_name": "Zrzut ekranu 2026-05-12 185301_line7.jpg", "ground_truth": "POWIERZCHOWNE", "prediction": "POWIERZCHOWINE"}
 {"file_name": "Zrzut ekranu 2026-05-12 185301_line8.jpg", "ground_truth": "pośladkowy wielki", "prediction": "posladbowy wielbi"}
@@ -888,7 +888,7 @@
 {"file_name": "Zrzut ekranu 2026-05-12 185313_line2.jpg", "ground_truth": "KRĘTACZ", "prediction": "KRĘTARZ"}
 {"file_name": "Zrzut ekranu 2026-05-12 185313_line3.jpg", "ground_truth": "MNIEJSZY", "prediction": "MNIEJSZY"}
 {"file_name": "Zrzut ekranu 2026-05-12 185313_line4.jpg", "ground_truth": "- składa się z 3 mięśni : m. biodrowego", "prediction": "- slułada się ze g. mięsni : m. biodrowego"}
-{"file_name": "Zrzut ekranu 2026-05-12 185313_line5.jpg", "ground_truth": "m. lędźwiowego wiekszego", "prediction": "m. ledźwiowego więknego"}
+{"file_name": "Zrzut ekranu 2026-05-12 185313_line5.jpg", "ground_truth": "m. lędźwiowego większego", "prediction": "m. ledźwiowego więknego"}
 {"file_name": "Zrzut ekranu 2026-05-12 185313_line6.jpg", "ground_truth": "m. lędźwiowego mniejszego", "prediction": "m. lędiwiowego mniejzego"}
 {"file_name": "Zrzut ekranu 2026-05-12 185313_line7.jpg", "ground_truth": "M. biodrowy", "prediction": "M. biodrowy"}
 {"file_name": "Zrzut ekranu 2026-05-12 185313_line8.jpg", "ground_truth": "Przyczep : 2/3 górnej części dołu biodrowego", "prediction": "Przywiep: 213 gdinej wesu dułu biodrowego"}
@@ -903,14 +903,14 @@
 {"file_name": "Zrzut ekranu 2026-05-12 185313_line17.jpg", "ground_truth": "warstwa głęboka -> wyrostki żebrowe kręgów L1-L5", "prediction": "warstwa głęboka -> wyrostki żebrowe bręgów L1-L5"}
 {"file_name": "Zrzut ekranu 2026-05-12 185313_line18.jpg", "ground_truth": "- przyczep końcowy -> krętacz mniejszy", "prediction": "- przyczep hońcowy -> krętane mniejszy"}
 {"file_name": "Zrzut ekranu 2026-05-12 185313_line19.jpg", "ground_truth": "Mięsień lędźwiowy mniejszy", "prediction": "Mięsień lędźwiowy mniejzzy"}
-{"file_name": "Zrzut ekranu 2026-05-12 185313_line20.jpg", "ground_truth": "od krązka piersiowo-lędźwiowego i brzegów przyległych trzonów kręgów", "prediction": "od krązka piersiowo-lędźwiowego i bnegów pryległych tronów hręgów"}
+{"file_name": "Zrzut ekranu 2026-05-12 185313_line20.jpg", "ground_truth": "od krążka piersiowo-lędźwiowego i brzegów przyległych trzonów kręgów", "prediction": "od krązka piersiowo-lędźwiowego i bnegów pryległych tronów hręgów"}
 {"file_name": "Zrzut ekranu 2026-05-12 185313_line21.jpg", "ground_truth": "do grzebienia kosci łonowej, łuku biodrowego-łonowego i powięzi biodrowej", "prediction": "do gneblenia hosu łonowej łuhu biodrowo-łonowego i powięzi biodrowej"}
 {"file_name": "Zrzut ekranu 2026-05-12 185313_line22.jpg", "ground_truth": "DZIAŁANIE : dolny zginacz stawu biodrowego", "prediction": "DZIAŁANIE: oślny zginacz ołanu biodrowego"}
 {"file_name": "Zrzut ekranu 2026-05-12 185313_line23.jpg", "ground_truth": "pochyla tułów i miednicę ku przodowi", "prediction": "padyla tułów i miednicę ku pzodowi"}
 {"file_name": "Zrzut ekranu 2026-05-12 185313_line24.jpg", "ground_truth": "rotacja zewnętrzna", "prediction": "rotalja zewnętnna"}
 {"file_name": "Zrzut ekranu 2026-05-12 185323_line1.jpg", "ground_truth": "POWIERZCHOWNE", "prediction": "POWIERZCHOWNE"}
 {"file_name": "Zrzut ekranu 2026-05-12 185323_line2.jpg", "ground_truth": "Mięsień pośladkowy wielki gluteus maximus muscle", "prediction": "Mięsień pośladhowy wielki głuteus maximus musde"}
-{"file_name": "Zrzut ekranu 2026-05-12 185323_line3.jpg", "ground_truth": "- najwiekszy tu", "prediction": "- największy tu"}
+{"file_name": "Zrzut ekranu 2026-05-12 185323_line3.jpg", "ground_truth": "- największy tu", "prediction": "- największy tu"}
 {"file_name": "Zrzut ekranu 2026-05-12 185323_line4.jpg", "ground_truth": "- najbardziej powierzchowny tu", "prediction": "- najbordziej powierzchowny tu"}
 {"file_name": "Zrzut ekranu 2026-05-12 185323_line5.jpg", "ground_truth": "Przyczep początkowy", "prediction": "Przyczep powathowy:"}
 {"file_name": "Zrzut ekranu 2026-05-12 185323_line6.jpg", "ground_truth": "1. blaszka tylna powięzi piersiowo-lędźwiowej", "prediction": "1. blaszka tylna powięzi piersiowo-lędźwiowej"}
@@ -933,9 +933,9 @@
 {"file_name": "Zrzut ekranu 2026-05-12 185332_line4.jpg", "ground_truth": "kresą pośladkową przednią, a grzebieniem biodrowym", "prediction": "Incia poślodkolna, pizednia, a grzebielniem biódrowym"}
 {"file_name": "Zrzut ekranu 2026-05-12 185332_line5.jpg", "ground_truth": "przyczep końcowy: brzeg górny krętacza większego", "prediction": "przyczep końcowy: brzeg górny krętarza więkrzego"}
 {"file_name": "Zrzut ekranu 2026-05-12 185332_line6.jpg", "ground_truth": "obecna kaletka", "prediction": "obewna kaletka"}
-{"file_name": "Zrzut ekranu 2026-05-12 185332_line7.jpg", "ground_truth": "Sredniego", "prediction": "Średniego"}
+{"file_name": "Zrzut ekranu 2026-05-12 185332_line7.jpg", "ground_truth": "Średniego", "prediction": "Średniego"}
 {"file_name": "Zrzut ekranu 2026-05-12 185332_line8.jpg", "ground_truth": "KRĘTARZ", "prediction": "KRĘTARZ"}
-{"file_name": "Zrzut ekranu 2026-05-12 185332_line9.jpg", "ground_truth": "WIEKSZY", "prediction": "WIĘKSZY"}
+{"file_name": "Zrzut ekranu 2026-05-12 185332_line9.jpg", "ground_truth": "WIĘKSZY", "prediction": "WIĘKSZY"}
 {"file_name": "Zrzut ekranu 2026-05-12 185332_line10.jpg", "ground_truth": "Mięsień posladkowy mały gluteus minimus muscle", "prediction": "Mięsień posłodkowy mały) głudeus minimus muscle"}
 {"file_name": "Zrzut ekranu 2026-05-12 185332_line11.jpg", "ground_truth": "przyczep początkowy:", "prediction": "przywep powąthowy:"}
 {"file_name": "Zrzut ekranu 2026-05-12 185332_line12.jpg", "ground_truth": "powierzchnia pośladkowa kości biodrowej,", "prediction": "powierzchnia posladhowa kośu biodrowej,"}
@@ -960,7 +960,7 @@
 {"file_name": "Zrzut ekranu 2026-05-12 185351_line12.jpg", "ground_truth": "M. zasłaniacz wewnętrzny", "prediction": "M. zasłaniacz wewnętrzny"}
 {"file_name": "Zrzut ekranu 2026-05-12 185351_line13.jpg", "ground_truth": "przyczep początkowy : pow. zewnętrzna błony zasłonowej", "prediction": "przyciep początkowy pow wewnętrzna błony zasłonowej"}
 {"file_name": "Zrzut ekranu 2026-05-12 185351_line14.jpg", "ground_truth": "przyczep końcowy : dół krętarzowy", "prediction": "powużep hońwy: dół brętarzowy"}
-{"file_name": "Zrzut ekranu 2026-05-12 185403_line1.jpg", "ground_truth": "Mięśnie bliżniacze", "prediction": "Mięśnie bliźniacze"}
+{"file_name": "Zrzut ekranu 2026-05-12 185403_line1.jpg", "ground_truth": "Mięśnie bliźniacze", "prediction": "Mięśnie bliźniacze"}
 {"file_name": "Zrzut ekranu 2026-05-12 185403_line2.jpg", "ground_truth": "1. M. bliźniaczy górny", "prediction": "1. M. bliźniowy obrny"}
 {"file_name": "Zrzut ekranu 2026-05-12 185403_line3.jpg", "ground_truth": "p.p. -> holec kulszowy", "prediction": "p.p. -> holec hubrowy"}
 {"file_name": "Zrzut ekranu 2026-05-12 185403_line4.jpg", "ground_truth": "2. M. bliźniaczy dolny", "prediction": "2. M. blicniawzy dolny"}
@@ -992,13 +992,13 @@
 {"file_name": "Zrzut ekranu 2026-05-12 185415_line17.jpg", "ground_truth": "uda", "prediction": "uda"}
 {"file_name": "Zrzut ekranu 2026-05-12 185415_line18.jpg", "ground_truth": "externus muscle", "prediction": "externus muscle"}
 {"file_name": "Zrzut ekranu 2026-05-12 185423_line1.jpg", "ground_truth": "MIĘŚNIE UDA", "prediction": "MIĘŚNIE UDA"}
-{"file_name": "Zrzut ekranu 2026-05-12 185423_line2.jpg", "ground_truth": "Prostowniki -> czworogłowy uda, miesień krawiecki", "prediction": "Prostowniki -> czworogłowy uda, mięsień krawiechi"}
+{"file_name": "Zrzut ekranu 2026-05-12 185423_line2.jpg", "ground_truth": "Prostowniki -> czworogłowy uda, mięsień krawiecki", "prediction": "Prostowniki -> czworogłowy uda, mięsień krawiechi"}
 {"file_name": "Zrzut ekranu 2026-05-12 185423_line3.jpg", "ground_truth": "Zginacze -> dwugłowy, półbłoniasty, półscięgnisty", "prediction": "Kainauce -> dwugłowy, półbłoniosty, półsuięgnisty"}
 {"file_name": "Zrzut ekranu 2026-05-12 185423_line4.jpg", "ground_truth": "Przywodziciele -> grzebienowy, smukły,", "prediction": "Przywodziwiele -> grzebleniowy, smukły,"}
 {"file_name": "Zrzut ekranu 2026-05-12 185423_line5.jpg", "ground_truth": "przywodziciel", "prediction": "przywodziwiel"}
 {"file_name": "Zrzut ekranu 2026-05-12 185423_line6.jpg", "ground_truth": "długi,", "prediction": "długi,"}
 {"file_name": "Zrzut ekranu 2026-05-12 185423_line7.jpg", "ground_truth": "krótki", "prediction": "lurótki"}
-{"file_name": "Zrzut ekranu 2026-05-12 185433_line1.jpg", "ground_truth": "Mięsnie prostowniki uda", "prediction": "Mięśnie prostowniki uda"}
+{"file_name": "Zrzut ekranu 2026-05-12 185433_line1.jpg", "ground_truth": "Mięśnie prostowniki uda", "prediction": "Mięśnie prostowniki uda"}
 {"file_name": "Zrzut ekranu 2026-05-12 185433_line2.jpg", "ground_truth": "czworoboczny uda", "prediction": "czworobazny uda"}
 {"file_name": "Zrzut ekranu 2026-05-12 185433_line3.jpg", "ground_truth": "krawiecki", "prediction": "krawiecki"}
 {"file_name": "Zrzut ekranu 2026-05-12 185433_line4.jpg", "ground_truth": "jedyny prostownik", "prediction": "i jedyny prostownik"}
@@ -1015,7 +1015,7 @@
 {"file_name": "Zrzut ekranu 2026-05-12 185433_line15.jpg", "ground_truth": "scięgna m. pośladkowego małego", "prediction": "sułona m. posladbowego małego"}
 {"file_name": "Zrzut ekranu 2026-05-12 185433_line16.jpg", "ground_truth": "Przyczep końcowy", "prediction": "Płzywep horcowy"}
 {"file_name": "Zrzut ekranu 2026-05-12 185433_line17.jpg", "ground_truth": "brzeg górny rzepki", "prediction": "brzeg górny rzephi"}
-{"file_name": "Zrzut ekranu 2026-05-12 185433_line18.jpg", "ground_truth": "2 Miesień obszerny przyśrodkowy rastus medialis muscle", "prediction": "26. Mięsień obszerny pzysrodhowy vosłus medialis muscle"}
+{"file_name": "Zrzut ekranu 2026-05-12 185433_line18.jpg", "ground_truth": "2 Mięsień obszerny przyśrodkowy rastus medialis muscle", "prediction": "26. Mięsień obszerny pzysrodhowy vosłus medialis muscle"}
 {"file_name": "Zrzut ekranu 2026-05-12 185433_line19.jpg", "ground_truth": "p.p -> warga przyśrodkowa kresy chropowatej", "prediction": "p. p -> worga przyśrodhowa kresy chropowatej"}
 {"file_name": "Zrzut ekranu 2026-05-12 185433_line20.jpg", "ground_truth": "p.k -> kłykieć przyśrodkowy piszczeli", "prediction": "p. k -> hłybieć prysrodłowy pisaweli"}
 {"file_name": "Zrzut ekranu 2026-05-12 185433_line21.jpg", "ground_truth": "przysrodkowej uda", "prediction": "prysrodłowej udo"}
@@ -1269,7 +1269,7 @@
 {"file_name": "Noga_page04_line8.jpg", "ground_truth": "wcięcie panewki", "prediction": "wuęwie panewki"}
 {"file_name": "Noga_page04_line9.jpg", "ground_truth": "dół panewki", "prediction": "dół panewki"}
 {"file_name": "Noga_page04_line10.jpg", "ground_truth": "obrąbek panewki", "prediction": "obrąbek panewki"}
-{"file_name": "Noga_page04_line11.jpg", "ground_truth": "Najwiekszy udział w budowie", "prediction": "Najwiębzy udział w budowie"}
+{"file_name": "Noga_page04_line11.jpg", "ground_truth": "Największy udział w budowie", "prediction": "Najwiębzy udział w budowie"}
 {"file_name": "Noga_page04_line12.jpg", "ground_truth": "TRZON KOŚCI KULSZOWEJ", "prediction": "TRZON KOŚCI KULSZOWEJ"}
 {"file_name": "Noga_page04_line13.jpg", "ground_truth": "dół", "prediction": "ddł"}
 {"file_name": "Noga_page04_line14.jpg", "ground_truth": "panewki", "prediction": "panewkł"}
@@ -1296,7 +1296,7 @@
 {"file_name": "Noga_page03_line7.jpg", "ground_truth": "bloczek", "prediction": "bloczeh"}
 {"file_name": "Noga_page03_line8.jpg", "ground_truth": "wyrostek boczny", "prediction": "hyrostek boczny"}
 {"file_name": "Noga_page03_line9.jpg", "ground_truth": "wyrostek tylny", "prediction": "ugrostek tylny -"}
-{"file_name": "Noga_page03_line10.jpg", "ground_truth": "wiekszy guzek boczny", "prediction": "Większy guzek bozny"}
+{"file_name": "Noga_page03_line10.jpg", "ground_truth": "większy guzek boczny", "prediction": "Większy guzek bozny"}
 {"file_name": "Noga_page03_line11.jpg", "ground_truth": "mniejszy guzek przyśrodkowy", "prediction": "mniejszy dułek pizysrodbwy"}
 {"file_name": "Noga_page03_line12.jpg", "ground_truth": "łączy się z 4 kośćmi", "prediction": "łąwy się z 4 hośćmi"}
 {"file_name": "Noga_page03_line13.jpg", "ground_truth": "piszczelowa", "prediction": "piszczelowa"}
@@ -1311,7 +1311,7 @@
 {"file_name": "Noga_page03_line22.jpg", "ground_truth": "wyrostek boczny", "prediction": "hyrostek bozny"}
 {"file_name": "Noga_page03_line23.jpg", "ground_truth": "mniejszy", "prediction": "mniejzuj"}
 {"file_name": "Noga_page03_line24.jpg", "ground_truth": "długiego palucha", "prediction": "stugiego palucho"}
-{"file_name": "Noga_page03_line25.jpg", "ground_truth": "bruzda ściegna zginacza", "prediction": "2. bruzda święona zeinawa"}
+{"file_name": "Noga_page03_line25.jpg", "ground_truth": "bruzda ścięgna zginacza", "prediction": "2. bruzda święona zeinawa"}
 {"file_name": "Noga_page03_line26.jpg", "ground_truth": "pow przyśr", "prediction": "pow przysi"}
 {"file_name": "Noga_page03_line27.jpg", "ground_truth": "pow boczna", "prediction": "pow. bowna"}
 {"file_name": "Noga_page03_line28.jpg", "ground_truth": "dla strzałek", "prediction": "dla ołxałek"}
@@ -1363,7 +1363,7 @@
 {"file_name": "Noga_page06_line19.jpg", "ground_truth": "mięsień, który odblokowuje zginanie", "prediction": "mięsień Móny odblohowuje zginonie"}
 {"file_name": "Noga_page06_line20.jpg", "ground_truth": "w stawie kolanowym", "prediction": "w sławie holanowym"}
 {"file_name": "Noga_page06_line21.jpg", "ground_truth": "MIĘSIEŃ PODKOLANOWY", "prediction": "MIĘSIEŃ PODWOLANOWY"}
-{"file_name": "Noga_page07_line1.jpg", "ground_truth": "Tetnica udowa", "prediction": "Tętnica udowa"}
+{"file_name": "Noga_page07_line1.jpg", "ground_truth": "Tętnica udowa", "prediction": "Tętnica udowa"}
 {"file_name": "Noga_page07_line2.jpg", "ground_truth": "odcinek", "prediction": "odunek"}
 {"file_name": "Noga_page07_line3.jpg", "ground_truth": "Trójkąt udowy", "prediction": "Trójkąt udowy"}
 {"file_name": "Noga_page07_line4.jpg", "ground_truth": "oddaje l. głęboką uda", "prediction": "oddzje t. złębdią uda"}
@@ -1632,7 +1632,7 @@
 {"file_name": "Serce - Więcej Niż Lek_page01_line2.jpg", "ground_truth": "oddziela przedsionki od komór", "prediction": "oddziela przedsionki od komór,"}
 {"file_name": "Serce - Więcej Niż Lek_page01_line3.jpg", "ground_truth": "Bruzdy międzykomorowe", "prediction": "Bruzdy międzyhomorowe"}
 {"file_name": "Serce - Więcej Niż Lek_page01_line4.jpg", "ground_truth": "bruzda międzykomorowa przednia", "prediction": "błuzda międzyhomorowa przednia"}
-{"file_name": "Serce - Więcej Niż Lek_page01_line5.jpg", "ground_truth": "bruzda miedzykomorowa tylna", "prediction": "bruzda międzyhomonowa łylna"}
+{"file_name": "Serce - Więcej Niż Lek_page01_line5.jpg", "ground_truth": "bruzda międzykomorowa tylna", "prediction": "bruzda międzyhomonowa łylna"}
 {"file_name": "Serce - Więcej Niż Lek_page01_line6.jpg", "ground_truth": "łączą się w wcięciu koniuszka", "prediction": "łąwą się w wuęuu honiuszho"}
 {"file_name": "Serce - Więcej Niż Lek_page01_line7.jpg", "ground_truth": "Koniuszek należy do komory lewej", "prediction": "Koniuszek należy do homory lewej"}
 {"file_name": "Serce - Więcej Niż Lek_page01_line8.jpg", "ground_truth": "Korona serca", "prediction": "Worona serva"}
@@ -1646,7 +1646,7 @@
 {"file_name": "Serce - Więcej Niż Lek_page01_line16.jpg", "ground_truth": "pień płucny", "prediction": "pień płucny"}
 {"file_name": "Serce - Więcej Niż Lek_page01_line17.jpg", "ground_truth": "Krzyż żylny serca", "prediction": "Krzyz żylny serca"}
 {"file_name": "Serce - Więcej Niż Lek_page01_line18.jpg", "ground_truth": "żyły", "prediction": "żyły"}
-{"file_name": "Serce - Więcej Niż Lek_page01_line19.jpg", "ground_truth": "wieksze uszko prawe", "prediction": "większe uszko prawe"}
+{"file_name": "Serce - Więcej Niż Lek_page01_line19.jpg", "ground_truth": "większe uszko prawe", "prediction": "większe uszko prawe"}
 {"file_name": "Serce - Więcej Niż Lek_page01_line20.jpg", "ground_truth": "mniejsze uszko lewe", "prediction": "mniejsze uszho lewe"}
 {"file_name": "Serce - Więcej Niż Lek_page01_line21.jpg", "ground_truth": "i dolna", "prediction": "i ololna"}
 {"file_name": "Serce - Więcej Niż Lek_page01_line22.jpg", "ground_truth": "są ułożone prostopadle", "prediction": "są ułożone prostopodle"}
@@ -1672,7 +1672,7 @@
 {"file_name": "Serce - Więcej Niż Lek_page03_line4.jpg", "ground_truth": "prawa, czyli trójdzielna", "prediction": "prawa, czyli trójdzielna"}
 {"file_name": "Serce - Więcej Niż Lek_page03_line5.jpg", "ground_truth": "lewa, czyli dwudzielna (mitralna)", "prediction": "lewa, ozyli dwudzielna (mitralna)"}
 {"file_name": "Serce - Więcej Niż Lek_page03_line6.jpg", "ground_truth": "Przejścia komór w duże naczynia tętnicze nazywamy", "prediction": "Przejsuia homór w duże nawynia tętnicie nazywamy"}
-{"file_name": "Serce - Więcej Niż Lek_page03_line7.jpg", "ground_truth": "Wyposazone są one w zastawki półksiężycowate", "prediction": "Wyposazone są one w zasławni półwięzywwate"}
+{"file_name": "Serce - Więcej Niż Lek_page03_line7.jpg", "ground_truth": "Wyposażone są one w zastawki półksiężycowate", "prediction": "Wyposazone są one w zasławni półwięzywwate"}
 {"file_name": "Serce - Więcej Niż Lek_page03_line8.jpg", "ground_truth": "Części komór prowadzące do ujść to odpowiednio", "prediction": "Częświ homór prowadzące do wjść ło odpowiednio:"}
 {"file_name": "Serce - Więcej Niż Lek_page03_line9.jpg", "ground_truth": "stożek tętniczy po stronie prawej", "prediction": "stożeh tętniczy po stronie prawej"}
 {"file_name": "Serce - Więcej Niż Lek_page03_line10.jpg", "ground_truth": "przedsionek aorty po stronie lewej", "prediction": "przedsionek oorty po stronie lewej"}
@@ -1741,7 +1741,7 @@
 {"file_name": "Serce - Więcej Niż Lek_page08_line20.jpg", "ground_truth": "włókna", "prediction": "włókna"}
 {"file_name": "Serce - Więcej Niż Lek_page08_line21.jpg", "ground_truth": "skośne", "prediction": "shośne"}
 {"file_name": "Serce - Więcej Niż Lek_page09_line1.jpg", "ground_truth": "Przedsionek prawy", "prediction": "przedsionek prawy"}
-{"file_name": "Serce - Więcej Niż Lek_page09_line2.jpg", "ground_truth": "składa się z gładkiej części będącej pozostałościa zatoki żył głównych", "prediction": "shłada się z gładniej części będącej pozostałością załoni zył głównych"}
+{"file_name": "Serce - Więcej Niż Lek_page09_line2.jpg", "ground_truth": "składa się z gładkiej części będącej pozostałością zatoki żył głównych", "prediction": "shłada się z gładniej części będącej pozostałością załoni zył głównych"}
 {"file_name": "Serce - Więcej Niż Lek_page09_line3.jpg", "ground_truth": "część mięśniowa - uszko prawe", "prediction": "część mięsniowa - uszho prawe"}
 {"file_name": "Serce - Więcej Niż Lek_page09_line4.jpg", "ground_truth": "Prawy przedsionek odbiera krew żylną z żył głównych", "prediction": "Prawy przedsionek odbiera hrew zylną z żył głównych"}
 {"file_name": "Serce - Więcej Niż Lek_page09_line5.jpg", "ground_truth": "oraz", "prediction": "oraz"}
@@ -1910,7 +1910,7 @@
 {"file_name": "13) Unaczynienie Miednica_page01_line2.jpg", "ground_truth": "MIEDNICY", "prediction": "MIEDNICY"}
 {"file_name": "13) Unaczynienie Miednica_page01_line3.jpg", "ground_truth": "T. BIODROWA WSPÓLNA", "prediction": "T BIODROWA WSPÓLNA"}
 {"file_name": "13) Unaczynienie Miednica_page01_line4.jpg", "ground_truth": "T. BIODROWA ZEWNĘTRZNA", "prediction": "T. BIODROWA ZEWNĘTRZNA"}
-{"file_name": "13) Unaczynienie Miednica_page01_line5.jpg", "ground_truth": "T. BIODROWA WEWNETRZNA", "prediction": "T. BIODROWA WEWNĘTRZNA"}
+{"file_name": "13) Unaczynienie Miednica_page01_line5.jpg", "ground_truth": "T. BIODROWA WEWNĘTRZNA", "prediction": "T. BIODROWA WEWNĘTRZNA"}
 {"file_name": "13) Unaczynienie Miednica_page01_line6.jpg", "ground_truth": "TT. KRZYŻOWE BOCZNE", "prediction": "TT. KRZYŻOWE BOCZNE"}
 {"file_name": "13) Unaczynienie Miednica_page01_line7.jpg", "ground_truth": "T. POŚLADKOWA GÓRNA", "prediction": "T. POŚLADKOWA GÓRNA"}
 {"file_name": "13) Unaczynienie Miednica_page01_line8.jpg", "ground_truth": "T. POŚLADKOWA DOLNA", "prediction": "T. POŚLADKOWA: DOLNA"}

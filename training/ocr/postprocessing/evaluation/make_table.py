@@ -14,7 +14,8 @@ RESULTS = Path(__file__).resolve().parent.parent / "results"
 
 LABELS = [
     # (variant, split, opis)
-    ("option1_harm03", "fine", "**opcja 1 (główny, harm ≤ 0.3%)**"),
+    ("option1_harm03_gtfix", "fine", "**opcja 1 (główny, harm ≤ 0.3%), GT po poprawce 39 tokenów; baseline 0.12727**"),
+    ("option1_harm03", "fine", "**opcja 1 (główny, harm ≤ 0.3%)**, GT przed poprawką"),
     ("option1", "fine", "opcja 1, harm ≤ 0.5%"),
     ("abl_no_multi", "fine", "ablacja: bez jednostek wieloznakowych"),
     ("abl_no_protect", "fine", "ablacja: bez klas chronionych P2–P8"),
@@ -79,8 +80,11 @@ def main() -> None:
         p = RESULTS / f"p4_{key[0]}_{key[1]}_per_group.json"
         if p.exists():
             pg[key] = json.loads(p.read_text())
-    for split in ("fine", "coarse"):
-        keys = [k for k in pg if k[1] == split]
+    for split in ("fine", "coarse", "gtfix"):
+        if split == "gtfix":
+            keys = [k for k in pg if k[0].endswith("_gtfix")]
+        else:
+            keys = [k for k in pg if k[1] == split and not k[0].endswith("_gtfix")]
         if not keys:
             continue
         groups = list(pg[keys[0]]["baseline"])

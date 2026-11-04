@@ -85,6 +85,34 @@ Zmiany „na inny błąd” (117): ok. 1/3 to tokeny, które po korekcie różni
 wielkością litery lub interpunkcją (`Prewód→Przewód` przy GT `przewód`); reszta to podmiana na
 inne słowo, często bliższe GT (`hubzowa→kulszowa` przy GT `kulszową`), ale nie zawsze.
 
+## 4a. Wynik na GT po ręcznym przeglądzie (2026-11-04)
+
+Przegląd 101 podejrzanych tokenów GT (`suspect_gt_diacritics.csv`, kolumny `gt_token_fix`, `decision`):
+39 to błędy etykiety (38 diakrytyków + literówka `kuklowate→kulkowate`), 62 jest wiernych obrazowi. Lista zmian w formacie DagsHub (`dataset/annotations.csv`) przekazana do aktualizacji repozytorium danych.
+Autorka notatek (zwłaszcza zrzuty G7/G8) często pomija kreskę nad ś; GT zapisuje to, co jest na
+obrazku, nie poprawną polszczyznę. Poprawki naniesione na `benchmark/dane/handlabeled/labels.csv`
+i `data/baseline/predictions.jsonl` (wielkość liter z oryginału). Ablacje z §2 liczone na GT sprzed poprawki.
+
+| | baseline | opcja 1 (główny, harm ≤ 0.3%) |
+|---|---|---|
+| CER | 0.12727 (było 0.12769) | **0.09989** (−2.74 p.p., −21.5%) |
+| 95% CI ΔCER, grupy / linie | | [−3.34, −1.81] / [−2.94, −2.52] p.p. |
+| WER | 0.4794 | 0.3556 |
+| fixed / broken / changed-wrong / net | | 763 / 17 / 163 / +746 |
+| precision / recall / harm test | | 0.809 / 0.273 / **0.53%** |
+
+Model kanału uczony na poprawionych parach śmielej dodaje diakrytyki, więc zysk rośnie (−2.29 → −2.74 p.p.),
+ale harm przekracza cel (0.40% → 0.53%), prawie w całości w G7/G8 (1.1–1.2%). 17 zepsutych tokenów:
+
+| typ | liczba | przykłady |
+|---|---|---|
+| diakrytyk dodany tam, gdzie autorka go pominęła (GT wierny obrazowi) | 8 | `mięsnie/mięsnia→mięś…` (×4), `posladkowa/-ej→poś…` (×2), `mozna→można`, `sredni→średni` |
+| termin angielski/łaciński poprawiony na polskie słowo | 8 | `femur→temu` (×4), `knee→nie`, `inferior→interior`, `tibial→tibia`, `minimus→minimum` |
+| literówka w GT | 1 | `kłaciek→kłaczek` |
+
+Pierwsza grupa to „szkoda” tylko względem transkrypcji wiernej obrazowi; druga to faktyczne zepsucia,
+które adresuje opcja 4.
+
 ## 5. Ograniczenia (do pracy)
 
 - **Fold = źródło, nie autor.** Liczba autorów handlabeled jest nieznana („kilka osób”); jeśli

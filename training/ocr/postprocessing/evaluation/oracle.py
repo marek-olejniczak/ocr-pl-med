@@ -169,7 +169,12 @@ def gt_diacritics(rows, gts, prs, groups, lex) -> None:
         w.writerow(["ALL", tot["words"], tot["oov"], f"{100*tot['oov']/tot['words']:.2f}", tot["oov_diac_variant"],
                     f"{100*tot['oov_diac_variant']/tot['words']:.2f}", tot["pred_has_variant"]])
     suspects.sort(key=lambda x: (not x["pred_has_variant"], x["group"], x["file_name"]))
-    with open(RESULTS / "suspect_gt_diacritics.csv", "w", newline="", encoding="utf-8") as f:
+    # suspect_gt_diacritics.csv to lista po ręcznym przeglądzie (gt_token_fix, decision, 2026-11-04):
+    # nie nadpisujemy jej, nowa lista z poprawionego GT idzie do osobnego pliku.
+    out = RESULTS / "suspect_gt_diacritics.csv"
+    if out.exists():
+        out = RESULTS / "suspect_gt_diacritics.regen.csv"
+    with open(out, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(suspects[0].keys()))
         w.writeheader()
         w.writerows(suspects)
