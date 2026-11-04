@@ -21,6 +21,7 @@ from evaluation.compare import compare, per_group_cer
 from evaluation.folds import line_groups
 from evaluation.metrics import load_predictions, normalize_ws, score
 from pp.lexicon import fold, polimorf_forms
+from pp.tokenize import token_pairs as pairs
 
 RESULTS = Path(__file__).resolve().parent.parent / "results"
 ZW = dict.fromkeys(map(ord, "​‌‍⁠﻿­"))
@@ -43,15 +44,6 @@ def is_word(c: str) -> bool:
 def oov(tok: str, lex: frozenset[str]) -> bool:
     c = core(tok)
     return is_word(c) and c.lower() not in lex
-
-
-def pairs(gt_tokens: list[str], pred_tokens: list[str]) -> list[tuple[int, int]]:
-    out = []
-    for op in Levenshtein.opcodes(gt_tokens, pred_tokens):
-        if op.tag in ("equal", "replace"):
-            for k in range(min(op.src_end - op.src_start, op.dest_end - op.dest_start)):
-                out.append((op.src_start + k, op.dest_start + k))
-    return out
 
 
 def apply_oracle(gts: list[str], preds: list[str], cond: Callable[[str, str], bool]) -> tuple[list[str], int]:

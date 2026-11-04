@@ -1,0 +1,2 @@
+variant,lines_changed,cer,cer_aux,wer,d_cer,d_cer_rel,ci_groups_lo,ci_groups_hi,p_boot_groups,ci_lines_lo,ci_lines_hi,p_boot_lines,lines_better,lines_worse,p_sign,base_cer,base_cer_aux,base_wer,fixed,broken,changed_wrong,unchanged_wrong,unchanged_correct,changed,net,precision,recall,harm
+option0_hygiene,0,0.127692,0.119531,0.481740,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,1.000000,0,0,1.000000,0.127692,0.119531,0.481740,0,0,0,2813,3211,0,0,nan,0.000000,0.000000

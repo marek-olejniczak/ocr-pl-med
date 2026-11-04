@@ -1,0 +1,6 @@
+lexicon,gt_coverage
+polimorf2026,0.93266
+polimorf2026+sjp,0.94348
+known(default),0.93266
+target(default),0.89550
+target(+sjp),0.94260

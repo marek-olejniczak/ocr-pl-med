@@ -1,0 +1,10 @@
+class,oov_correct,oov_wrong
+P1_symbols,196,15
+P2_digits,100,60
+P3_num_unit,0,0
+P4_abbr_dot,16,22
+P5_abbr_list,5,5
+P6_short_upper,0,0
+P7_len_le_2,0,9
+P8_hyphen,23,48
+unprotected,111,2116
