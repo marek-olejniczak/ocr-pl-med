@@ -1,0 +1,10 @@
+group,words,oov,oov_pct,oov_diac_variant,diac_pct_of_words,pred_has_variant
+G1_noga,989,43,4.35,5,0.51,2
+G2_anatomia_zmysly,501,51,10.18,9,1.80,1
+G3_serce,781,20,2.56,5,0.64,2
+G4_unaczynienie,538,21,3.90,1,0.19,1
+G5_elementy_topo,165,14,8.48,1,0.61,0
+G6_dataN,254,14,5.51,3,1.18,1
+G7_zrzuty_0507,1205,193,16.02,38,3.15,9
+G8_zrzuty_0512,1158,114,9.84,42,3.63,10
+ALL,5591,470,8.41,104,1.86,26
