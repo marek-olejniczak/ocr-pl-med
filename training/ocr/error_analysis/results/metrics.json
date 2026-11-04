@@ -1,0 +1,35 @@
+{
+  "adapter": "training/results/ocr/surya/v2_200k-lora-r64-mega/adapter",
+  "train_config": {
+    "run_name": "surya-v2_200k-lora-r64-mega",
+    "learning_rate": "2e-05",
+    "lora_rank": "64",
+    "lora_alpha": "64",
+    "lora_dropout": "0.2",
+    "lora_target_modules": "['q_proj', 'v_proj', 'o_proj']",
+    "max_steps": "15800",
+    "batch_size": "96",
+    "weight_decay": "0.05",
+    "warmup_ratio": "0.1",
+    "lr_scheduler_type": "cosine",
+    "seed": "42"
+  },
+  "labels_csv": "benchmark/dane/handlabeled/labels.csv",
+  "images_dir": "benchmark/dane/handlabeled/images",
+  "task_name": "ocr_without_boxes",
+  "math_mode": true,
+  "batch_size": 16,
+  "count": 2160,
+  "samples_loaded": 2160,
+  "metrics_level": "line",
+  "metrics": {
+    "cer": 0.12769176220304929,
+    "wer": 0.4817397078353254,
+    "ema": 0.25277777777777777,
+    "near_perfect_match": 0.44722222222222224,
+    "levenshtein_distance": 2.5009259259259258
+  },
+  "elapsed_seconds": 170.2,
+  "inference_seconds": 163.8,
+  "created_at": "2026-10-01T18:58:29"
+}

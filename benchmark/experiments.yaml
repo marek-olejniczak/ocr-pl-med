@@ -1,9 +1,9 @@
 experiment:
-  name: "ocr-benchmark-autorun-test-handlabeled-01"
+  name: "ocr-benchmark-handlabeled-surya-trocr-rysocr"
   project_name: "ocr-benchmark"
   wandb_entity: "ocr-pl-med"
-  tags: ["autorun", "http", "sequential", "smoke", "laptop"]
-  hardware_note: "Nvidia GTX 1650, 4GB VRAM"
+  tags: ["autorun", "http", "sequential", "surya", "trocr", "rysocr", "handlabeled", "server"]
+  hardware_note: "Nvidia RTX 3090, 24GB VRAM"
 
 settings:
   output_dir: "wyniki"
@@ -53,15 +53,22 @@ datasets:
     limit: 32
     single_words: true
 
-  - id: "noisy_synthetic_medical_smoke"
+  - id: "handlabeled"
     enabled: true
+    labels_csv: "dane/handlabeled/labels.csv"
+    images_dir: "dane/handlabeled/images"
+    limit: null
+    single_words: false
+
+  - id: "noisy_synthetic_medical_smoke"
+    enabled: false
     labels_csv: "dane/noisy_synthetic_medical/labels.csv"
     images_dir: "dane/noisy_synthetic_medical/Data/discharge_summaries"
     limit: 5
     single_words: false
 
   - id: "licence_plates_smoke"
-    enabled: true
+    enabled: false
     labels_csv: "dane/licence_plates/labels.csv"
     images_dir: "dane/licence_plates/LP-characters/images"
     limit: 10
@@ -72,7 +79,7 @@ models:
   - id: "tesseract_pol"
     service_name: "tesseract-pol"
     base_url: "http://localhost:8007"
-    enabled: true
+    enabled: false
     timeout: 120
     options:
       language: "pol"
@@ -83,7 +90,7 @@ models:
   - id: "easyocr"
     service_name: "easyocr"
     base_url: "http://localhost:8001"
-    enabled: true
+    enabled: false
     timeout: 120
     options:
       langs: ["pl", "en"]
@@ -93,8 +100,11 @@ models:
   - id: "rysocr"
     service_name: "rysocr"
     base_url: "http://localhost:8006"
-    enabled: true
+    enabled: false
     timeout: 36000
+    # ODPALONY OSOBNO (Stage 5b): obraz rysocr (pytorch 2.5.1-cuda12.1 + paddleocr
+    # 3.x + PaddleOCR-VL) wymaga ~5-7GB na /var/lib/docker, a jest tylko 2.5GB
+    # wolnego. Po zwolnieniu dysku: enabled: true + osobny build/run.
     options:
       adapter_model_id: "kacperwikiel/RysOCR"
       base_model_id: "PaddlePaddle/PaddleOCR-VL"
@@ -106,24 +116,39 @@ models:
       use_amp: true
       cache_dir: "modele/cache/rysocr"
 
-  - id: "trocr" # nie ma sensu uzywac - tylko angielski
+  - id: "trocr_polish" # polski TrOCR base (PET3R12, transformers 5.0.0)
     service_name: "trocr"
     base_url: "http://localhost:8002"
-    enabled: false
+    enabled: true
     timeout: 3600
     options:
-      model_id: "microsoft/trocr-base-handwritten"
+      model_id: "PET3R12/trocr-base-polish-handwriting"
       max_new_tokens: 256
       device: "cuda"
       local_files_only: false
-      batch_size: 4
+      batch_size: 8
+      use_amp: true
+      cache_dir: "modele/cache/trocr"
+
+  - id: "trocr_polish_ft" # nasz fine-tune: pelny checkpoint TrOCR na ocr_800k (40k krokow)
+    service_name: "trocr"
+    base_url: "http://localhost:8002"
+    enabled: true
+    timeout: 3600
+    options:
+      # sciezka WEWNATRZ kontenera (mount: benchmark/../training/results -> /app/training/results)
+      model_id: "/app/training/results/ocr/trocr/ocr800k-full"
+      max_new_tokens: 256
+      device: "cuda"
+      local_files_only: false
+      batch_size: 8
       use_amp: true
       cache_dir: "modele/cache/trocr"
 
   - id: "paddleocr"
     service_name: "paddleocr"
     base_url: "http://localhost:8003"
-    enabled: true
+    enabled: false
     timeout: 240
     options:
       rec_model_name: "PP-OCRv4_mobile_rec"
@@ -136,7 +161,7 @@ models:
   - id: "parseq" # nie ma sensu uzywac - slaby
     service_name: "parseq"
     base_url: "http://localhost:8004"
-    enabled: true
+    enabled: false
     timeout: 240
     options:
       device: "cuda"
@@ -148,10 +173,43 @@ models:
       model_id: null
       local_files_only: false
 
+  # Nasze fine-tuny docTR PARSeq na liniach ocr_800k. Rozmiar wejscia, vocab i
+  # preprocessing biora sie z meta.json checkpointu (input_size NIE jest podawany —
+  # przy lokalnym checkpointcie i tak wygrywa rozmiar z treningu), wiec oba wpisy
+  # roznia sie tylko sciezka.
+  - id: "parseq_ft" # 32x128, 40k krokow (run 2026-09-07)
+    service_name: "parseq"
+    base_url: "http://localhost:8004"
+    enabled: true
+    timeout: 240
+    options:
+      # sciezka WEWNATRZ kontenera (mount: benchmark/../training/results -> /app/training/results)
+      model_id: "/app/training/results/ocr/parseq/ocr800k-full"
+      device: "cuda"
+      batch_size: 8
+      cache_dir: "modele/cache/parseq"
+      use_amp: true
+      language: "pl"
+      local_files_only: false
+
+  - id: "parseq_ft_w512" # 32x512, 40k krokow (run 2026-09-13) — szersze wejście
+    service_name: "parseq"
+    base_url: "http://localhost:8004"
+    enabled: true
+    timeout: 240
+    options:
+      model_id: "/app/training/results/ocr/parseq/ocr800k-full-w512"
+      device: "cuda"
+      batch_size: 8
+      cache_dir: "modele/cache/parseq"
+      use_amp: true
+      language: "pl"
+      local_files_only: false
+
   - id: "calamari" # nie dziala poprawnie
     service_name: "calamari"
     base_url: "http://localhost:8005"
-    enabled: true
+    enabled: false
     timeout: 240
     options:
       model: "idiotikon"
@@ -161,7 +219,7 @@ models:
       checkpoints: null
       device: "auto"
 
-  - id: "surya" # najlepszy
+  - id: "surya" # base (bez adaptera)
     service_name: "surya"
     base_url: "http://localhost:8008"
     enabled: true
@@ -173,10 +231,24 @@ models:
       disable_math: false
       cache_dir: "modele/cache/surya"
 
+  - id: "surya_lora_ocr800k" # nasz fine-tuning: LoRA na ocr_800k (r64, 40k krokow)
+    service_name: "surya"
+    base_url: "http://localhost:8008"
+    enabled: true
+    timeout: 600
+    options:
+      device: "cuda"
+      batch_size: 8
+      task_name: "ocr_without_boxes"
+      disable_math: false
+      cache_dir: "modele/cache/surya"
+      # ścieżka WEWNĄTRZ kontenera (mount: benchmark/../training/results -> /app/training/results)
+      lora_adapter_path: "/app/training/results/ocr/surya/ocr800k-lora-r64/adapter"
+
   - id: "got_ocr"
     service_name: "got-ocr"
     base_url: "http://localhost:8009"
-    enabled: true
+    enabled: false
     timeout: 900
     options:
       model_id: "ucaslcl/GOT-OCR2_0"
@@ -201,7 +273,7 @@ models:
   - id: "kraken" # nie ma sensu uzywac - slaby i tylko francuski odreczny
     service_name: "kraken"
     base_url: "http://localhost:8011"
-    enabled: true
+    enabled: false
     timeout: 600
     options:
       model_path: "modele/cache/kraken/199fb0ec-cf40-50aa-b99a-69ba1f42f0bc/lectaurep_base.mlmodel"

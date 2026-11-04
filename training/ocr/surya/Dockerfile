@@ -26,4 +26,6 @@ COPY training/ocr/common training/ocr/common
 # Dane treningowe (bind-mount w docker compose)
 # COPY training/data training/data
 
-ENTRYPOINT ["python", "training/ocr/surya/cli.py"]
+# Brak ENTRYPOINT — konwersję robi convert_data.py, a trening cli.py,
+# więc komendę podaje się jawnie (docker compose run ... <komenda>).
+CMD ["python", "training/ocr/surya/cli.py", "--help"]

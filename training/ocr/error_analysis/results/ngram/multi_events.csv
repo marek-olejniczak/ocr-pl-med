@@ -1,0 +1,51 @@
+src,tgt,kind,count,src_occ_in_gt,p_given_src,lift,category,n_groups,top_group,top_group_share,n_words,top_word,top_word_share,reported
+ci,u,2:1,94,307,0.3062,934.0,optyczne?,6,Zrzut ekranu 2026-05-07,0.44,30,kości,0.32,1
+cz,w,2:1,87,517,0.1683,67.0,optyczne?,7,Zrzut ekranu 2026-05-12,0.51,36,przyczep,0.16,1
+rz,n,2:1,65,673,0.0966,66.9,optyczne?,8,Zrzut ekranu 2026-05-07,0.32,45,powierzchnia,0.14,1
+ci,w,2:1,47,307,0.1531,272.7,optyczne?,7,Zrzut ekranu 2026-05-12,0.30,28,kości,0.21,1
+oc,a,2:1,26,169,0.1538,323.2,optyczne?,4,Zrzut ekranu 2026-05-12,0.42,8,boczny,0.27,1
+ls,b,2:1,23,42,0.5476,3259.0,optyczne?,5,Zrzut ekranu 2026-05-07,0.43,10,kulszowy,0.35,1
+k,lu,1:2,22,1526,0.0144,4311.2,optyczne?,5,Zrzut ekranu 2026-05-07,0.27,19,kresa,0.09,1
+d,ol,1:2,16,1302,0.0123,2360.6,optyczne?,5,anatomia_zmysly,0.44,16,dominuje,0.06,1
+ki,lu,2:2,12,200,0.0600,344.9,optyczne?,5,Noga,0.42,7,rzepki,0.33,1
+rz,a,2:1,11,673,0.0163,106.8,optyczne?,3,Zrzut ekranu 2026-05-07,0.45,9,przyczep,0.27,1
+śc,su,2:2,11,148,0.0743,6.5,optyczne?,4,Serce - Więcej Niż Lek,0.55,5,kości,0.45,1
+cz,wi,2:2,10,517,0.0193,19.5,optyczne?,2,Zrzut ekranu 2026-05-12,0.70,5,przyczep,0.60,1
+co,w,2:1,10,68,0.1471,684.3,optyczne?,4,Serce - Więcej Niż Lek,0.50,10,nieco,0.10,1
+rn,m,2:1,9,67,0.1343,926.9,optyczne?,5,data,0.44,8,podskórna,0.22,1
+b,lo,1:2,8,544,0.0147,2829.5,optyczne?,5,anatomia_zmysly,0.25,7,brzeg,0.25,1
+k,li,1:2,7,1526,0.0046,335.4,optyczne?,4,Zrzut ekranu 2026-05-07,0.29,6,międzykłykciowy,0.29,1
+as,o,2:1,7,94,0.0745,24.5,optyczne?,3,Zrzut ekranu 2026-05-12,0.43,6,zasłonowy,0.29,1
+ci,uj,2:2,7,307,0.0228,245.9,optyczne?,3,Zrzut ekranu 2026-05-07,0.43,6,nadkłykciowa,0.29,1
+ks,b,2:1,7,48,0.1458,130.6,optyczne?,4,Noga,0.43,6,większy,0.29,1
+sz,r,2:1,6,254,0.0236,45.6,optyczne?,4,Zrzut ekranu 2026-05-07,0.50,5,większe,0.33,1
+ko,ha,2:2,6,648,0.0093,1.9,optyczne?,3,Zrzut ekranu 2026-05-12,0.50,5,początkowy,0.33,0
+cz,ur,2:2,6,517,0.0116,21.7,optyczne?,3,Zrzut ekranu 2026-05-12,0.50,5,piszczelowej,0.33,1
+ą,"a,",1:2,6,232,0.0259,439.9,optyczne?,2,Zrzut ekranu 2026-05-12,0.50,6,należą,0.17,1
+ru,ni,2:2,5,85,0.0588,330.8,optyczne?,3,Noga,0.60,5,gruczoły,0.20,1
+ci,a,2:1,5,307,0.0163,444.5,optyczne?,3,anatomia_zmysly,0.60,3,wcięcie,0.40,1
+ta,ło,2:2,5,205,0.0244,2.9,optyczne?,2,Zrzut ekranu 2026-05-07,0.80,3,stawowe,0.40,0
+tr,ł,2:1,5,149,0.0336,13.7,optyczne?,3,Zrzut ekranu 2026-05-07,0.40,4,strzałkowa,0.40,1
+łk,th,2:2,5,52,0.0962,5.8,optyczne?,2,Noga,0.80,4,strzałkowy,0.40,1
+ko,b,2:1,5,648,0.0077,53.1,optyczne?,4,Noga,0.40,5,skokowa,0.20,1
+ń,ri,1:2,5,102,0.0490,1034.1,optyczne?,1,Zrzut ekranu 2026-05-12,1.00,1,końcowy,1.00,1
+rw,m,2:1,5,57,0.0877,1302.4,optyczne?,1,Noga,1.00,3,nerw,0.60,1
+dł,at,2:2,4,105,0.0381,57.2,optyczne?,2,data,0.50,3,gardło,0.50,0
+a,ol,1:2,4,2446,0.0016,29.2,optyczne?,2,anatomia_zmysly,0.75,4,dwunastnica,0.25,0
+za,ło,2:2,4,227,0.0176,22.1,optyczne?,1,anatomia_zmysly,1.00,4,zawzgórze,0.25,0
+cz,d,2:1,4,517,0.0077,71.6,optyczne?,3,Zrzut ekranu 2026-05-07,0.50,2,boczna,0.75,0
+cl,d,2:1,4,17,0.2353,759.0,optyczne?,2,Zrzut ekranu 2026-05-07,0.50,2,tubercle,0.50,0
+gó,od,2:2,4,61,0.0656,66.3,optyczne?,2,Zrzut ekranu 2026-05-07,0.50,3,górna,0.50,0
+ki,łu,2:2,4,200,0.0200,167.0,optyczne?,3,Zrzut ekranu 2026-05-07,0.50,2,rzepki,0.75,0
+ko,ła,2:2,4,648,0.0062,25.7,optyczne?,3,Zrzut ekranu 2026-05-07,0.50,4,podkolanowe,0.25,0
+ąc,ow,2:2,4,39,0.1026,18.3,optyczne?,2,Serce - Więcej Niż Lek,0.75,3,biegnące,0.50,0
+wł,ut,2:2,3,18,0.1667,159.8,optyczne?,1,anatomia_zmysly,1.00,2,włókna,0.67,0
+zę,e,2:1,3,51,0.0588,30.8,optyczne?,1,anatomia_zmysly,1.00,2,rzęskowy,0.67,0
+rz,o,2:1,3,673,0.0045,13.0,optyczne?,2,Zrzut ekranu 2026-05-07,0.67,3,przednim,0.33,0
+ch,ia,2:2,3,213,0.0141,4146.2,optyczne?,2,Zrzut ekranu 2026-05-07,0.67,1,powierzchnia,1.00,0
+cz,a,2:1,3,517,0.0058,39.0,optyczne?,2,Zrzut ekranu 2026-05-12,0.67,3,boczna,0.33,0
+st,oł,2:2,3,380,0.0079,3.6,optyczne?,2,Zrzut ekranu 2026-05-07,0.67,3,stawowa,0.33,0
+ki,w,2:1,3,200,0.0150,199.7,optyczne?,2,Zrzut ekranu 2026-05-07,0.67,2,kostki,0.67,0
+śr,si,2:2,3,94,0.0319,6.3,optyczne?,2,Noga,0.67,2,przyśrodkowa,0.67,0
+at,oł,2:2,3,123,0.0244,2.9,optyczne?,1,Noga,1.00,3,brzuchatym,0.33,0
+uj,w,2:1,3,44,0.0682,507.8,optyczne?,1,Serce - Więcej Niż Lek,1.00,1,ujście,1.00,0
