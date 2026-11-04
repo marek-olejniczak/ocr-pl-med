@@ -35,3 +35,6 @@ yolo_dataset/
 inference_compare/
 runs/
 wandb/
+
+# lokalny tracker issue/specy (docs/agents/issue-tracker.md), poza repo
+.scratch/
