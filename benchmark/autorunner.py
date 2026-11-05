@@ -243,7 +243,9 @@ class AutoRunner:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Autorunner benchmarku OCR")
     parser.add_argument("--build", action="store_true", help="Zbuduj obrazy Docker i zakoncz")
+    parser.add_argument("--config", default="experiments.yaml",
+                        help="Plik konfiguracji eksperymentu (domyslnie experiments.yaml)")
     args = parser.parse_args()
 
-    autorunner = AutoRunner()
+    autorunner = AutoRunner(args.config)
     autorunner.run(build_only=args.build)

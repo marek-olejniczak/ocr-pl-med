@@ -1,0 +1,47 @@
+# Benchmark PARSeq (docTR) zbudowany NA obrazie treningowym, a nie na
+# pytorch/pytorch:2.5.1-cuda12.1-cudnn9-runtime jak docker/parseq/Dockerfile.
+#
+# Powod: na serwerze partycja root (a wiec /var/lib/docker) jest zapelniona —
+# wolne ~2,8 GB, a sama baza pytorch/pytorch:2.5.1 po rozpakowaniu to ~7-8 GB
+# (do tego unpinned python-doctr/opencv z requirements.txt). Pelny build
+# zapelnilby / do 100% i zagrozil serwisom innych projektow (postgres, n8n,
+# opendicom, callens, amoz). Delta tutaj to ~150 MB.
+#
+# Ten sam manewr jest juz uzyty w repo po stronie treningu — patrz komentarz
+# w training/ocr/parseq/Dockerfile ("delta kilkunastu-warstwowego obrazu jest
+# bezpieczna (~100-300MB) w przeciwieństwie do pelnego rebuildu (2-4GB)").
+#
+# training-parseq-training:latest ma juz wszystko, czego wymaga
+# docker/parseq/requirements.txt poza serwerem HTTP: torch 2.7.1+cu118,
+# torchvision 0.22.1, python-doctr 1.1.0 (ta sama wersja, ktora trenowalismy —
+# na PyPI nadal najnowsza), opencv-python, pillow, numpy. Dlatego NIE robimy
+# `pip install -r requirements.txt`: dokladamy tylko fastapi/uvicorn, zeby nie
+# podmienic dzialajacego cv2 na wariant headless i nie ciagnac nowego torcha.
+#
+# Roznica wobec kanonicznego obrazu to wersja torch (2.7.1+cu118 vs 2.5.1+cu121)
+# — czyli blizej stacku, na ktorym powstanly nasze checkpointy.
+#
+# Uzywa go benchmark/experiments.parseq.yaml (service_name: parseq-trainbase);
+# kanoniczny serwis `parseq` i experiments.yaml zostaja bez zmian.
+#
+#   cd benchmark && docker compose build parseq-trainbase
+#
+# Uwaga dla maszyny bez obrazu bazowego: najpierw
+#   docker compose -f training/docker-compose.yml build parseq-training
+
+FROM training-parseq-training:latest
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir --timeout 300 --retries 10 \
+	"fastapi>=0.115.0" \
+	"uvicorn[standard]>=0.30.0"
+
+COPY docker/common.py docker/common.py
+COPY docker/logging_utils.py docker/logging_utils.py
+COPY docker/parseq docker/parseq
+COPY modele/__init__.py modele/__init__.py
+COPY modele/base_wrapper.py modele/base_wrapper.py
+COPY modele/parseq_wrapper.py modele/parseq_wrapper.py
+
+CMD ["uvicorn", "docker.parseq.app:app", "--host", "0.0.0.0", "--port", "8000"]

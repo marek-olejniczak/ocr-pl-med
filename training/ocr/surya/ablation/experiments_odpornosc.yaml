@@ -1,0 +1,62 @@
+# Wygenerowane przez text-gen (runda 2 ablacji, 2026-10). Uruchomienie:
+#   cd benchmark && python autorunner.py --config ../training/ocr/surya/ablation/experiments_odpornosc.yaml
+experiment:
+  name: ocr-odpornosc
+  project_name: ocr-benchmark
+  wandb_entity: ocr-pl-med
+  tags:
+  - autorun
+  - http
+  - sequential
+  - server
+  - odpornosc
+  hardware_note: Nvidia RTX 3090, 24GB VRAM
+settings:
+  output_dir: wyniki
+  export_overleaf_table: false
+  auto_start_services: true
+  stop_service_after_run: true
+  sequential: true
+  warmup_samples: 1
+  cooldown_seconds: 5
+  restart_docker_per_dataset: false
+  http_timeout_default: 120
+  wandb_log: false
+datasets:
+- id: robustness
+  enabled: true
+  labels_csv: dane/robustness/labels.csv
+  images_dir: dane/robustness/images
+  limit: null
+  single_words: false
+- id: v2_val10k
+  enabled: true
+  labels_csv: dane/v2_val10k/labels.csv
+  images_dir: dane/v2_val10k/images
+  limit: null
+  single_words: false
+models:
+- id: surya_lora_ocr800k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/ocr800k-lora-r64/adapter
+- id: surya_lora_v2_800k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/v2_800k-lora-r64/adapter

@@ -13,7 +13,10 @@ per-line detection score, so score = 1.0 (note: ECE is degenerate for Kraken).
 
 import argparse
 import json
+import os
 import platform
+import re
+import shutil
 import statistics
 import subprocess
 import time
@@ -44,23 +47,97 @@ def speed_stats(speeds_ms):
             "ms_per_image_median": float(statistics.median(speeds_ms))}
 
 
+EPOCH_CKPT = re.compile(r"^model_(\d+)\.mlmodel$")
+
+
+def resolve_checkpoint(out):
+    """ketos writes model_<epoch>.mlmodel every epoch and model_best.mlmodel
+    only when validation picked a winner - a single-epoch run leaves none. The
+    benchmark contract is model_best, so fall back to the last epoch."""
+    out = Path(out)
+    best = out / "model_best.mlmodel"
+    if best.exists():
+        return best, "best"
+    epochs = []
+    for path in out.glob("model_*.mlmodel"):
+        m = EPOCH_CKPT.match(path.name)
+        if m:
+            epochs.append((int(m.group(1)), path))
+    if not epochs:
+        return None, None
+    last = max(epochs)[1]
+    shutil.copy2(last, best)
+    return best, last.stem
+
+
+def ketos_device(device):
+    """kraken indexes the device string past the colon, so a bare 'cuda' dies
+    with IndexError before training starts."""
+    d = device or "cuda"
+    return f"{d}:0" if d == "cuda" else d
+
+
+def run_logged(cmd, log_path):
+    """Run a subprocess, tee its output to log_path with elapsed seconds in
+    front of every line, return the total. ketos prints its own progress in a
+    format that moves between versions, so we timestamp instead of parsing:
+    per-epoch times stay recoverable from the log whatever it prints."""
+    t0 = time.perf_counter()
+    with open(log_path, "w") as log:
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT, text=True, bufsize=1)
+        for line in proc.stdout:
+            log.write(f"{time.perf_counter() - t0:9.2f} {line}")
+            print(line, end="")
+        proc.wait()
+    if proc.returncode:
+        raise SystemExit(f"ketos segtrain failed ({proc.returncode}); "
+                         f"see {log_path}")
+    return time.perf_counter() - t0
+
+
 def cmd_train(args):
     # ketos segtrain is the stable interface (CLI), so we shell out rather than
     # bind to a churning Python API. PAGE XML produced by to_pagexml.py.
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
+    from training_diagnostics.timing import epoch_cost
+
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     xmls = sorted(str(p) for p in Path(args.data).glob("*.xml"))
     if not xmls:
         raise SystemExit(f"no PAGE XML in {args.data} (run to_pagexml first)")
-    cmd = ["ketos", "segtrain", "-f", "page",
+    # -v before the subcommand: kraken builds a lightning RichProgressBar only
+    # when not verbose, and the image pairs rich 15 with lightning 2.4, where
+    # clear_live() pops an empty stack. Verbose output is what the timestamped
+    # log wants anyway.
+    cmd = ["ketos", "-v", "segtrain", "-f", "page",
            "-o", str(out / "model"),
            "--epochs", str(args.epochs),
            "-r", str(args.lr0),
-           "--device", args.device or "cuda",
+           "--device", ketos_device(args.device),
            *xmls]
     print("running:", " ".join(cmd[:8]), f"... ({len(xmls)} xml)")
-    subprocess.run(cmd, check=True)   # writes out/model_best.mlmodel
-    print(f"best checkpoint: {out / 'model_best.mlmodel'}")
+    log_path = out / "segtrain.log"
+    total_s = run_logged(cmd, log_path)   # writes out/model_best.mlmodel
+
+    cost = {**epoch_cost(total_s, args.epochs, len(xmls)),
+            "git_commit": os.environ.get("GIT_COMMIT"),
+            "note": "averages over the epochs requested; if ketos stopped "
+                    "early the per-epoch figure is a lower bound - "
+                    f"{log_path.name} carries the real timings"}
+    (out / "epoch_cost.json").write_text(json.dumps(cost, indent=2))
+    print(f"{total_s / 60:.1f} min for {len(xmls)} pages x {args.epochs} epochs "
+          f"({cost['s_per_page_per_epoch'] * 1000:.0f} ms/page/epoch)")
+
+    ckpt, source = resolve_checkpoint(out)
+    if ckpt is None:
+        raise SystemExit(f"segtrain wrote no checkpoint into {out}")
+    if source != "best":
+        print(f"no model_best.mlmodel from ketos; using {source}")
+    print(f"best checkpoint: {ckpt}")
 
 
 def cmd_predict(args):
@@ -69,6 +146,7 @@ def cmd_predict(args):
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
     from common.resources import reset_gpu_peak, resource_meta
+    from common.resume import PredictionLog
     from PIL import Image
     from kraken import blla
     from kraken.lib import vgsl
@@ -91,8 +169,12 @@ def cmd_predict(args):
 
     dev = args.device or "cuda"   # blla.segment defaults to cpu; we want GPU
     images = coco["images"][:args.limit] if args.limit else coco["images"]
-    predictions, speeds = [], []
+    log = PredictionLog(out / "predictions.jsonl")
+    if len(log):
+        print(f"resuming: {len(log)} of {len(images)} images already done")
     for img in tqdm(images, desc="kraken predict"):
+        if log.done(img["id"]):
+            continue
         path = Path(args.images_root) / img["file_name"]
         try:
             im = Image.open(path).convert("RGB")
@@ -100,11 +182,12 @@ def cmd_predict(args):
             continue
         t0 = time.perf_counter()
         seg = blla.segment(im, model=model, device=dev)
-        speeds.append((time.perf_counter() - t0) * 1000.0)
+        ms = (time.perf_counter() - t0) * 1000.0
         boundaries = [getattr(ln, "boundary", None) for ln in seg.lines]
-        predictions.extend(lines_to_coco(boundaries, img["id"]))
+        log.add(img["id"], lines_to_coco(boundaries, img["id"]), ms)
 
-    (out / "predictions.json").write_text(json.dumps(predictions))
+    speeds = log.speeds()
+    predictions = log.finish(out / "predictions.json")
 
     import kraken
     meta = {"model": "kraken-blla", "weights": str(args.weights),
@@ -132,6 +215,7 @@ def main(argv=None):
     t.add_argument("--lr0", type=float, default=0.0002)   # -> ketos -r
     t.add_argument("--imgsz", type=int, default=640)   # accepted, unused
     t.add_argument("--batch", type=int, default=1)     # accepted, unused
+    t.add_argument("--nbs", type=int, default=64)      # accepted, unused
     t.add_argument("--device", default=None)
     t.set_defaults(fn=cmd_train)
 

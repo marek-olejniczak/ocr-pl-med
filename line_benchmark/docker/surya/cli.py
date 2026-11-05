@@ -50,6 +50,7 @@ def cmd_predict(args):
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # line_benchmark/
     from common.resources import reset_gpu_peak, resource_meta
+    from common.resume import PredictionLog
     from PIL import Image
     from surya.detection import DetectionPredictor
 
@@ -59,8 +60,12 @@ def cmd_predict(args):
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    predictions, speeds = [], []
+    log = PredictionLog(out / "predictions.jsonl")
+    if len(log):
+        print(f"resuming: {len(log)} of {len(coco['images'])} images already done")
     for img in coco["images"]:
+        if log.done(img["id"]):
+            continue
         path = Path(args.images_root) / img["file_name"]
         try:
             image = Image.open(path).convert("RGB")
@@ -68,15 +73,16 @@ def cmd_predict(args):
             continue
         t0 = time.perf_counter()
         result = det([image])[0]
-        speeds.append((time.perf_counter() - t0) * 1000.0)
+        ms = (time.perf_counter() - t0) * 1000.0
         bboxes_conf = [
             (b.bbox, b.confidence if b.confidence is not None else 1.0)
             for b in result.bboxes
             if (b.confidence if b.confidence is not None else 1.0) >= args.conf
         ]
-        predictions.extend(detections_to_coco(bboxes_conf, img["id"]))
+        log.add(img["id"], detections_to_coco(bboxes_conf, img["id"]), ms)
 
-    (out / "predictions.json").write_text(json.dumps(predictions))
+    speeds = log.speeds()
+    predictions = log.finish(out / "predictions.json")
 
     import surya
     meta = {"model": "surya-detection", "weights": str(args.weights),

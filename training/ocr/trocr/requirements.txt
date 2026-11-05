@@ -1,0 +1,24 @@
+# TrOCR training stack (VisionEncoderDecoderModel + Seq2SeqTrainer)
+#
+# Obraz bazowy training-surya-training:latest ma już: torch 2.7.1, torchvision
+# 0.22.1, peft, datasets, accelerate, wandb, pillow, numpy. Poniższe wersje
+# są zgodne z tym obrazem (pip potwierdza satysfakcję i niczego nie reinstaluje).
+#
+# KLUCZOWA RÓŻNICA vs Surya: transformers 5.0.0 (nie 4.56.1). Polski TrOCR
+# (PET3R12/trocr-base-polish-handwriting) jest zapisany z transformers 5.0.0 —
+# nowe processor_config.json zamiast preprocessor_config.json. transformers 4.56.1
+# (obraz Suryi) nie wczyta tego modelu.
+torch==2.7.1
+torchvision==0.22.1
+transformers==5.0.0
+pillow>=10.0.0
+numpy>=1.26.0
+
+# Seq2SeqTrainer (trening TrOCR)
+datasets>=3.0.0
+accelerate>=1.0.0
+sentencepiece>=0.2.0    # tokenizer Roberta
+protobuf>=5.0.0
+
+# Opcjonalne
+wandb>=0.18.0           # logowanie do W&B

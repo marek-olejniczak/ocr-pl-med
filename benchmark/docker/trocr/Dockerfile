@@ -1,4 +1,13 @@
-FROM pytorch/pytorch:2.6.0-cuda12.4-cudnn9-runtime
+# TrOCR benchmark service
+#
+# Bazuje na obrazie treningowym TrOCR (training-trocr-training:latest: torch
+# 2.7.1+cu118, transformers 5.0.0, peft, datasets, wandb). Polski TrOCR
+# (PET3R12/trocr-base-polish-handwriting) i nasz fine-tune są zapisane z
+# transformers 5.0.0 (plik processor_config.json) — na obrazie z transformers 4.x
+# (dawny FROM pytorch/pytorch:2.6.0) się nie załadują.
+# Delta względem obrazu treningowego jest mała (~100-200MB), co jest bezpieczne
+# przy 99% pełnej partycji root /var/lib/docker.
+FROM training-trocr-training:latest
 
 WORKDIR /app
 

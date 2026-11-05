@@ -1,0 +1,9 @@
+# docTR PARSeq (recognition). Bazuje na training-surya-training:latest, które ma
+# torch 2.7.1+cu118, torchvision 0.22.1, wandb — python-doctr 1.1.0 deklaruje je
+# jako TWARDE zależności (torch<3,>=2.0; torchvision>=0.15), ale że są już
+# spełnione, pip ich nie rusza.
+#
+# Uwaga: od python-doctr 1.1.0 nie ma już extra "[torch]" — wystarczy zwykły
+# "python-doctr". opencv-python (pełny, wymagany przez docTR) dobiera się sam;
+# potrzebuje systemowych libgl1/libglib2.0-0 — apt-get w Dockerfile.
+python-doctr==1.1.0

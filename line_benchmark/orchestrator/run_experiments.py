@@ -16,6 +16,7 @@ Usage (from line_benchmark/):
 
 import argparse
 import csv
+import os
 import subprocess
 import sys
 from datetime import datetime
@@ -26,6 +27,8 @@ import yaml
 BENCH_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BENCH_ROOT))
 
+from common.batching import describe, effective_batch  # noqa: E402
+
 # canonical checkpoint to evaluate, per framework (best_<metric>.pt are analysis extras)
 CKPT_REL = {
     "ultralytics": "train/weights/best.pt",  # ultralytics fitness
@@ -34,9 +37,31 @@ CKPT_REL = {
 }
 DEFAULT_CKPT = "train/weights/best.pt"
 
+# CLIs that understand the wandb grouping flags
+WANDB_SERVICES = {"ultralytics", "detectron2"}
+
 
 def _ckpt_rel(service):
     return CKPT_REL.get(service, DEFAULT_CKPT)
+
+
+def git_commit():
+    """Containers only get line_benchmark/ bind-mounted, so .git is not visible
+    inside them; the commit has to come in as an environment variable."""
+    try:
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+                              cwd=BENCH_ROOT, capture_output=True, text=True,
+                              timeout=5).stdout.strip() or None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def job_env(base=None):
+    env = dict(os.environ if base is None else base)
+    sha = git_commit()
+    if sha:
+        env["GIT_COMMIT"] = sha
+    return env
 
 
 def load_config(path):
@@ -49,10 +74,14 @@ def build_matrix(cfg, results_dir="results"):
     # the dataset belongs in the id: the same model and variant get retrained
     # on other datasets, and every layout is materialized to the same paths
     prefix = f"{cfg['dataset']}_" if cfg.get("dataset") else ""
+    # run 1 answered the preprocessing question (prep never won), so training
+    # can sit on one variant while evaluation still covers both
+    train_variants = cfg.get("train_variants") or list(cfg["data"])
     for model, mc in cfg["models"].items():
         ckpts = {}
         if mc.get("finetune"):
-            for variant, dc in cfg["data"].items():
+            for variant in train_variants:
+                dc = cfg["data"][variant]
                 train_id = f"{prefix}{model}_ft-{variant}"
                 ckpts[train_id] = (f"{results_dir}/checkpoints/{train_id}/"
                                    f"{_ckpt_rel(mc['service'])}")
@@ -80,6 +109,38 @@ def build_matrix(cfg, results_dir="results"):
     return jobs
 
 
+def wandb_flags(cfg, job, imgsz, batch, nbs):
+    """Group by campaign, not by dataset: re-running the matrix on the same
+    data produced runs with identical names last time, separable only by
+    wandb's own id."""
+    dataset = cfg.get("dataset", "")
+    run = str(cfg.get("run", "")) or None
+    group = "/".join(x for x in (dataset, run) if x)
+    tags = [dataset, run, job["model"], job["service"], "ft", job["variant"],
+            f"imgsz{imgsz}"]
+    notes = [cfg.get("notes", "").strip()]
+    if nbs:
+        tags.append(f"eb{effective_batch(nbs, batch)}")
+        # the run's own batching, spelled out where the UI shows it without
+        # opening the config
+        notes.append(describe(nbs, batch))
+    out = []
+    if group:
+        out += ["--wandb-group", group]
+    note = " | ".join(n for n in notes if n)
+    if note:
+        out += ["--wandb-notes", note]
+    return [*out, "--wandb-tags", ",".join(t for t in tags if t)]
+
+
+def train_args(mc):
+    """Any other CLI flag, by name: {"weight-decay": 1e-4} -> --weight-decay
+    0.0001. HPO trials put their values here, so a trial is the exact command
+    line a matrix run would be, plus the tuned flags."""
+    return [x for flag, value in (mc.get("train_args") or {}).items()
+            for x in (f"--{flag}", str(value))]
+
+
 def job_command(job, cfg, local, results_dir="results"):
     d = cfg["defaults"]
     if job["kind"] == "train":
@@ -90,6 +151,9 @@ def job_command(job, cfg, local, results_dir="results"):
         # heavier backbones need their own batch/imgsz: one 24 GB card, and a
         # detector that fits at nano scale does not fit at rtdetr-l scale
         batch = mc.get("batch", d["batch"])
+        # what fits on the card varies per model; the batch the optimizer sees
+        # must not, or the models are not comparable
+        nbs = mc.get("nbs", d.get("nbs"))
         imgsz = mc.get("imgsz", d["imgsz"])
         mosaic = mc.get("mosaic", d.get("mosaic"))
         # data_format seam: YOLO models take a data.yaml; COCO-native frameworks
@@ -107,12 +171,8 @@ def job_command(job, cfg, local, results_dir="results"):
         # train flags are framework-specific (--line-val/--diagnostics are
         # ultralytics-only); per-model override falls back to defaults
         flags = mc.get("train_flags", d.get("train_flags", []))
-        # wandb grouping is ultralytics-only (the other CLIs have no such flags)
-        if "--wandb" in flags and job["service"] == "ultralytics":
-            if cfg.get("dataset"):
-                flags = [*flags, "--wandb-group", cfg["dataset"]]
-            flags = [*flags, "--wandb-tags",
-                     ",".join([job["model"], "ft", job["variant"]])]
+        if "--wandb" in flags and job["service"] in WANDB_SERVICES:
+            flags = [*flags, *wandb_flags(cfg, job, imgsz, batch, nbs)]
         argv = ["python", f"docker/{job['service']}/cli.py", "train",
                 "--weights", job["weights"],
                 *data_args,
@@ -120,8 +180,10 @@ def job_command(job, cfg, local, results_dir="results"):
                 "--epochs", str(mc.get("epochs", d["epochs"])),
                 "--imgsz", str(imgsz),
                 "--batch", str(batch),
+                *(["--nbs", str(nbs)] if nbs is not None else []),
                 *(["--lr0", str(lr0)] if lr0 is not None else []),
                 *(["--mosaic", str(mosaic)] if mosaic is not None else []),
+                *train_args(mc),
                 *flags]
     elif job["kind"] == "predict":
         argv = ["python", f"docker/{job['service']}/cli.py", "predict",
@@ -194,6 +256,7 @@ def main(argv=None):
     if args.stage:
         jobs = [j for j in jobs if j["kind"] == args.stage]
 
+    env = job_env()
     ran = skipped = failed = 0
     for job in jobs:
         cmd = job_command(job, cfg, args.local, args.results_dir)
@@ -209,7 +272,7 @@ def main(argv=None):
         print(f"run   {job['kind']:8s} {job['exp_id']}")
         # cwd pinned to line_benchmark/ so relative script paths resolve no matter
         # where the runner itself was invoked from
-        result = subprocess.run(cmd, cwd=BENCH_ROOT)
+        result = subprocess.run(cmd, cwd=BENCH_ROOT, env=env)
         if result.returncode == 0:
             _log_run(args.results_dir, job, "ok")
             ran += 1
