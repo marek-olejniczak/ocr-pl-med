@@ -18,7 +18,7 @@
 set -u
 cd "$(dirname "$0")/../../../.." || exit 1
 
-DATA_ROOT="${DATA_ROOT:-dataset}"                       # dataset/<name>/images_shards + labels.jsonl
+DATA_ROOT="${DATA_ROOT:-dataset/train/ocr}"             # <DATA_ROOT>/<name>/images_shards + labels.jsonl
 PROCESSED="${PROCESSED:-training/data/processed}"       # converted Surya-format data
 RESULTS="${RESULTS:-training/results/ocr/surya}"
 COMPOSE=(docker compose -f training/docker-compose.yml run --rm surya-training)

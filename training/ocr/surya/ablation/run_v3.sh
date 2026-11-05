@@ -2,7 +2,7 @@
 # Generator v3 pilot in one go: seven trainings, then the benchmark of eight models.
 # Run inside tmux, from anywhere:
 #   bash ~/ocr-pl-med/training/ocr/surya/ablation/run_v3.sh
-# Needs dataset/v3_base_200k, dataset/v3_200k and dataset/v3_no_*_200k (dvc pull).
+# Needs dataset/train/ocr/v3_base_200k, v3_200k and v3_no_*_200k (dvc pull).
 # A finished training is skipped, so after an interruption just start it again.
 set -u
 cd "$(dirname "$0")/../../../.." || exit 1

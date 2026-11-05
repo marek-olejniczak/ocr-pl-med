@@ -9,9 +9,12 @@ still carry a valid box, so they count for detection while staying out of
 the OCR ground truth: the transcription is written to the annotation's
 `text` field and left null for them (e2e_benchmark/gt.py reads that field).
 
+dataset/test/real/v1 already ships this as annotations/instances.json; the
+converter is for raw labeling-tool exports.
+
 Usage (from line_benchmark/):
-    python data_prep/converters/manual_to_coco.py --csv ../dataset/annotations.csv \\
-        --dataset-root ../dataset --out dataset/annotations/instances_manual.json \\
+    python data_prep/converters/manual_to_coco.py --csv <export>/annotations.csv \\
+        --dataset-root <export> --out dataset/annotations/instances_manual.json \\
         --images-out dataset/real_scans
 """
 

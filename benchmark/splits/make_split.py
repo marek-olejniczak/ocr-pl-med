@@ -13,17 +13,12 @@ import re
 import sys
 from pathlib import Path
 
-TEST_SOURCES = {"anatomia_zmysly", "Noga", "13) Unaczynienie Miednica"}
+TEST_SOURCES = {"anatomia_zmysly_foto", "noga", "miednica"}
 
 
 def source_group(file_name: str) -> str:
-    """Zeszyt z nazwy pliku linii (jak error_analysis/analyze_ngram.py)."""
-    stem = re.sub(r"_line\d+\.\w+$", "", file_name)
-    stem = re.sub(r"_page\d+$", "", stem)
-    stem = re.sub(r"^(Zrzut ekranu \d{4}-\d{2}-\d{2}).*$", r"\1", stem)
-    stem = re.sub(r"^data\d+$", "data", stem)
-    stem = re.sub(r"_\d+$", "", stem)
-    return stem
+    """Zeszyt z nazwy wycinka: <dokument>_p<NN>[_tytuł]_l<NNN>.jpg (dataset/test/real/v1)."""
+    return re.match(r"(.+?)_p\d+", file_name).group(1)
 
 
 def main() -> None:

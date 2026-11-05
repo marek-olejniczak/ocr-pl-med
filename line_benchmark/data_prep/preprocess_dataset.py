@@ -7,7 +7,7 @@ relative to --images-root.
 
 Usage (from line_benchmark/):
     python data_prep/preprocess_dataset.py \
-        --images-root ../../dataset --out-dir dataset/prep --workers 8
+        --images-root ../../dataset/train/detection --out-dir dataset/prep --workers 8
 """
 
 import argparse

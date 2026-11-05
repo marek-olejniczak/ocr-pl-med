@@ -12,7 +12,7 @@
 #   docker compose -f training/docker-compose.yml build surya-training
 #   docker compose -f training/docker-compose.yml run --rm surya-training \
 #       python training/ocr/surya/convert_data.py ocr800k \
-#       --input dataset/ocr_800k --output training/data/processed/surya
+#       --input dataset/train/ocr/ocr_800k --output training/data/processed/surya
 #   docker compose -f training/docker-compose.yml run --rm surya-training \
 #       python training/ocr/surya/cli.py \
 #       --train-metadata training/data/processed/surya/train/metadata.jsonl \

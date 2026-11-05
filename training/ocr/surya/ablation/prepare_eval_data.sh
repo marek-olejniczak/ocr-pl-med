@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Unpack the round-two evaluation sets from dataset/ (pulled with DVC) into
 # benchmark/dane/, where the benchmark configs expect them.
-#   dvc pull dataset/robustness dataset/v2_val10k
+#   dvc pull dataset/test/synthetic/robustness dataset/train/ocr/v2_val10k
 #   bash training/ocr/surya/ablation/prepare_eval_data.sh
 set -euo pipefail
 cd "$(dirname "$0")/../../../.."
 
-for name in robustness v2_val10k; do
-  src="dataset/$name"
+for src in dataset/test/synthetic/robustness dataset/train/ocr/v2_val10k; do
+  name=$(basename "$src")
   dst="benchmark/dane/$name"
   if [[ ! -f "$src/labels.csv" ]]; then
     echo "== brak $src - najpierw: dvc pull $src"
