@@ -30,7 +30,7 @@ from fetch_resources import cache_dir
 from pp.candidates import Prefilter
 from pp.decide import DecisionParams, Scored, best_two, decide, score_key
 from pp.error_model import ErrorModel, Params, word_pairs
-from pp.lexicon import Lexicon, fold
+from pp.lexicon import Lexicon, domain_terms, fold
 from pp.lm import UnigramLM
 from pp.protect import protected_class, train_abbreviations, upper_share
 from pp.tokenize import is_word, restore_case, split_token, token_pairs, tokenize
@@ -93,11 +93,12 @@ def eligible(d: Data, i: int, pi: int, abbrev, disabled=()) -> bool:
 class Fold:
     """Model kanału + skróty wyuczone na zbiorze linii `train`; ocenia klucze z linii `evals`."""
 
-    def __init__(self, d: Data, lex: Lexicon, lm: UnigramLM, train: list[int], em: Params, forward: bool = False):
+    def __init__(self, d: Data, lex: Lexicon, lm: UnigramLM, train: list[int], em: Params, forward: bool = False,
+                 protect: frozenset[str] = frozenset()):
         self.forward = forward
         self.model = ErrorModel.fit(word_pairs([d.gts[i] for i in train], [d.prs[i] for i in train],
                                                [d.groups[i] for i in train]), em)
-        self.abbrev = lex.abbrev | train_abbreviations((d.gts[i] for i in train), lex.known)
+        self.abbrev = lex.abbrev | train_abbreviations((d.gts[i] for i in train), lex.known) | protect
         self.lm = lm
         self._sc: dict[str, Scored] = {}
 
@@ -210,6 +211,9 @@ def main() -> None:
     ap.add_argument("--no-protect", action="store_true", help="ablacja: bez klas chronionych P2–P8 (P1 zostaje)")
     ap.add_argument("--sjp", action="store_true", help="ablacja: + sjp odmiany")
     ap.add_argument("--forward", action="store_true", help="ablacja: forward (suma po ścieżkach) zamiast Viterbi")
+    ap.add_argument("--domain", default="", help="języki listy TA chroniącej terminy, np. la,pl albo en,la,pl; "
+                                                 "domyślnie wyłączona; progi stroimy bez niej")
+    ap.add_argument("--domain-in-tuning", action="store_true", help="ablacja: lista także przy strojeniu progów")
     ap.add_argument("--diacritics-only", action="store_true", help="ablacja: opcja 2 osobno (tylko warianty diakrytyczne)")
     ap.add_argument("--harm-max", type=float, default=HARM_MAX, help="limit harm na walidacji wewnętrznej")
     ap.add_argument("--deploy", action="store_true",
@@ -217,6 +221,8 @@ def main() -> None:
     ap.add_argument("--dump", type=Path, help="zapisz predykcje out-of-fold (z tekstem linii, poza repo!)")
     a = ap.parse_args()
     t0 = time.time()
+    terms = frozenset(domain_terms(a.domain.split(","))) if a.domain else frozenset()
+    tuned_terms = terms if a.domain_in_tuning else frozenset()
     lex = Lexicon(use_sjp=a.sjp)
     lm = UnigramLM(lex.targets())
     lp_unseen = math.log(lm.unseen) - lm.logz
@@ -246,11 +252,11 @@ def main() -> None:
         t1 = time.time()
         recs, ok = [], 0
         for h, itrain, itest in inner:
-            f_in = Fold(d, lex, lm, itrain, em, a.forward)
+            f_in = Fold(d, lex, lm, itrain, em, a.forward, tuned_terms)
             recs += records(d, f_in, itest, disabled)
             ok += n_correct(d, itest)
         p, info = tune(d, recs, ok, lp_unseen, a.harm_max)
-        f_out = Fold(d, lex, lm, train, em, a.forward)
+        f_out = Fold(d, lex, lm, train, em, a.forward, terms)
         apply(d, f_out, test, p, lp_unseen, out, disabled)
         lost = lost_paths(d, f_out, lex, test, p)
         tt = compare([d.gts[i] for i in test], [d.prs[i] for i in test], [out[i] for i in test],

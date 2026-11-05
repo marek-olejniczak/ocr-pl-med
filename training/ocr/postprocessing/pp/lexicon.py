@@ -18,6 +18,7 @@ import zipfile
 from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
+from typing import Iterable
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from fetch_resources import cache_dir, resource_path  # noqa: E402
@@ -27,6 +28,9 @@ SJP = "sjp-odm-20261101.zip"
 COMMON_CATEGORIES = {"", "nazwa_pospolita"}
 LETTER_RUN = re.compile(r"[^\W\d_]+")
 FRAGMENT = 16  # człon hasła wieloczłonowego / z dywizem: tylko do known()
+DOMAIN_TERMS = Path(__file__).resolve().parent.parent / "data" / "domain" / "ta_terms.tsv"
+MIN_DOMAIN_LEN = 4
+DOMAIN_LANGS = {"en", "la", "pl"}
 
 # Skróty anatomiczne z TA98 (User Guide, ticket 04), małymi literami, bez kropki.
 TA98_ABBREV = {"a", "aa", "lig", "ligg", "m", "mm", "n", "nn", "r", "rr", "v", "vv"}
@@ -99,6 +103,24 @@ def sjp_forms() -> frozenset[str]:
                 forms.update(r.lower() for r in LETTER_RUN.findall(w))
     cached.write_text("\n".join(sorted(forms)), encoding="utf-8")
     return frozenset(forms)
+
+
+def domain_terms(langs: Iterable[str], path: Path = DOMAIN_TERMS) -> set[str]:
+    """Terminy anatomiczne z wybranych języków (en, la, pl), do `Lexicon(extra_known=...)`.
+
+    Słowo należy do wyniku, jeśli ma etykietę w co najmniej jednym z języków: `femur` zostaje przy
+    samym `la`, a `muscle` (tylko en) nie. Pusty wybór daje pusty zbiór, czyli listę wyłączoną.
+    """
+    want = set(langs)
+    if want - DOMAIN_LANGS:
+        raise ValueError(f"nieznane języki: {sorted(want - DOMAIN_LANGS)}")
+    out = set()
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            word, word_langs = line.rstrip("\n").split("\t")
+            if want & set(word_langs.split(",")):
+                out.add(word)
+    return out
 
 
 class Lexicon:

@@ -1,4 +1,4 @@
-"""P0: metrics.py odtwarza CER/WER baseline z eval_cer.py (metrics.json, 2026-10-01)."""
+"""P0: metrics.py odtwarza CER/WER baseline z eval_cer.py (metrics.json, dataset-v1)."""
 
 from __future__ import annotations
 
@@ -21,14 +21,11 @@ def rows():
 
 
 def test_baseline_matches_metrics_json(rows):
-    # metrics.json to wynik eval_cer.py na GT sprzed poprawki diakrytyków (0.12769 / 0.48174).
-    # predictions.jsonl ma GT po poprawce 39 tokenów (2026-11-04, results/suspect_gt_diacritics.csv).
     ref = json.loads((BASELINE_DIR / "metrics.json").read_text())["metrics"]
-    assert ref["cer"] == pytest.approx(0.12769, abs=1e-5)
     s = score([r["ground_truth"] for r in rows], [r["prediction"] for r in rows])
     assert s.n == 2160
-    assert s.cer == pytest.approx(0.12727, abs=1e-5)
-    assert s.wer == pytest.approx(0.47942, abs=1e-5)
+    assert s.cer == pytest.approx(ref["cer"], abs=1e-6)
+    assert s.wer == pytest.approx(ref["wer"], abs=1e-6)
 
 
 def test_nfc_is_noop_on_baseline(rows):

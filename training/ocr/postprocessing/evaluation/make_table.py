@@ -14,16 +14,20 @@ RESULTS = Path(__file__).resolve().parent.parent / "results"
 
 LABELS = [
     # (variant, split, opis)
-    ("option1_harm03_gtfix", "fine", "**opcja 1 (główny, harm ≤ 0.3%), GT po poprawce 39 tokenów; baseline 0.12727**"),
-    ("option1_harm03", "fine", "**opcja 1 (główny, harm ≤ 0.3%)**, GT przed poprawką"),
-    ("option1", "fine", "opcja 1, harm ≤ 0.5%"),
-    ("abl_no_multi", "fine", "ablacja: bez jednostek wieloznakowych"),
-    ("abl_no_protect", "fine", "ablacja: bez klas chronionych P2–P8"),
-    ("abl_option2_only", "fine", "opcja 2 osobno (tylko diakrytyki)"),
-    ("abl_sjp", "fine", "ablacja: + sjp odmiany"),
-    ("abl_forward", "fine", "ablacja: forward zamiast Viterbi"),
-    ("option1_harm03", "coarse", "test odporności: podział gruby (6 grup), harm ≤ 0.3%"),
-    ("option1", "coarse", "podział gruby, harm ≤ 0.5%"),
+    ("v1_ta", "fine", "**główny: dataset-v1, lista TA en,la,pl, progi strojone bez listy**"),
+    ("v1_base", "fine", "dataset-v1, bez listy"),
+    ("v1_lapl", "fine", "dataset-v1, lista TA la,pl"),
+    ("v1_ta_tuned", "fine", "ablacja dataset-v1: lista także w strojeniu (luźniejsze progi)"),
+    ("option1_harm03_gtfix", "fine", "hist.: opcja 1, predykcje z 1.10, GT po poprawce; baseline 0.12727"),
+    ("option1_harm03", "fine", "hist.: opcja 1, predykcje z 1.10, GT przed poprawką; baseline 0.12769"),
+    ("option1", "fine", "hist.: harm ≤ 0.5%"),
+    ("abl_no_multi", "fine", "hist. ablacja: bez jednostek wieloznakowych"),
+    ("abl_no_protect", "fine", "hist. ablacja: bez klas chronionych P2–P8"),
+    ("abl_option2_only", "fine", "hist.: opcja 2 osobno (tylko diakrytyki)"),
+    ("abl_sjp", "fine", "hist. ablacja: + sjp odmiany"),
+    ("abl_forward", "fine", "hist. ablacja: forward zamiast Viterbi"),
+    ("option1_harm03", "coarse", "hist.: test odporności, podział gruby (6 grup), harm ≤ 0.3%"),
+    ("option1", "coarse", "hist.: podział gruby, harm ≤ 0.5%"),
 ]
 ORACLES = [
     ("O1_oov->GT_inlex_lev<=2", "oracle: OOV → GT (GT w słowniku, lev ≤ 2)"),
@@ -41,13 +45,14 @@ def main() -> None:
     with open(RESULTS / "p4_summary.csv", encoding="utf-8") as f:
         for r in csv.DictReader(f):
             summ[(r["variant"], r["split"])] = r  # ostatni wpis wygrywa
-    base = next(iter(summ.values()))
+    base = summ[("v1_ta", "fine")]
     head = ("| wariant | CER | CER pomocn. | WER | ΔCER p.p. | Δ wzgl. | 95% CI grupy | 95% CI linie | p (znaki) "
             "| fixed / broken / ch-wrong / net | prec. | recall | harm |")
     lines = ["# Tabela wyników (generowana: `python -m evaluation.make_table`)", "",
-             "Predykcje out-of-fold, zagnieżdżone LOGO, 2160 linii handlabeled. ΔCER względem baseline.", "",
+             "Predykcje out-of-fold, zagnieżdżone LOGO, 2160 linii handlabeled. ΔCER względem baseline swojego wiersza. "
+             "Wiersze „hist.” dotyczą predykcji z 2026-10-01 i starszego GT; oracle i opcja 0 także.", "",
              head, "|" + "---|" * 13,
-             f"| baseline (Surya v2_200k) | {float(base['base_cer']):.5f} | {float(base['base_cer_aux']):.5f} "
+             f"| baseline (Surya v2_200k, dataset-v1) | {float(base['base_cer']):.5f} | {float(base['base_cer_aux']):.5f} "
              f"| {float(base['base_wer']):.4f} | — | — | — | — | — | — | — | — | — |"]
     o0 = RESULTS / "p2_option0.csv"
     if o0.exists():

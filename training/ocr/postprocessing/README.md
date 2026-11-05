@@ -5,8 +5,9 @@ Brill & Moore uczonym na parach (GT, predykcja). Ewaluacja na handlabeled (2160 
 w zagnieżdżonym leave-one-group-out. Wyniki i wnioski: [`results/RAPORT.md`](results/RAPORT.md),
 pełna tabela: [`results/TABLE.md`](results/TABLE.md).
 
-**Wynik główny** (harm ≤ 0.3% na walidacji wewnętrznej): CER 0.1277 → 0.1048 (−2.29 p.p., −18%,
-95% CI po grupach [−2.93, −1.48]), WER 0.482 → 0.377, harm na teście 0.40%.
+**Wynik główny** (dataset-v1, harm ≤ 0.3% na walidacji, lista terminów `en,la,pl`): na zamrożonym teście
+CER 0.1238 → 0.1064 (−1.74 p.p., 95% CI po liniach [−2.03, −1.43]), harm 0.00%; w LOGO na 2160 liniach
+CER 0.1270 → 0.0986 (−2.84 p.p., 95% CI po grupach [−3.40, −1.89]), harm 0.31%.
 
 ## Uruchomienie
 
@@ -23,9 +24,15 @@ export PYTHONPATH=.
 .venv/bin/python -m evaluation.oracle       # pułapy zysku, lista podejrzanych etykiet GT
 .venv/bin/python -m evaluation.p2_report    # pokrycie słownika, opcja 0, klasy chronione
 .venv/bin/python -m evaluation.p3_report    # model błędu per fold vs Levenshtein
-.venv/bin/python -m evaluation.run_cv --harm-max 0.003 --tag option1_harm03   # wariant główny (~10 min)
+.venv/bin/python -m evaluation.run_cv --harm-max 0.003 --tag v1_ta --domain en,la,pl   # LOGO, wariant główny (~10 min)
 .venv/bin/python -m evaluation.make_table   # results/TABLE.md
+.venv/bin/python -m evaluation.run_holdout --tag ta --domain en,la,pl          # warianty porównuj na dev
+.venv/bin/python -m evaluation.run_holdout --tag ta --domain en,la,pl --test   # test: raz, po wyborze wariantu
 ```
+
+`--domain` wybiera języki listy terminów chronionych przed korektą (`data/domain/ta_terms.tsv`), np. `la,pl`
+dla tekstów bez angielskiego; bez flagi lista jest wyłączona. Progi stroimy bez listy, więc zmiana języków
+nie wymaga ponownego strojenia. `--domain-in-tuning` to ablacja z listą także w strojeniu.
 
 `$PP_CACHE` domyślnie `~/.cache/ocr-pl-med/postprocessing` (poza repo; tam też cache prefiltra).
 Ablacje `run_cv`: `--no-multi`, `--no-protect`, `--diacritics-only`, `--sjp`, `--forward`,
@@ -38,9 +45,10 @@ from pp.correct import Corrector
 from pp.decide import DecisionParams
 
 corr = Corrector.from_training(gt_lines, pred_lines, groups,
-                               DecisionParams(lam=1.0, delta=1.0, mu=3.0, d_max=3, L_min=3, f_min=20))
+                               DecisionParams(lam=0.75, delta=-3.0, mu=3.0, d_max=3, L_min=3, f_min=1),
+                               domain_langs=("la", "pl"))
 corr.correct_lines(["Tętnica podholanowy biegnie (pawierzchnia)"])
-# -> ["Tętnica podkolanowy biegnie (powierzchnia)"]
+# -> ["Tętnica podkolanowy biegnie (pawierzchnia)"]; drugi token odpada na marginesie μ
 ```
 
 Inicjalizacja ok. 26 s (słownik 4.7 mln form, LM, model kanału). Korekta działa partią:
@@ -53,13 +61,14 @@ to nie jest wynik testowy).
 
 | Ścieżka | Co |
 |---|---|
-| `data/baseline/predictions.jsonl` | predykcje Surya v2_200k na handlabeled (z etykietami), 2026-10-01 |
-| `data/baseline/metrics.json`, `groups.csv` | wynik `eval_cer.py` (CER 0.12769, WER 0.48174); mapa linia → grupa |
+| `data/baseline/predictions.jsonl` | predykcje Surya v2_200k na dataset-v1 (z etykietami), 2026-11-05 |
+| `data/baseline/metrics.json`, `groups.csv` | wynik `eval_cer.py` (CER 0.12701, WER 0.48307); mapa linia → grupa |
+| `data/domain/` | lista terminów TA z Wikidata (CC0) i kwerenda SPARQL |
 | `pp/normalize.py`, `tokenize.py`, `protect.py` | opcja 0, tokenizacja + wielkość liter, klasy chronione P1–P8 |
 | `pp/lexicon.py`, `lm.py` | słownik `known` / `target`, P(w) z NKJP + Simple Good-Turing |
 | `pp/error_model.py` | model kanału Brill & Moore (hard-EM, jednostki do 2 znaków, Viterbi/forward) |
 | `pp/candidates.py`, `decide.py`, `correct.py` | prefiltr rapidfuzz, reguła decyzji, API |
-| `evaluation/` | metryki, istotność (`sig.py`), foldy, oracle, raporty P2–P4, `run_cv.py`, `make_table.py` |
+| `evaluation/` | metryki, istotność (`sig.py`), foldy, oracle, raporty P2–P4, `run_cv.py`, `run_holdout.py`, `make_table.py` |
 | `results/` | CSV/JSON/MD bez tekstu linii |
 
 ## Ograniczenia
@@ -68,7 +77,9 @@ to nie jest wynik testowy).
 - 8 grup: przedziały po grupach są szerokie; raportujemy też przedziały po liniach.
 - Checkpoint Surya był wybierany na tym samym zbiorze: bezwzględny CER jest „in-sample”, delta
   korekty mniej (dotyczy obu stron porównania jednakowo).
-- Część „zepsuć” to błędy etykiet GT (brak diakrytyków, ticket 09); oficjalny GT bez zmian.
+- Część „zepsuć” to diakrytyki pominięte przez autorkę; GT jest wierny obrazowi.
+- Strojenie ogranicza harm, ale nie błędne podmiany (changed-wrong): RAPORT §4b, §5.
+- `oracle`, `p2_report`, `p3_report` i ablacje z RAPORT §2 mają zapisane wyniki z predykcji 2026-10-01.
 
 ## Atrybucja zasobów
 

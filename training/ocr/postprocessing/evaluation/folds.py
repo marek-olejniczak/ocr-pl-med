@@ -17,14 +17,14 @@ from typing import Iterator, Sequence
 from evaluation.metrics import BASELINE_DIR, load_predictions
 
 GROUP_RULES: list[tuple[str, re.Pattern]] = [
-    ("G1_noga", re.compile(r"^Noga_page\d+")),
-    ("G2_anatomia_zmysly", re.compile(r"^anatomia_zmysly_\d+")),
-    ("G3_serce", re.compile(r"^Serce - Więcej Niż Lek_page\d+")),
-    ("G4_unaczynienie", re.compile(r"^13\) Unaczynienie Miednica_page\d+")),
-    ("G5_elementy_topo", re.compile(r"^Elementy Topograficzne_page\d+")),
-    ("G6_dataN", re.compile(r"^data\d+_")),
-    ("G7_zrzuty_0507", re.compile(r"^Zrzut ekranu 2026-05-07")),
-    ("G8_zrzuty_0512", re.compile(r"^Zrzut ekranu 2026-05-12")),
+    ("G1_noga", re.compile(r"^noga_p\d+")),
+    ("G2_anatomia_zmysly", re.compile(r"^anatomia_zmysly_foto_p\d+")),
+    ("G3_serce", re.compile(r"^serce_p\d+")),
+    ("G4_unaczynienie", re.compile(r"^miednica_p\d+")),
+    ("G5_elementy_topo", re.compile(r"^elementy_topograficzne_p\d+")),
+    ("G6_dataN", re.compile(r"^inne_p\d+")),
+    ("G7_zrzuty_0507", re.compile(r"^kosci_p\d+")),
+    ("G8_zrzuty_0512", re.compile(r"^miesnie_p\d+")),
 ]
 
 # Test odporności (spec §3): łączymy źródła, które mogą mieć wspólnego autora.

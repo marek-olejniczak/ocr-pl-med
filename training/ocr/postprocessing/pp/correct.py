@@ -13,7 +13,7 @@ from typing import Sequence
 from pp.candidates import Prefilter
 from pp.decide import DecisionParams, decide, score_key
 from pp.error_model import ErrorModel, Params, word_pairs
-from pp.lexicon import Lexicon
+from pp.lexicon import Lexicon, domain_terms
 from pp.lm import UnigramLM
 from pp.normalize import hygiene
 from pp.protect import protected_class, train_abbreviations, upper_share
@@ -31,8 +31,13 @@ class Corrector:
 
     @classmethod
     def from_training(cls, gt_lines, pred_lines, groups, params: DecisionParams = DecisionParams(),
-                      em_params: Params | None = None, lexicon: Lexicon | None = None, lm: UnigramLM | None = None):
-        lex = lexicon or Lexicon()
+                      em_params: Params | None = None, lexicon: Lexicon | None = None, lm: UnigramLM | None = None,
+                      domain_langs: Sequence[str] = ()):
+        """`domain_langs`: języki listy terminów TA, np. ("la", "pl"); puste = lista wyłączona.
+
+        Progi stroimy bez listy, więc jej zmiana nie wymaga ponownego strojenia.
+        """
+        lex = lexicon or Lexicon(extra_known=domain_terms(domain_langs))
         lm = lm or UnigramLM(lex.targets())
         model = ErrorModel.fit(word_pairs(gt_lines, pred_lines, groups), em_params)
         abbrev = lex.abbrev | train_abbreviations(gt_lines, lex.known)

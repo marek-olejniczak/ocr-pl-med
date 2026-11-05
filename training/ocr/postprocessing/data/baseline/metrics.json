@@ -1,5 +1,5 @@
 {
-  "adapter": "training/results/ocr/surya/v2_200k-lora-r64-mega/adapter",
+  "adapter": "/adapters/v2/adapter",
   "train_config": {
     "run_name": "surya-v2_200k-lora-r64-mega",
     "learning_rate": "2e-05",
@@ -18,18 +18,18 @@
   "images_dir": "benchmark/dane/handlabeled/images",
   "task_name": "ocr_without_boxes",
   "math_mode": true,
-  "batch_size": 16,
+  "batch_size": 8,
   "count": 2160,
   "samples_loaded": 2160,
   "metrics_level": "line",
   "metrics": {
-    "cer": 0.12769176220304929,
-    "wer": 0.4817397078353254,
-    "ema": 0.25277777777777777,
-    "near_perfect_match": 0.44722222222222224,
-    "levenshtein_distance": 2.5009259259259258
+    "cer": 0.12700626403498405,
+    "wer": 0.48306772908366535,
+    "ema": 0.25787037037037036,
+    "near_perfect_match": 0.44814814814814813,
+    "levenshtein_distance": 2.4875
   },
-  "elapsed_seconds": 170.2,
-  "inference_seconds": 163.8,
-  "created_at": "2026-10-01T18:58:29"
+  "elapsed_seconds": 273.3,
+  "inference_seconds": 266.0,
+  "created_at": "2026-11-05T18:16:51"
 }

@@ -1,0 +1,8 @@
+# Terminy anatomiczne: elementy Wikidata z identyfikatorem TA98 (P1323) albo TA2 (P7173),
+# etykiety i aliasy en/la/pl. Dane Wikidata są na licencji CC0.
+SELECT ?item ?lang ?label WHERE {
+  { ?item wdt:P1323 ?ta . } UNION { ?item wdt:P7173 ?ta2 . }
+  { ?item rdfs:label ?label . } UNION { ?item skos:altLabel ?label . }
+  BIND(LANG(?label) AS ?lang)
+  FILTER(?lang IN ("en", "la", "pl"))
+}
