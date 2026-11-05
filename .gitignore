@@ -35,3 +35,4 @@ yolo_dataset/
 inference_compare/
 runs/
 wandb/
+/dataset
