@@ -108,3 +108,170 @@ zbiorze testowym.
 	i eksperymentów do późniejszego opisu w pracy.
 \end{itemize}
 
+\section{Wkład Tomasza Presia --- szkic}
+
+Roboczy zakres własnych prac do późniejszego rozwinięcia. Wyniki OCR dotyczą
+2160 ręcznie oznaczonych linii z notatek studentów medycyny. Zbiór ten
+posłużył również do podejmowania decyzji projektowych, dlatego ma charakter
+walidacyjny, a nie niezależnego zbioru testowego. Od trzeciej
+wersji generatora zbiór podzielono na część roboczą (1212 linii), na której
+porównywano warianty, oraz część zamrożoną (948 linii), przeznaczoną
+na jednokrotny pomiar końcowy.
+
+\begin{itemize}
+	\item \textbf{Generator dokumentów do detekcji linii:} wypełnianie
+	61 szablonów formularzy medycznych z dwóch dokumentów PDF pismem
+	syntetycznym. Szablony z etykietami pól drukowanych, tekstowych,
+	liczbowych i mieszanych oraz dwiema bazami strony: pustą i częściowo
+	wypełnioną. Treść medyczna dopasowana do szerokości pola: leki, kody
+	ICD-10, dawkowanie, rozpoznania i dane osobowe. Pola wysokie wypełniane
+	kilkoma liniami, od 0 do 40\% pustych pól na formularz. Wynik w formacie
+	COCO z ramkami ciasno wokół atramentu i transkrypcją każdej linii.
+	Profile skanu: kolorowy, w skali szarości i fotokopia. Rezygnacja
+	z obrotu strony, ponieważ ramki osiowe źle obejmują obrócony tekst.
+
+	\item \textbf{Artefakty papieru i spójność etykiet:} pieczątki
+	prostokątne i okrągłe z obrotem do $\pm 20^\circ$, z ramką tylko dla
+	pieczątek prostych, zakreślacz z progiem czytelności tekstu oraz
+	przypadkowe kreski długopisu jako przykłady negatywne. Sanityzacja
+	treści względem znaków dostępnych w danym kroju pisma przed pomiarem
+	szerokości, tak aby etykieta była dokładnie tekstem narysowanym.
+
+	\item \textbf{Kroje pisma:} dołączenie 9 krojów utworzonych
+	z prawdziwego pisma, co zwiększyło pulę z 6 do 15. Następnie przegląd
+	kształtu liter ,,k'' i ,,a'' we wszystkich krojach i dodanie 20 krojów
+	z Google Fonts z pełnym zestawem polskich znaków, w tym kroju szkolnego
+	Playwrite z ,,k'' z pętelką. Łącznie 35 krojów.
+
+	\item \textbf{Generator linii tekstu dla OCR:} renderowanie pojedynczych
+	linii znak po znaku z losowym stylem ręki, tłem papieru, linią do pisania
+	i niedokładnym kadrowaniem naśladującym wycinki z detektora. Zapis
+	etykiet na bieżąco, tak aby przerwana generacja pozostawiała spójny
+	zbiór. Karta pochodzenia w każdym zbiorze i rejestr wszystkich zbiorów
+	w repozytorium. Usunięcie niedeterminizmu biblioteki albumentations,
+	która ignorowała ziarno losowania (102 z 300 obrazów różniło się między
+	przebiegami); po poprawce przebiegi są identyczne co do bajta.
+
+	\item \textbf{Zbiory danych i wersjonowanie:} wygenerowanie m.in.
+	20\,008 stron formularzy z 1\,089\,766 ramkami linii dla detekcji,
+	800\,000 linii dla pierwszego treningu OCR, 800\,000 linii generatora
+	w drugiej wersji oraz 13 zbiorów po 200\,000 linii do badań ablacyjnych.
+	Publikacja 18 zbiorów w DVC na DagsHub, łącznie 52.5 GB. Wykrycie ucinania plików
+	większych niż ok. 1 GiB przy pobieraniu na serwer i podział danych
+	na archiwa do 0.9 GiB z kontrolą kompletności przed treningiem.
+
+	\item \textbf{Analiza błędów modelu bazowego:} analiza odczytów modelu
+	Surya z adapterem LoRA wytrenowanym przez zespół na pierwszych danych
+	syntetycznych (CER 0.159). Najczęstsze pomyłki: ,,k'' odczytywane jako
+	,,h'' (434 razy) i ,,a'' jako ,,o'' (216 razy). CER rosnący wraz ze
+	skracaniem linii, od 0.137 dla linii powyżej 45 znaków do 0.308 dla
+	linii do 5 znaków, przy 39\% linii testowych krótszych niż 13 znaków.
+	Porównanie statystyk zbioru testowego i treningowego: cyfry stanowiły
+	0.5\% znaków w teście i 22\% w danych treningowych, wielkie litery
+	7.1\% w teście i prawie zero w danych.
+
+	\item \textbf{Druga wersja generatora linii:} dziewięć rodzin augmentacji
+	wyznaczonych na podstawie analizy błędów, każda z osobnym przełącznikiem.
+	Treść: krótkie słowa, nagłówki wielkimi literami, punktory i strzałki,
+	słownictwo anatomiczne. Obraz: litery sąsiednich linii wchodzące w kadr,
+	kratka zeszytu, ścienienie i pogrubienie tuszu, odkształcenia elastyczne
+	oraz symulacja zdjęcia telefonem. Pule słownictwa: 450 terminów
+	anatomicznych spisanych ręcznie, 1467 fraz w stylu notatek wygenerowanych
+	lokalnym modelem językowym, 14\,903 nazwy chorób ICD-11 i 7603 badania
+	laboratoryjne. Udział cyfr zmniejszony z 22\% do ok. 3\%.
+
+	\item \textbf{Wynik drugiej wersji danych:} uruchomienie treningów
+	adapterów LoRA na serwerze z RTX 3090 z użyciem kodu treningowego
+	zespołu, bez przypisywania sobie implementacji treningu. Przy tym samym
+	modelu, budżecie treningu i zbiorze oceny CER spadł z 0.159 do 0.129,
+	a odsetek linii odczytanych bezbłędnie wzrósł z 0.186 do 0.249.
+	Przedziały ufności bootstrap nie zachodzą na siebie. Zbiór 200\,000 linii
+	przy 10\,000 krokach dał wynik równy zbiorowi 800\,000 linii przy
+	40\,000 krokach (CER 0.127 wobec 0.129), więc ilość danych przestała
+	ograniczać wynik.
+
+	\item \textbf{Badania ablacyjne:} 13 treningów w dwóch rundach:
+	pełny generator oraz warianty z wyłączoną jedną z 3 grup lub jedną
+	z 9 rodzin augmentacji, porównane linia po linii z pełnym generatorem. Wyłączenie słownictwa
+	anatomicznego podniosło CER o 1.9 p.p., wyłączenie wielkich liter
+	o 1.8 p.p., a liter sąsiednich linii o 0.5 p.p. Pozostałe rodziny,
+	w tym odkształcenia elastyczne, nie dały efektu odróżnialnego od szumu.
+	Efekt wielkich liter w całości dotyczy wielkości liter: bez niej model
+	odczytuje litery poprawnie, ale zapisuje je małymi. Efekt sąsiednich
+	linii wymaga powtórzenia treningu z innym ziarnem losowania, ponieważ
+	każdy wariant trenowano jednokrotnie.
+
+	\item \textbf{Zbiór kontrolny odporności:} 1500 linii, każda w 31
+	wersjach różniących się jedną augmentacją o określonej sile, na wzór
+	ImageNet-C. Najgroźniejsze okazały się litery sąsiednich linii wchodzące
+	głęboko w kadr (wzrost CER o 8.6 p.p. dla nowego modelu i 30.7 p.p.
+	dla poprzedniego) oraz silnie zdegradowane zdjęcie (3.7 p.p.).
+	Odkształcenia elastyczne i kratka podnosiły CER najwyżej o 0.2 p.p.
+	Składowe zdjęcia telefonem osobno szkodziły w niewielkim stopniu,
+	a wyraźnie dopiero łącznie.
+
+	\item \textbf{Analiza pomyłek po drugiej wersji:} punktem wyjścia była
+	analiza pomyłek znakowych wykonana w zespole przez Marka Olejniczaka.
+	W ramach pracy sprawdzono ją na 15 adapterach LoRA wytrenowanych na
+	różnych danych i z różnym budżetem. Przy CER od 0.126 do 0.159 liczba
+	pomyłek ,,ci'' odczytanego jako ,,u'' pozostawała w zakresie 102--154,
+	a ,,k'' jako ,,h'' w zakresie 338--475. Druga wersja generatora zawierała
+	od 2 do 6 razy więcej wystąpień ,,ci'', ,,cz'', ,,rz'' i ,,ś'' niż
+	pierwsza, a pomyłki te się nie zmniejszyły. Wniosek: pozostałe błędy
+	wynikają z kształtu liter w krojach pisma, a nie z braku przykładów.
+
+	\item \textbf{Trzecia wersja generatora linii:} trzy rodziny zmieniające
+	wygląd liter, każda z osobnym przełącznikiem. Łączenia liter: ujemne
+	odstępy między znakami w 40\% linii oraz dodatkowe dosunięcie 16 par,
+	m.in. ,,ci'', ,,cz'', ,,rz'' i ,,rn''. Warianty liter: litery ,,k'',
+	,,a'', ,,t'', ,,ł'', ,,g'', ,,r'' i ,,o'' rysowane w 50\% linii innym
+	krojem, w którym dana litera najbardziej przypomina znak, z którym jest
+	mylona. Kroje dobrano automatycznie przez porównanie szkieletów obu liter
+	(IoU w ramce $32 \times 32$), z warunkiem zbliżonej grubości kreski.
+	Położenie znaków diakrytycznych: kreska, kropka lub ogonek wycinane
+	z litery, a następnie przesuwane, obracane do $\pm 30^\circ$, skalowane
+	lub pomijane (12\%), przy niezmienionej etykiecie.
+
+	\item \textbf{Parowanie zbiorów:} ustawianie generatora liczb losowych
+	od nowa przed każdą linią i każdym etapem jej przetwarzania. Dzięki temu
+	pięć zbiorów po 200\,000 linii ma identyczny tekst, krój, tło
+	i zakłócenia, a różni się wyłącznie włączonymi rodzinami. Umożliwiło to
+	także generowanie zbioru równolegle w częściach z wynikiem identycznym
+	co do bajta.
+
+	\item \textbf{Badanie ablacyjne trzeciej wersji:} siedem treningów
+	o tych samych ustawieniach (LoRA rzędu 64, 10\,000 kroków): zbiór
+	odniesienia bez nowych rodzin, pełny zbiór, trzy warianty z jedną rodziną
+	wyłączoną oraz powtórzenie odniesienia i pełnego zbioru z innym ziarnem
+	losowania. Na części roboczej CER spadł z 0.1275 do 0.1170. Różnica
+	w parach linia po linii wyniosła $-1.05$ p.p. (95\% przedział ufności
+	od $-1.38$ do $-0.73$), a po zmianie ziarna $-1.01$ p.p. Sama zmiana
+	ziarna przesunęła wynik odniesienia o 0.23 p.p. Wyłączenie łączeń liter
+	podniosło CER o 0.67 p.p., położenia znaków diakrytycznych o 0.29 p.p.,
+	a wariantów liter o 0.12 p.p., czyli mniej niż różnica między ziarnami.
+
+	\item \textbf{Wpływ na poszczególne pomyłki:} ,,ci'' jako ,,u'' 98 do 68,
+	,,cz'' jako ,,w'' 69 do 56, ,,t'' jako ,,ł'' 60 do 36, ,,ś'' jako ,,s''
+	121 do 86. Spadki pierwszych trzech są wyraźnie mniejsze po wyłączeniu
+	łączeń liter, a spadek ,,ś'' jako ,,s'' znika po wyłączeniu położenia
+	znaków diakrytycznych. Pomyłka ,,k'' jako ,,h'' pozostała bez zmiany
+	odróżnialnej od szumu (286 i 272, przy 310 dla odniesienia z innym
+	ziarnem), podobnie ,,a'' jako ,,o'' (204 i 205). Skutki uboczne:
+	,,s'' jako ,,ś'' 16 do 24 oraz ,,ł'' jako ,,t'' 41 do 48. Wynik wymaga
+	potwierdzenia na części zamrożonej.
+
+	\item \textbf{Wnioski metodologiczne:} strata walidacyjna na danych
+	syntetycznych okazała się odwrotnie związana z jakością na danych
+	rzeczywistych: model z najniższą stratą (0.0086) miał najwyższy CER
+	(0.159). Rozkład poprawy o 3 p.p.: ok. 0.8 p.p. z poprawnej wielkości
+	liter, ok. 0.9 p.p. ze słownictwa dziedzinowego i ok. 1.2 p.p.
+	przypisane nowym krojom pisma, przy czym ostatnia wartość wynika
+	z odejmowania, a nie z bezpośredniego pomiaru. Augmentacje obrazu
+	nie wniosły mierzalnej poprawy. Przygotowanie skryptów raportów
+	z przedziałami ufności i porównaniem w parach oraz dokumentacji
+	eksperymentów w repozytorium. Trzecia wersja potwierdziła ten kierunek:
+	poprawę dały zmiany kształtu i układu liter, a nie zakłócenia obrazu.
+	Podmiana pojedynczych liter na inne kroje nie wystarczyła tam, gdzie
+	żaden z 35 krojów nie oddaje sposobu pisania danej litery.
+\end{itemize}
+
