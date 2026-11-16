@@ -6,8 +6,8 @@ w zagnieżdżonym leave-one-group-out. Wyniki i wnioski: [`results/RAPORT.md`](r
 pełna tabela: [`results/TABLE.md`](results/TABLE.md).
 
 **Wynik główny** (dataset-v1, harm ≤ 0.3% na walidacji, lista terminów `en,la,pl`): na zamrożonym teście
-CER 0.1238 → 0.1064 (−1.74 p.p., 95% CI po liniach [−2.03, −1.43]), harm 0.00%; w LOGO na 2160 liniach
-CER 0.1270 → 0.0986 (−2.84 p.p., 95% CI po grupach [−3.40, −1.89]), harm 0.31%.
+CER 0.1238 → 0.1062 (−1.76 p.p., 95% CI po liniach [−2.05, −1.44]), harm 0.00%; w LOGO na 2160 liniach
+CER 0.1270 → 0.0987 (−2.83 p.p., 95% CI po grupach [−3.38, −1.89]), harm 0.31%.
 
 ## Uruchomienie
 
@@ -35,8 +35,8 @@ dla tekstów bez angielskiego; bez flagi lista jest wyłączona. Progi stroimy b
 nie wymaga ponownego strojenia. `--domain-in-tuning` to ablacja z listą także w strojeniu.
 
 `$PP_CACHE` domyślnie `~/.cache/ocr-pl-med/postprocessing` (poza repo; tam też cache prefiltra).
-Ablacje `run_cv`: `--no-multi`, `--no-protect`, `--diacritics-only`, `--sjp`, `--forward`,
-`--split coarse`. `--dump PLIK` zapisuje predykcje z tekstem linii: tylko poza repo.
+Ablacje `run_cv`: `--uniform`, `--no-multi`, `--no-group-cap`, `--no-protect`, `--diacritics-only`, `--sjp`,
+`--forward`, `--split coarse`. `--dump PLIK` zapisuje predykcje z tekstem linii: tylko poza repo.
 
 ## API
 

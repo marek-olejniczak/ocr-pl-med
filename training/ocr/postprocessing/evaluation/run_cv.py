@@ -208,6 +208,8 @@ def main() -> None:
     ap.add_argument("--split", default="fine", choices=["fine", "coarse"])
     ap.add_argument("--tag", default="option1")
     ap.add_argument("--no-multi", action="store_true", help="ablacja: bez jednostek wieloznakowych")
+    ap.add_argument("--uniform", action="store_true", help="ablacja: jednostajny Levenshtein zamiast wyuczonych pomyłek")
+    ap.add_argument("--no-group-cap", action="store_true", help="ablacja: bez limitu udziału grupy w licznikach błędów")
     ap.add_argument("--no-protect", action="store_true", help="ablacja: bez klas chronionych P2–P8 (P1 zostaje)")
     ap.add_argument("--sjp", action="store_true", help="ablacja: + sjp odmiany")
     ap.add_argument("--forward", action="store_true", help="ablacja: forward (suma po ścieżkach) zamiast Viterbi")
@@ -227,7 +229,8 @@ def main() -> None:
     lm = UnigramLM(lex.targets())
     lp_unseen = math.log(lm.unseen) - lm.logz
     d = prepare(lex, a.split, "polimorf+sjp" if a.sjp else "polimorf", a.diacritics_only)
-    em = Params(multi=not a.no_multi)
+    em = Params(multi=not a.no_multi, uniform=a.uniform,
+                max_group_share=1.0 if a.no_group_cap else Params.max_group_share)
     disabled = tuple(c for c in ("P2_digits", "P3_num_unit", "P4_abbr_dot", "P5_abbr_list", "P6_short_upper",
                                  "P7_len_le_2", "P8_hyphen")) if a.no_protect else ()
     print(f"przygotowanie {time.time() - t0:.0f}s")

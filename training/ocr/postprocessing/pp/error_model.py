@@ -1,7 +1,7 @@
 """Model kanału Brill & Moore dla par słów (GT → predykcja), ticket 02, spec P3.
 
 P(obs | w) = max (Viterbi) albo suma (forward) po ścieżkach złożonych z jednostek α→β:
-  1:1 / usunięcie   a → b, a → ε           P(b|a) Witten-Bell/Dirichlet z priorem wizualnym
+  1:1 / usunięcie   a → b, a → ε           P(b|a) Witten-Bell/Dirichlet z priorem jednostajnym
   wstawienie        ε → b  (na slot)       P_ins(b), oraz P(brak wstawienia) na slot
   wieloznakowe      1:2, 2:1, 2:2          z inwentarza (N ≥ min_n, ≥ min_groups grup),
                                           wygładzone w stronę najlepszej dekompozycji na 1:1
@@ -20,8 +20,6 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from typing import Iterable, Sequence
 
-from pp.lexicon import fold
-
 NEG_INF = float("-inf")
 POLISH = "aąbcćdeęfghijklłmnńoóprsśtuvwxyzźżq-"
 
@@ -30,12 +28,12 @@ POLISH = "aąbcćdeęfghijklłmnńoóprsśtuvwxyzźżq-"
 class Params:
     iterations: int = 4
     s: float = 1.0               # siła Witten-Bell (k_a = s * N1+(a))
-    w_diac: float = 20.0         # waga par z tej samej rodziny diakrytycznej w priorze
     min_n: int = 3               # min. liczba zdarzeń jednostki wieloznakowej
     min_groups: int = 3          # min. liczba grup z tą jednostką
     s_multi: float = 1.0         # siła priora (dekompozycji) dla jednostek wieloznakowych
     max_group_share: float = 0.5  # limit udziału jednej grupy w liczniku błędu
     multi: bool = True           # ablacja: bez jednostek wieloznakowych
+    uniform: bool = False        # ablacja: `ErrorModel.uniform` zamiast wyuczonych pomyłek
     gamma: float = 1.0           # skalar na log P(c→c) (ticket 02 §2), strojony w P4
 
 
@@ -224,6 +222,8 @@ class ErrorModel:
     def fit(cls, pairs: Sequence[tuple[str, str, str]], params: Params | None = None) -> "ErrorModel":
         """pairs: (gt_word, pred_word, group), małe litery."""
         p = params or Params()
+        if p.uniform:
+            return cls.uniform(pairs)
         alphabet = set(POLISH)
         cnt1: Counter = Counter()
         cnt2: Counter = Counter()
@@ -278,21 +278,15 @@ class ErrorModel:
                 tot_chars += len(s)
                 tot_err += len(s)
         rho = tot_err / max(tot_chars, 1.0)
+        err_prior = rho / len(alphabet)  # wyjścia inne niż a: pozostałe znaki alfabetu i usunięcie
         for a in alphabet:
             row = c1.get(a, {})
             n1 = max(1, len(row))
             k = p.s * n1
             denom = sum(row.values()) + used_by_multi[a] + k
-            weights = {b: (p.w_diac if fold(b) == fold(a) and b else 1.0) for b in alphabet if b != a}
-            weights[""] = 1.0
-            wz = sum(weights.values())
-
-            def prior(b: str) -> float:
-                return (1 - rho) if b == a else rho * weights.get(b, 1.0) / wz
-
             for b, c in row.items():
-                m.l1[(a, b)] = math.log((c + k * prior(b)) / denom)
-            m.l1_default[a] = math.log(k * rho / wz / denom)
+                m.l1[(a, b)] = math.log((c + k * ((1 - rho) if b == a else err_prior)) / denom)
+            m.l1_default[a] = math.log(k * err_prior / denom)
             if (a, a) not in m.l1:
                 m.l1[(a, a)] = math.log(k * (1 - rho) / denom)
         m.unk_src = math.log(rho / V)

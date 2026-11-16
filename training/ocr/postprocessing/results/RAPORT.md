@@ -1,4 +1,4 @@
-# Statyczny postprocessing wyjścia Surya: raport (P0–P5, stan 2026-11-05)
+# Statyczny postprocessing wyjścia Surya: raport (P0–P5, stan 2026-11-06)
 
 Korektor słownikowy z modelem kanału (opcja 1, z opcją 2 wchłoniętą) na wyjściu Surya v2_200k
 (LoRA r64), bez ponownej inferencji. Dane: handlabeled z dataset-v1, 2160 linii, 8 grup (źródeł notatek).
@@ -7,31 +7,31 @@ Pełna tabela: [`TABLE.md`](TABLE.md); szczegóły faz: [`ORACLE.md`](ORACLE.md)
 
 ## 1. Wynik główny
 
-Wariant główny (decyzje 2026-11-04 i 2026-11-05): limit szkód harm ≤ 0.3% poprawnych tokenów na
+Wariant główny (decyzje 2026-11-04 do 2026-11-06): limit szkód harm ≤ 0.3% poprawnych tokenów na
 walidacji wewnętrznej, progi strojone bez listy terminów, a przy korekcie działa lista TA `en,la,pl`
 chroniąca terminy (§4b). Dwa protokoły: zamrożony test (progi i model kanału tylko z dev, grupy G3,
 G5–G8) oraz zagnieżdżone leave-one-group-out na wszystkich liniach.
 
 | | zamrożony test (948 linii) | LOGO (2160 linii) |
 |---|---|---|
-| CER (jak `eval_cer.py`) | 0.12377 → **0.10642** | 0.12701 → **0.09862** |
-| ΔCER | −1.74 p.p. (−14.0%) | −2.84 p.p. (−22.4%) |
-| 95% CI ΔCER, po grupach | [−2.86, −0.24] p.p. (3 grupy) | [−3.40, −1.89] p.p. |
-| 95% CI ΔCER, po liniach | [−2.03, −1.43] p.p. | [−3.06, −2.62] p.p. |
-| WER | 0.4477 → 0.3635 | 0.4831 → 0.3552 |
-| tokeny fixed / broken / changed-wrong | 179 / 0 / 37 | 780 / 10 / 143 |
-| precision / recall | 0.829 / 0.194 | 0.836 / 0.278 |
+| CER (jak `eval_cer.py`) | 0.12377 → **0.10621** | 0.12701 → **0.09874** |
+| ΔCER | −1.76 p.p. (−14.2%) | −2.83 p.p. (−22.3%) |
+| 95% CI ΔCER, po grupach | [−2.89, −0.27] p.p. (3 grupy) | [−3.38, −1.89] p.p. |
+| 95% CI ΔCER, po liniach | [−2.05, −1.44] p.p. | [−3.04, −2.61] p.p. |
+| WER | 0.4477 → 0.3625 | 0.4831 → 0.3556 |
+| tokeny fixed / broken / changed-wrong | 181 / 0 / 37 | 778 / 10 / 144 |
+| precision / recall | 0.830 / 0.196 | 0.835 / 0.278 |
 | harm | 0.00% | 0.31% |
 
 Do pracy idzie zamrożony test; LOGO uczy model i progi na większej liczbie grup i obejmuje też zrzuty
-ekranu, więc pokazuje szerszy obraz. CER pomocniczy w LOGO (casefold, bez interpunkcji): 0.11741 → 0.08768.
-Linie lepsze / gorsze w LOGO: 666 / 29. Zysk jest na każdej z 8 grup: od −0.27 p.p. (G4, baseline 0.048)
+ekranu, więc pokazuje szerszy obraz. CER pomocniczy w LOGO (casefold, bez interpunkcji): 0.11741 → 0.08780.
+Linie lepsze / gorsze w LOGO: 665 / 30. Zysk jest na każdej z 8 grup: od −0.27 p.p. (G4, baseline 0.048)
 i −1.46 (G2, baseline 0.218) do −3.77 p.p. (G3).
 
 ## 2. Ablacje (wszystkie przy harm ≤ 0.3%, podział drobny)
 
 Liczone na predykcjach z 2026-10-01 i GT przed poprawką z §4a, więc ich punktem odniesienia jest
-tutejszy wiersz −2.29 p.p., a nie wynik z §1. Ablacje listy terminów na dataset-v1: §4b.
+tutejszy wiersz −2.29 p.p., a nie wynik z §1. Ablacje modelu kanału na dataset-v1: §2a, listy terminów: §4b.
 
 | wariant | ΔCER p.p. | harm test | wniosek |
 |---|---|---|---|
@@ -46,6 +46,33 @@ tutejszy wiersz −2.29 p.p., a nie wynik z §1. Ablacje listy terminów na data
 
 Opcja 0 (NFC, zero-width, spacje): 0 zmienionych linii, predykcje są już czyste. Zostaje tylko
 jako metryka pomocnicza.
+
+## 2a. Ablacje modelu kanału na dataset-v1 (2026-11-06)
+
+LOGO na 2160 liniach, harm ≤ 0.3%, lista `en,la,pl`, kod końcowy. Każdy wariant ma progi strojone od nowa.
+
+| wariant | CER | ΔCER p.p. | fixed / broken / changed-wrong | precision | harm |
+|---|---|---|---|---|---|
+| **pełny model (główny)** | **0.09874** | −2.83 | 778 / 10 / 144 | 0.835 | 0.31% |
+| bez limitu udziału grupy (`--no-group-cap`) | 0.09959 | −2.74 | 757 / 9 / 158 | 0.819 | 0.28% |
+| tylko pomyłki 1:1 (`--no-multi`) | 0.10446 | −2.26 | 732 / 12 / 188 | 0.785 | 0.37% |
+| jednostajny Levenshtein (`--uniform`) | 0.11999 | −0.70 | 315 / 8 / 121 | 0.709 | 0.25% |
+
+- **Wyuczone pomyłki dają trzy czwarte zysku.** Sam słownik ze zwykłą odległością to −0.70 p.p. Pomyłki 1:1
+  dokładają 1.55 p.p., a jednostki wieloznakowe 0.57 p.p., czyli 20% zysku. Bez jednostek ubywa 46 poprawek i
+  przybywa 44 błędnych podmian, więc poprawiają one głównie trafność (precision 0.785 → 0.835).
+- **Limit udziału grupy:** różnica 0.09 p.p. i 14 błędnych podmian mieści się w szumie strojenia (niżej), więc
+  wpływ jest mały. Limit zostaje, bo chroni model przed pomyłkami jednego zeszytu, co sprawdza LOGO tylko częściowo.
+- **Usunięta waga `w_diac`.** Model miał wagę 20 dla par z tej samej rodziny diakrytycznej, ale działała ona tylko
+  na pary już widziane. Para niewidziana dostawała wartość domyślną, taką samą jak każda inna (`z→ż` = `z→q`).
+  Z wagą: LOGO 0.09862, 780 / 10 / 143, test 0.10642, 179 / 0 / 37. Bez wagi: 0.09874 i 0.10621, czyli różnica
+  w granicach szumu. Prior w `P(b|a)` jest teraz jednostajny, a wszystkie wiersze dataset-v1 przeliczono bez wagi.
+- **Jawnego podobieństwa kształtów liter nie ma.** Podobieństwo wchodzi przez dane, bo model uczy się pomyłek Suryi.
+  Prior z podobieństwa glifów miałby mały pułap: na wyłączonych grupach pary 1:1 niewidziane w uczeniu to 159 z 4862
+  operacji błędu (3.3%), z czego 4 diakrytyczne. Liczba może być zaniżona, bo wyrównanie omija drogie pary.
+- **Szum strojenia to około 0.1 p.p.** Usunięcie wagi zmieniło wynik główny o 0.01 p.p., ale w wariantach blisko
+  granicy harm progi przeskoczyły: wariant z listą w strojeniu z 0.09602 na 0.09472, a wariant 1:1 z 691 na 732
+  poprawki przy prawie tym samym CER. Różnic rzędu 0.1 p.p. między wariantami nie należy traktować jako mocnych.
 
 ## 3. Obserwacje
 
@@ -134,16 +161,16 @@ więc zmiana języków nie wymaga ponownego strojenia.
 
 | LOGO, 2160 linii | CER | fixed / broken / changed-wrong | precision | harm |
 |---|---|---|---|---|
-| bez listy | 0.09902 | 780 / 23 / 143 | 0.825 | 0.71% |
-| `la,pl` | 0.09881 | 780 / 18 / 143 | 0.829 | 0.56% |
-| **`en,la,pl` (główny)** | **0.09862** | 780 / 10 / 143 | 0.836 | **0.31%** |
-| `en,la,pl`, lista także w strojeniu | 0.09602 | 851 / 13 / 225 | 0.781 | 0.40% |
+| bez listy | 0.09914 | 778 / 23 / 144 | 0.823 | 0.71% |
+| `la,pl` | 0.09892 | 778 / 18 / 144 | 0.828 | 0.56% |
+| **`en,la,pl` (główny)** | **0.09874** | 778 / 10 / 144 | 0.835 | **0.31%** |
+| `en,la,pl`, lista także w strojeniu | 0.09472 | 914 / 16 / 258 | 0.769 | 0.50% |
 
 - **Lista działa jak ochrona, nie jak korekta:** −0.04 p.p. CER, 13 zepsuć mniej, bez kosztu. Korzyść daje
   głównie angielski: słowa tylko angielskie to 67 z 5591 słów, 64 z nich w zrzutach G7/G8. Poza zrzutami harm
   wynosi 0.11% niezależnie od listy, a na zamrożonym teście wynik z listą i bez niej jest identyczny.
 - **Dlaczego bez strojenia z listą:** lista zwalnia budżet harm i strojenie luzuje próg δ. Daje to niższy
-  CER (na teście 0.10408 zamiast 0.10642), ale +71 poprawek kosztuje +82 błędne podmiany w LOGO, np.
+  CER (na teście 0.10408 zamiast 0.10621), ale +136 poprawek kosztuje +114 błędnych podmian w LOGO, np.
   `dotyku→bałtyku` (przez `błotyku`) albo `śluzowa→służbowe`. Widoczny śmieć z OCR staje się płynnym, błędnym
   słowem. Harm tego nie liczy, a CER prawie nie karze, a w tekście medycznym to gorsze niż widoczny błąd.
 - **Co zostało zepsute (10 tokenów w wariancie głównym):** 7 to diakrytyki pominięte przez autorkę
@@ -151,7 +178,8 @@ więc zmiana języków nie wymaga ponownego strojenia.
 - **Harm to kilka–kilkanaście tokenów**, więc różnice rzędu 0.1 p.p. nie są mocne.
 
 Zastrzeżenie: linie testowe nie brały udziału w strojeniu ani w uczeniu, ale projekt korektora
-(siatka progów, klasy chronione, pomysł listy) powstał po analizie wszystkich 2160 linii.
+(siatka progów, klasy chronione, pomysł listy) powstał po analizie wszystkich 2160 linii. Test oceniono też ponownie
+po usunięciu `w_diac` (§2a), bo zmienił się kod.
 
 ## 5. Ograniczenia (do pracy)
 
@@ -166,7 +194,7 @@ Zastrzeżenie: linie testowe nie brały udziału w strojeniu ani w uczeniu, ale 
   Pozostałe 62 są wierne obrazowi; część „zepsuć” to diakrytyki pominięte przez autorkę.
 - **Szum inferencji:** dwa przebiegi tego samego adaptera (2026-10-01 i dataset-v1) różnią się w 640 z 2160
   linii, przy CER 0.12727 i 0.12701 na tym samym GT. Różnice CER rzędu 0.03 p.p. mogą być szumem.
-- **Błędne podmiany (changed-wrong) nie są ograniczane:** strojenie pilnuje tylko harm. To 143 tokeny
+- **Błędne podmiany (changed-wrong) nie są ograniczane:** strojenie pilnuje tylko harm. To 144 tokeny
   w LOGO, a część z nich zamienia śmieć z OCR w wiarygodnie wyglądające, błędne słowo (§4b).
 - Strojenie progów używa przybliżenia (zmiana edycji przy podmianie jednego tokenu); wynik
   testowy liczony dokładnie.
