@@ -50,7 +50,7 @@ def main() -> None:
           f"target: {len(lex.common)} pospolitych + {len(lex.proper_target)} własnych (c≥5)")
 
     # 2. Opcja 0
-    out = [hygiene(p) for p in prs]
+    out = [hygiene(p, loops=False) for p in prs]  # P2: higiena bez deloop (wynik historyczny)
     row0 = {"variant": "option0_hygiene", "lines_changed": sum(a != b for a, b in zip(out, prs))}
     row0.update(compare(gts, prs, out, groups))
     print(f"opcja 0: CER {row0['cer']:.5f} (Δ {row0['d_cer'] * 100:+.3f} p.p.), linii zmienionych {row0['lines_changed']}")

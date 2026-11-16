@@ -37,6 +37,12 @@ nie wymaga ponownego strojenia. `--domain-in-tuning` to ablacja z listą także 
 `$PP_CACHE` domyślnie `~/.cache/ocr-pl-med/postprocessing` (poza repo; tam też cache prefiltra).
 Ablacje `run_cv`: `--uniform`, `--no-multi`, `--no-group-cap`, `--no-protect`, `--diacritics-only`, `--sjp`,
 `--forward`, `--split coarse`. `--dump PLIK` zapisuje predykcje z tekstem linii: tylko poza repo.
+Inne predykcje (np. Surya v3, test v1.1) w formacie `data/baseline/predictions.jsonl`: `--predictions PLIK`,
+wyniki wtedy poza `results/`: `--out-dir KATALOG`.
+
+Higiena wejścia korektora (`pp/normalize.hygiene`) zwija zapętlenia modelu (`deloop`): n-gramy do 3 słów
+powtórzone ≥ 3 razy z rzędu oraz powtórzone segmenty `<br>`. Surya v3 na RxHandBD: CER 0.710 → 0.600;
+na notatkach dataset-v1 i v1.1 zmienia 0–1 linii.
 
 ## API
 

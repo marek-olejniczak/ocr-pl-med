@@ -59,8 +59,9 @@ class Data:
     cands: dict[str, list[tuple[str, int]]]
 
 
-def prepare(lex: Lexicon, split: str, lex_tag: str = "polimorf", diacritics_only: bool = False) -> Data:
-    rows = load_predictions()
+def prepare(lex: Lexicon, split: str, lex_tag: str = "polimorf", diacritics_only: bool = False,
+            predictions: Path | None = None) -> Data:
+    rows = load_predictions(predictions) if predictions else load_predictions()
     gts = [normalize_ws(r["ground_truth"]) for r in rows]
     prs = [normalize_ws(r["prediction"]) for r in rows]
     groups = line_groups(rows, split)
@@ -221,6 +222,9 @@ def main() -> None:
     ap.add_argument("--deploy", action="store_true",
                     help="progi do wdrożenia: LOGO na wszystkich grupach -> results/deploy_params.json (to NIE jest test)")
     ap.add_argument("--dump", type=Path, help="zapisz predykcje out-of-fold (z tekstem linii, poza repo!)")
+    ap.add_argument("--predictions", type=Path,
+                    help="inny plik predykcji (format data/baseline/predictions.jsonl), np. Surya v3 albo test v1.1")
+    ap.add_argument("--out-dir", type=Path, default=RESULTS, help="katalog wyników (eksperymenty poza results/)")
     a = ap.parse_args()
     t0 = time.time()
     terms = frozenset(domain_terms(a.domain.split(","))) if a.domain else frozenset()
@@ -228,7 +232,7 @@ def main() -> None:
     lex = Lexicon(use_sjp=a.sjp)
     lm = UnigramLM(lex.targets())
     lp_unseen = math.log(lm.unseen) - lm.logz
-    d = prepare(lex, a.split, "polimorf+sjp" if a.sjp else "polimorf", a.diacritics_only)
+    d = prepare(lex, a.split, "polimorf+sjp" if a.sjp else "polimorf", a.diacritics_only, a.predictions)
     em = Params(multi=not a.no_multi, uniform=a.uniform,
                 max_group_share=1.0 if a.no_group_cap else Params.max_group_share)
     disabled = tuple(c for c in ("P2_digits", "P3_num_unit", "P4_abbr_dot", "P5_abbr_list", "P6_short_upper",
@@ -242,8 +246,8 @@ def main() -> None:
             recs += records(d, Fold(d, lex, lm, itrain, em, a.forward), itest, disabled)
             ok += n_correct(d, itest)
         p, info = tune(d, recs, ok, lp_unseen, a.harm_max)
-        RESULTS.mkdir(exist_ok=True)
-        (RESULTS / "deploy_params.json").write_text(json.dumps(
+        a.out_dir.mkdir(parents=True, exist_ok=True)
+        (a.out_dir / "deploy_params.json").write_text(json.dumps(
             {"harm_max": a.harm_max, "params": p.as_dict(), "logo_all_groups": info,
              "note": "progi strojone na LOGO wszystkich 8 grup; model kanału do wdrożenia uczony na całości"},
             indent=1), encoding="utf-8")
@@ -272,7 +276,7 @@ def main() -> None:
               f"test ΔCER {tt['d_cer'] * 100:+.2f} p.p. harm {tt['harm']:.4f} fixed {tt['fixed']} broken {tt['broken']} "
               f"| GT w kandydatach {lost['gt_in_cands']}/{lost['wrong_eligible']} [{row['seconds']:.0f}s]", flush=True)
 
-    rows = load_predictions()
+    rows = load_predictions(a.predictions) if a.predictions else load_predictions()
     raw_gts = [r["ground_truth"] for r in rows]
     res = {"variant": a.tag, "split": a.split, "harm_max": a.harm_max, **compare(raw_gts, d.prs, out, d.groups)}
     print(f"\n{a.tag} ({a.split}): CER {res['base_cer']:.5f} -> {res['cer']:.5f} (Δ {res['d_cer'] * 100:+.3f} p.p., "
@@ -281,21 +285,22 @@ def main() -> None:
           f"WER {res['base_wer']:.4f} -> {res['wer']:.4f}; fixed {res['fixed']} broken {res['broken']} "
           f"changed_wrong {res['changed_wrong']} net {res['net']}; precision {res['precision']:.3f} "
           f"recall {res['recall']:.3f} harm {res['harm']:.4f}")
-    RESULTS.mkdir(exist_ok=True)
+    res_dir = a.out_dir
+    res_dir.mkdir(parents=True, exist_ok=True)
     stem = f"p4_{a.tag}_{a.split}"
-    with open(RESULTS / f"{stem}_folds.csv", "w", newline="", encoding="utf-8") as f:
+    with open(res_dir / f"{stem}_folds.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(folds_info[0]))
         w.writeheader()
         for r in folds_info:
             w.writerow({k: (f"{v:.6f}" if isinstance(v, float) else v) for k, v in r.items()})
-    summary = RESULTS / "p4_summary.csv"
+    summary = res_dir / "p4_summary.csv"
     new = not summary.exists()
     with open(summary, "a", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(res))
         if new:
             w.writeheader()
         w.writerow({k: (f"{v:.6f}" if isinstance(v, float) else v) for k, v in res.items()})
-    with open(RESULTS / f"{stem}_per_group.json", "w", encoding="utf-8") as f:
+    with open(res_dir / f"{stem}_per_group.json", "w", encoding="utf-8") as f:
         json.dump({"baseline": per_group_cer(raw_gts, d.prs, d.groups),
                    a.tag: per_group_cer(raw_gts, out, d.groups)}, f, indent=1)
     if a.dump:

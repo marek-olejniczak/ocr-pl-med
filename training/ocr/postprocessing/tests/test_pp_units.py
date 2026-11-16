@@ -51,3 +51,14 @@ def test_protect_classes():
 def test_train_abbreviations_only_oov_with_dot():
     got = train_abbreviations(["t. udowa przyśr. kość."], known=lambda w: w in {"kość", "udowa"})
     assert got == {"t", "przyśr"}
+
+
+def test_deloop():
+    from pp.normalize import deloop, hygiene
+    assert deloop("A Maring Maring Maring Maring") == "A Maring"
+    assert deloop("- - - - - -") == "-"
+    assert deloop("Mungy<br>M Mungy<br>M Mungy") == "Mungy M Mungy"
+    assert deloop("bardzo bardzo dobrze") == "bardzo bardzo dobrze"
+    assert deloop("1. 1. 1. 1. x") == "1. x"
+    assert deloop("ab cd ab cd ab cd ef") == "ab cd ef"
+    assert hygiene("kość  udowa") == "kość udowa"
