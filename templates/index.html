@@ -266,12 +266,18 @@ canvas { display: block; }
   transition: background var(--transition);
 }
 .ann-item:hover { background: var(--bg-hover); }
-.ann-item.selected { background: var(--accent-glow); border: 1px solid rgba(108,92,231,0.3); }
-.ann-item .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.ann-item.selected, .ann-item.is-auto.selected {
+  background: rgba(108,92,231,0.35);
+  box-shadow: inset 4px 0 0 #fff;
+  outline: 1px solid rgba(255,255,255,0.65);
+  outline-offset: -1px;
+}
+.ann-item .ann-number {
+  min-width: 3ch;
   flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 .ann-item .info {
   flex: 1;
@@ -280,9 +286,8 @@ canvas { display: block; }
 .ann-item .info .name {
   font-size: 13px;
   font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 .ann-item .info .coords {
   font-size: 10px;
@@ -365,7 +370,9 @@ canvas { display: block; }
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  width: calc(100% - 24px);
   align-items: center;
   gap: 8px;
   background: var(--bg-secondary);
@@ -385,22 +392,31 @@ canvas { display: block; }
   transform: translateX(-50%) translateY(0);
 }
 .label-bar .label-hint {
+  grid-column: 1 / -1;
   font-size: 12px;
   color: var(--text-muted);
   font-weight: 500;
 }
-.label-bar input {
+.label-bar textarea {
+  grid-column: 1 / -1;
+  field-sizing: content;
   padding: 7px 10px;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);
   background: var(--bg-primary);
   color: var(--text-primary);
+  font-family: inherit;
   font-size: 14px;
-  width: 260px;
+  line-height: 1.5;
+  width: 100%;
+  min-width: 0;
+  min-height: 64px;
+  max-height: min(240px, 35vh);
+  resize: vertical;
   outline: none;
   transition: border var(--transition);
 }
-.label-bar input:focus { border-color: var(--accent); }
+.label-bar textarea:focus { border-color: var(--accent); }
 .label-bar button {
   padding: 7px 14px;
   border: none;
@@ -411,11 +427,13 @@ canvas { display: block; }
   transition: all var(--transition);
 }
 .label-bar .btn-confirm {
+  grid-column: 2;
   background: var(--accent);
   color: #fff;
 }
 .label-bar .btn-confirm:hover { background: var(--accent-hover); }
 .label-bar .btn-cancel {
+  grid-column: 3;
   background: var(--bg-tertiary);
   color: var(--text-secondary);
 }
@@ -577,7 +595,7 @@ canvas { display: block; }
     </div>
     <div class="label-bar" id="labelBar">
       <span class="label-hint">Label:</span>
-      <input type="text" id="modalLabelInput" placeholder="e.g. patient_name, date, address..." spellcheck="false" autocomplete="off">
+      <textarea id="modalLabelInput" rows="2" placeholder="e.g. patient_name, date, address..." spellcheck="false" autocomplete="off"></textarea>
       <button class="btn-confirm" onclick="confirmLabel()">Add</button>
       <button class="btn-cancel" onclick="cancelLabel()">Cancel</button>
     </div>
@@ -878,7 +896,7 @@ function render() {
     const lw = (i === selectedIdx ? 3 : 2) / zoom;
 
     // Fill — visible tint so you can see what's covered
-    ctx.fillStyle = color + (i === selectedIdx ? "55" : "40");
+    ctx.fillStyle = color + (i === selectedIdx ? "66" : "30");
     ctx.fillRect(ann.x_min, ann.y_min, w, h);
 
     // Border — dashed while the proposal is still unverified
@@ -891,7 +909,7 @@ function render() {
     // Label tag — fixed 14px on screen regardless of zoom
     const fs = 14 / zoom;
     ctx.font = `700 ${fs}px 'Segoe UI', sans-serif`;
-    const tagText = ann.label || "(puste)";
+    const tagText = `${i + 1}.`;
     const tw = ctx.measureText(tagText).width;
     const padX = 6 / zoom;
     const padY = 4 / zoom;
@@ -913,6 +931,12 @@ function render() {
   if (selectedIdx >= 0 && annotations[selectedIdx]) {
     const a = annotations[selectedIdx];
     const s = HANDLE_PX / zoom;
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 8 / zoom;
+    ctx.strokeRect(a.x_min, a.y_min, a.x_max - a.x_min, a.y_max - a.y_min);
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = 4 / zoom;
+    ctx.strokeRect(a.x_min, a.y_min, a.x_max - a.x_min, a.y_max - a.y_min);
     ctx.fillStyle = "#fff";
     ctx.strokeStyle = "#111";
     ctx.lineWidth = 1 / zoom;
@@ -1145,12 +1169,11 @@ canvas.addEventListener("mousemove", (e) => {
 canvas.addEventListener("mouseup", (e) => {
   if (panning) { panning = false; canvas.style.cursor = ctrlHeld ? "grab" : "crosshair"; return; }
 
-  // Finished correcting a box — let the model read the new crop
   if (resizing) {
-    const idx = resizing.idx;
     resizing = null;
     unsaved = true;
-    reRecognize(idx);
+    annCache[images[currentIdx].id] = annotations;
+    render(); updateList(); updateThumbs();
     return;
   }
 
@@ -1187,6 +1210,12 @@ canvas.addEventListener("dblclick", (e) => {
 
 canvas.addEventListener("wheel", (e) => {
   e.preventDefault();
+  if (ctrlHeld) {
+    panX -= e.deltaX;
+    panY -= e.deltaY;
+    render();
+    return;
+  }
   const rect = canvas.getBoundingClientRect();
   const mx = e.clientX - rect.left, my = e.clientY - rect.top;
   const old = zoom;
@@ -1212,9 +1241,10 @@ function startEdit(i) {
   editingIdx = i;
   selectedIdx = i;
   pendingBox = null;
+  zoomToAnnotation(ann);
   render(); updateList();
   document.getElementById("labelBar").querySelector(".label-hint").textContent =
-    ann.source === "auto" ? "Weryfikacja:" : "Label:";
+    ann.source === "auto" ? `Weryfikacja ${i + 1}:` : `Ramka ${i + 1}:`;
   document.getElementById("labelBar").querySelector(".btn-confirm").textContent =
     ann.source === "auto" ? "Zatwierdź" : "Zapisz";
   showLabelModal(ann.label || "");
@@ -1281,7 +1311,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Control") return;  // handled separately
   // Don't handle shortcuts when modal is open or typing in inputs
   if (document.getElementById("labelBar").classList.contains("visible")) return;
-  if (e.target.tagName === "INPUT") return;
+  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
 
   if (e.ctrlKey && e.key === "s") { e.preventDefault(); saveAnnotations(); }
   else if (e.ctrlKey && e.key === "z") { e.preventDefault(); undoLast(); }
@@ -1298,6 +1328,16 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ── Zoom helpers ───────────────────────────────────────────────
+function zoomToAnnotation(annotation) {
+  if (!img) return;
+  const width = Math.max(1, annotation.x_max - annotation.x_min);
+  const height = Math.max(1, annotation.y_max - annotation.y_min);
+  zoom = Math.max(0.02, Math.min(4,
+    Math.max(1, canvas.width - 96) / width,
+    Math.max(1, canvas.height - 96) / height));
+  panX = canvas.width / 2 - (annotation.x_min + annotation.x_max) * zoom / 2;
+  panY = canvas.height / 2 - (annotation.y_min + annotation.y_max) * zoom / 2;
+}
 function zoomBy(f) {
   const cx = canvas.width / 2, cy = canvas.height / 2, old = zoom;
   zoom = Math.min(30, Math.max(0.02, zoom * f));
@@ -1331,7 +1371,7 @@ function updateList() {
       : ann.source === "verified" ? '<span class="badge badge-ok">OK</span>' : "";
     const name = ann.label ? esc(ann.label) : '<span class="empty">(puste)</span>';
     item.innerHTML = `
-      <span class="dot" style="background:${color}"></span>
+      <span class="ann-number" style="color:${color}">${i + 1}.</span>
       <div class="info">
         <div class="name">${badge}${name}</div>
         <div class="coords">${ann.x_min}, ${ann.y_min} → ${ann.x_max}, ${ann.y_max}</div>
@@ -1340,7 +1380,7 @@ function updateList() {
       <button class="del-btn" data-i="${i}">&#10005;</button>`;
     item.addEventListener("click", (e) => {
       if (e.target.closest(".del-btn") || e.target.closest(".edit-btn")) return;
-      selectedIdx = i; render(); updateList();
+      selectedIdx = i; zoomToAnnotation(ann); render(); updateList();
     });
     item.addEventListener("dblclick", (e) => {
       if (e.target.closest(".del-btn")) return;
