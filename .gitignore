@@ -26,7 +26,8 @@ __pycache__/
 /dataset/
 
 # Line segmentation benchmark artifacts
-line_benchmark/dataset/
+line_benchmark/dataset/*
+!line_benchmark/dataset/*.dvc
 line_benchmark/results/
 line_benchmark/*.pt
 e2e_benchmark/dataset/

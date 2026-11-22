@@ -1,0 +1,6 @@
+outs:
+- md5: 7531db5e3caa1f87a33db39cfc682951.dir
+  size: 6588370059
+  nfiles: 3087
+  hash: md5
+  path: handwritten_lines
