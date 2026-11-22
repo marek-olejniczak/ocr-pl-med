@@ -3,8 +3,9 @@
 Split by source document, so variants of one IAM form (a01_000, a01_000u,
 a01_000x) and pages of one Bengali document never land in both train and val.
 Train pages are linked as they are and additionally written once as an
-augmented copy (*_aug.jpg). Only pixel-level augmentations happen here, boxes
-stay where they are; rotation/perspective are left to ultralytics.
+augmented copy (*_aug.jpg). Augmentations here are pixel-level, except for
+widened word gaps, which also stretch the line box; rotation/perspective are
+left to ultralytics.
 
 --extra-train/--extra-val add pages from image lists of another YOLO layout
 (hpo/prepare.py lists of docs_20k), linked image and label next to ours.
@@ -44,7 +45,7 @@ GROUP_RES = (re.compile(r"^(iam_[a-z]\d+_\d+)[a-z]?$"),
              re.compile(r"^(seg_\d+_\d+)_\d+$"),
              re.compile(r"^(auto_\d+)_\d+$"))
 
-P_BARS, P_BLUE, P_SCAN, P_RULED = 0.4, 0.3, 0.6, 0.15
+P_BARS, P_BLUE, P_SCAN, P_RULED, P_DOTS, P_GAPS = 0.4, 0.3, 0.6, 0.15, 0.3, 0.5
 
 
 def group_key(file_name):
@@ -106,6 +107,70 @@ def ruled_lines(img, boxes, rng):
             d.line([(x, 0), (x, img.height)], fill=color, width=2)
 
 
+def dot_grid(img, boxes, rng):
+    """Dotted notebook paper, like the real notes."""
+    d = ImageDraw.Draw(img)
+    step = max(12, int(np.median([b[3] for b in boxes]) * rng.uniform(0.4, 0.8)))
+    r = max(1, step // 15)
+    color = (rng.randint(140, 190),) * 3
+    for y in range(rng.randint(0, step), img.height, step):
+        for x in range(rng.randint(0, step), img.width, step):
+            d.ellipse((x - r, y - r, x + r, y + r), fill=color)
+
+
+def _gaps(band, min_len):
+    """(start, end) of blank column runs between ink inside a line crop."""
+    ink = (band < 150).sum(axis=0) > 1
+    xs = np.flatnonzero(ink)
+    if len(xs) < 2:
+        return []
+    runs, start = [], None
+    for x in range(xs[0], xs[-1] + 1):
+        if not ink[x] and start is None:
+            start = x
+        elif ink[x] and start is not None:
+            if x - start >= min_len:
+                runs.append((start, x))
+            start = None
+    return runs
+
+
+def widen_gaps(img, boxes, rng):
+    """Wide spaces between words, as in the real notes: blank columns are
+    inserted into a few word gaps and the rest of the line moves right. Only
+    lines whose row band is free of other boxes and whose right side is blank
+    paper, so nothing else gets sheared or pushed off the page."""
+    a = np.asarray(img).copy()
+    gray = a.mean(axis=2)
+    out = [list(b) for b in boxes]
+    for i, (x, y, w, h) in enumerate(boxes):
+        if rng.random() < 0.4:
+            continue
+        x0, y0, x1, y1 = int(x), int(y), int(x + w), int(y + h)
+        others = [b for j, b in enumerate(boxes) if j != i]
+        if x0 < 0 or y0 < 0 or x1 > a.shape[1] or y1 > a.shape[0] or _overlaps(
+                (0, y0, a.shape[1], y1), others):
+            continue
+        gaps = _gaps(gray[y0:y1, x0:x1], max(4, int(0.25 * h)))
+        if not gaps:
+            continue
+        right_ink = np.flatnonzero((gray[y0:y1, x1:] < 150).sum(axis=0) > 1)
+        room = (right_ink[0] if len(right_ink) else a.shape[1] - x1) - 10
+        for g0, g1 in sorted(rng.sample(gaps, min(len(gaps), rng.randint(1, 3))),
+                             reverse=True):
+            add = min(int(rng.uniform(0.3, 1.5) * h), room)
+            if add <= 0:
+                break
+            c = x0 + (g0 + g1) // 2
+            row = a[y0:y1]
+            a[y0:y1] = np.concatenate(
+                [row[:, :c], np.repeat(row[:, c:c + 1], add, axis=1),
+                 row[:, c:row.shape[1] - add]], axis=1)
+            room -= add
+            out[i][2] += add
+    return Image.fromarray(a), out
+
+
 def scan_profile(img, rng):
     kind = rng.choice(["grayscale", "photocopy", "blur"])
     if kind == "grayscale":
@@ -123,16 +188,22 @@ def scan_profile(img, rng):
 
 
 def augment(img, boxes, rng):
+    """Returns the augmented image and its line boxes (xywh)."""
     img = img.convert("RGB")
-    if rng.random() < P_RULED:
+    if rng.random() < P_GAPS:
+        img, boxes = widen_gaps(img, boxes, rng)
+    paper = rng.random()
+    if paper < P_RULED:
         ruled_lines(img, boxes, rng)
+    elif paper < P_RULED + P_DOTS:
+        dot_grid(img, boxes, rng)
     if rng.random() < P_BLUE:
         img = blue_ink(img, rng)
     if rng.random() < P_BARS:
         redaction_bars(img, boxes, rng)
     if rng.random() < P_SCAN:
         img = scan_profile(img, rng)
-    return img
+    return img, boxes
 
 
 def write_split(images, anns, images_root, out_dir, split, aug_rng=None):
@@ -151,10 +222,11 @@ def write_split(images, anns, images_root, out_dir, split, aug_rng=None):
                                               img["height"])) + "\n"
         (lbl_out / f"{stem}.txt").write_text(lines)
         if aug_rng is not None:
-            boxes = [a["bbox"] for a in anns[img["id"]]]
-            augment(Image.open(src), boxes, aug_rng).save(
-                img_out / f"{stem}_aug.jpg", quality=90)
-            (lbl_out / f"{stem}_aug.txt").write_text(lines)
+            aug, boxes = augment(Image.open(src),
+                                 [a["bbox"] for a in anns[img["id"]]], aug_rng)
+            aug.save(img_out / f"{stem}_aug.jpg", quality=90)
+            (lbl_out / f"{stem}_aug.txt").write_text("\n".join(coco_to_yolo_lines(
+                [{"bbox": b} for b in boxes], img["width"], img["height"])) + "\n")
 
 
 def list_pairs(list_txt):

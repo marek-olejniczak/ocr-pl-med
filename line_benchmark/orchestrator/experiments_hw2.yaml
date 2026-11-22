@@ -1,0 +1,39 @@
+# hw2: hw1 recipe (from r2 again), the augmented copies also get dotted paper
+# and widened word gaps, the two things r2/hw1 split notes on.
+# hw1: r2 yolov8n fine-tuned on handwritten full pages (IAM + Bengali, one
+# augmented copy each) mixed ~50/50 with the HPO docs_20k subsample, so the
+# printed forms are not forgotten. docs_20k test is still predicted below as
+# the forgetting check; the real notes/cards are evaluated outside the matrix.
+dataset: hw_mix2
+run: hw2
+notes: >-
+  hw2: hw1 + dotted paper and widened word gaps in the aug copies; r2 yolov8n best.pt
+  fine-tuned on handwritten_lines_coco (+ aug copy) and
+  docs_20k g100/g67, lower lr, slight rotation
+
+train_variants: [raw]
+
+defaults:
+  epochs: 15
+  imgsz: 1024
+  batch: 16
+  nbs: 64
+  conf_thresh: 0.25
+  train_flags: [--line-val, --diagnostics, --wandb]
+
+data:
+  raw:
+    yolo: dataset/yolo_hw_mix2/data.yaml
+    images_root: dataset/docs_20k/images
+
+test_coco: dataset/annotations/instances_test.json
+train_coco: dataset/annotations/instances_train.json
+val_coco: dataset/annotations/instances_val.json
+
+models:
+  yolov8-r2:
+    service: ultralytics
+    weights: results_r2/checkpoints/docs_20k_yolov8_ft-raw/train/weights/best.pt
+    finetune: true
+    lr0: 0.0002
+    train_args: {warmup-epochs: 1, degrees: 2}
