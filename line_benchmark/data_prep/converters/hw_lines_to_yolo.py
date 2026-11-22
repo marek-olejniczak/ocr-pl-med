@@ -163,7 +163,7 @@ def list_pairs(list_txt):
         return []
     base = Path(list_txt).resolve().parent
     pairs = []
-    for ln in Path(list_txt).read_text().split():
+    for ln in filter(None, Path(list_txt).read_text().splitlines()):
         img = base / ln
         lbl = (base / ln.replace("images/", "labels/", 1)).with_suffix(".txt")
         for f in (img, lbl):
