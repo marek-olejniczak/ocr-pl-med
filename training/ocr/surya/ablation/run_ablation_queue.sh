@@ -52,6 +52,11 @@ RUNS=(
   "v3_no_diacritic_placement_200k 10000 2500 42"
   "v3_base_200k_s43 10000 2500 43 v3_base_200k"
   "v3_200k_s43 10000 2500 43 v3_200k"
+  # generator v4 (2026-11): the final set. 10k steps is the budget of every
+  # earlier 200k run, so it compares with v2 and v3 directly; 25k steps is
+  # one full pass over the 200k lines.
+  "v4_200k 10000 2500 42"
+  "v4_200k_25k 25000 2500 42 v4_200k"
 )
 # Restrict with: ONLY="noA_200k noB_200k" bash training/ocr/surya/ablation/run_ablation_queue.sh
 ONLY="${ONLY:-}"
