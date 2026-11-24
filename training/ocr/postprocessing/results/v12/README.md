@@ -54,3 +54,29 @@ P=~/.cache/ocr-pl-med/postprocessing/preds-v4
 .venv/bin/python -m evaluation.run_holdout --harm-max 0.003 --domain en,la,pl --test --predictions $P/surya_lora_v4_200k_25k.v12.jsonl \
     --groups data/v12/groups.csv --tag v12_v4_200k_25k_ta --out-dir results/v12
 ```
+
+## Porównanie z RysOCR (2026-11-24)
+
+RysOCR = PaddleOCR-VL + LoRA `kacperwikiel/RysOCR` (apache-2.0), benchmarkowy wrapper `rysocr_wrapper.py` uruchomiony
+w procesie na serwerze (venv na /home; obrazu Dockera nie da się zbudować, bo partycja z Dockerem jest pełna), batch 1,
+max_new_tokens 128, prompt `OCR:` z karty modelu: na 200 liniach dev CER 0.52 wobec 0.63 dla `Transcribe the text.`
+Dwie uwagi do wrappera: podmiana `create_causal_mask` psuje obecną rewizję PaddleOCR-VL (dae2996, brak `cache_position`;
+wyłączona w skrypcie uruchomieniowym), a ścieżka wsadowa ucina prompt po `attention_mask.sum()`, co przy lewym
+dopełnieniu jest błędne (dlatego batch 1).
+
+CER (WER w nawiasie); RxHandBD i htrlex bez wielkości liter i interpunkcji (`normalize_aux`), RxHandBD tylko split test bez flag.
+
+| model | v1.2 całość | v1.2 test | karty (G9) | nowe notatki | RxHandBD test (1111) | htrlex core2k (2000) |
+|---|---|---|---|---|---|---|
+| RysOCR | 0.3249 (0.796) | 0.2811 | 1.190 | 0.255 | **0.4775** (1.013) | 0.1955 (0.799) |
+| Surya v2_200k | 0.1550 (0.514) | 0.1513 | 0.608 | 0.116 | 0.5412 (0.945) | 0.0726 (0.300) |
+| Surya v3_200k | 0.1446 (0.495) | 0.1405 | 0.526 | 0.112 | 0.6256 (1.141) | 0.0723 (0.309) |
+| Surya v4_200k | 0.1160 (0.409) | 0.1091 | 0.592 | 0.080 | 0.5600 (0.926) | 0.0694 (0.301) |
+| Surya v4_200k_25k | **0.1098** (0.399) | **0.1040** | **0.493** | **0.074** | 0.5816 (1.004) | **0.0662** (0.287) |
+
+Po `deloop` (ta sama higiena dla wszystkich): RysOCR v1.2 0.3042, RxHandBD bez zmian; Surya v3 RxHandBD 0.5319, v4_25k 0.5738.
+RysOCR zapętla się na części linii notatek („1. 1. 1. …”): 10 najgorszych z 200 linii pilota to 38% edycji.
+
+Korektor (ten sam protokół) na wyjściu RysOCR: LOGO 0.3249 → 0.3021 (−2.28 p.p., harm 0.06%, changed_wrong 594),
+dev → test 0.2811 → 0.2624 (−1.87 p.p.). RysOCR z korektą jest prawie 3× gorszy niż Surya v4 bez korekty.
+Na RxHandBD (angielskie nazwy leków z recept z Bangladeszu) RysOCR jest lepszy od każdej Suryi, a v4 nie poprawił się względem v2.

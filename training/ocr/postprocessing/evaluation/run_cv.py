@@ -57,6 +57,7 @@ class Data:
     gt_of: list[dict[int, str]]
     base_edits: list[int]
     cands: dict[str, list[tuple[str, int]]]
+    rows: list[dict]  # wiersze wejścia (file_name, etykieta), w kolejności linii
 
 
 def prepare(lex: Lexicon, split: str, lex_tag: str = "polimorf", diacritics_only: bool = False,
@@ -83,7 +84,7 @@ def prepare(lex: Lexicon, split: str, lex_tag: str = "polimorf", diacritics_only
         print(f"prefiltr: {len(keys)} kluczy w {time.time() - t0:.0f}s -> {cp}")
     if diacritics_only:  # opcja 2 osobno: tylko warianty różniące się diakrytykami
         cands = {k: [(c, dd) for c, dd in v if fold(c) == fold(k)] for k, v in cands.items()}
-    return Data(gts, prs, groups, toks, ups, gt_of, [Levenshtein.distance(g, p) for g, p in zip(gts, prs)], cands)
+    return Data(gts, prs, groups, toks, ups, gt_of, [Levenshtein.distance(g, p) for g, p in zip(gts, prs)], cands, rows)
 
 
 def eligible(d: Data, i: int, pi: int, abbrev, disabled=()) -> bool:
@@ -278,7 +279,7 @@ def main() -> None:
               f"test ΔCER {tt['d_cer'] * 100:+.2f} p.p. harm {tt['harm']:.4f} fixed {tt['fixed']} broken {tt['broken']} "
               f"| GT w kandydatach {lost['gt_in_cands']}/{lost['wrong_eligible']} [{row['seconds']:.0f}s]", flush=True)
 
-    rows = load_predictions(a.predictions) if a.predictions else load_predictions()
+    rows = d.rows  # bez ponownego wczytania: plik mógł się zmienić w trakcie przebiegu
     raw_gts = [r["ground_truth"] for r in rows]
     res = {"variant": a.tag, "split": a.split, "harm_max": a.harm_max, **compare(raw_gts, d.prs, out, d.groups)}
     print(f"\n{a.tag} ({a.split}): CER {res['base_cer']:.5f} -> {res['cer']:.5f} (Δ {res['d_cer'] * 100:+.3f} p.p., "
