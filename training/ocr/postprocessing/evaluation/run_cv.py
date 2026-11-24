@@ -24,7 +24,7 @@ import numpy as np
 from rapidfuzz.distance import Levenshtein
 
 from evaluation.compare import compare, per_group_cer
-from evaluation.folds import line_groups, nested_logo
+from evaluation.folds import line_groups, nested_logo, read_group_map
 from evaluation.metrics import load_predictions, normalize_ws
 from fetch_resources import cache_dir
 from pp.candidates import Prefilter
@@ -60,11 +60,11 @@ class Data:
 
 
 def prepare(lex: Lexicon, split: str, lex_tag: str = "polimorf", diacritics_only: bool = False,
-            predictions: Path | None = None) -> Data:
+            predictions: Path | None = None, groups_csv: Path | None = None) -> Data:
     rows = load_predictions(predictions) if predictions else load_predictions()
     gts = [normalize_ws(r["ground_truth"]) for r in rows]
     prs = [normalize_ws(r["prediction"]) for r in rows]
-    groups = line_groups(rows, split)
+    groups = line_groups(rows, split, read_group_map(groups_csv) if groups_csv else None)
     toks = [tokenize(p) for p in prs]
     ups = [upper_share(t) for t in toks]
     gt_of = []
@@ -224,6 +224,8 @@ def main() -> None:
     ap.add_argument("--dump", type=Path, help="zapisz predykcje out-of-fold (z tekstem linii, poza repo!)")
     ap.add_argument("--predictions", type=Path,
                     help="inny plik predykcji (format data/baseline/predictions.jsonl), np. Surya v3 albo test v1.1")
+    ap.add_argument("--groups", type=Path,
+                    help="CSV file_name,group dla linii spoza GROUP_RULES (np. strony new_* z test/real/v1.2)")
     ap.add_argument("--out-dir", type=Path, default=RESULTS, help="katalog wyników (eksperymenty poza results/)")
     a = ap.parse_args()
     t0 = time.time()
@@ -232,7 +234,7 @@ def main() -> None:
     lex = Lexicon(use_sjp=a.sjp)
     lm = UnigramLM(lex.targets())
     lp_unseen = math.log(lm.unseen) - lm.logz
-    d = prepare(lex, a.split, "polimorf+sjp" if a.sjp else "polimorf", a.diacritics_only, a.predictions)
+    d = prepare(lex, a.split, "polimorf+sjp" if a.sjp else "polimorf", a.diacritics_only, a.predictions, a.groups)
     em = Params(multi=not a.no_multi, uniform=a.uniform,
                 max_group_share=1.0 if a.no_group_cap else Params.max_group_share)
     disabled = tuple(c for c in ("P2_digits", "P3_num_unit", "P4_abbr_dot", "P5_abbr_list", "P6_short_upper",
@@ -249,7 +251,7 @@ def main() -> None:
         a.out_dir.mkdir(parents=True, exist_ok=True)
         (a.out_dir / "deploy_params.json").write_text(json.dumps(
             {"harm_max": a.harm_max, "params": p.as_dict(), "logo_all_groups": info,
-             "note": "progi strojone na LOGO wszystkich 8 grup; model kanału do wdrożenia uczony na całości"},
+             "note": f"progi strojone na LOGO wszystkich {len(set(d.groups))} grup; model kanału do wdrożenia uczony na całości"},
             indent=1), encoding="utf-8")
         print(f"deploy: {p.as_dict()} {info}")
         return

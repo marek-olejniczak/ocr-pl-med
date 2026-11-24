@@ -48,3 +48,20 @@ def test_token_table_categories():
     t = token_table(["ala ma kota"], ["ala mo kot"], ["ala ma kat"])
     assert (t["fixed"], t["changed_wrong"], t["unchanged_correct"]) == (1, 1, 1)
     assert t["precision"] == 0.5 and t["recall"] == 0.5 and t["harm"] == 0.0
+
+
+def test_blank_lines_skipped(tmp_path):
+    p = tmp_path / "p.jsonl"
+    p.write_text('{"file_name": "a.jpg", "ground_truth": "[BLANK]", "prediction": "x"}\n'
+                 '{"file_name": "b.jpg", "ground_truth": "kość", "prediction": "kosc"}\n', encoding="utf-8")
+    assert [r["file_name"] for r in load_predictions(p)] == ["b.jpg"]
+
+
+def test_v12_groups_map():
+    from evaluation.folds import line_groups, read_group_map, source_group
+    from evaluation.import_bench import V12_GROUPS
+    assert source_group("Kopia KARTA PACJENTA 3_page07.png") == "G9_karta"
+    gm = read_group_map(V12_GROUPS)
+    assert len(gm) == 2904 and len(set(gm.values())) == 11
+    new = next(fn for fn in gm if fn.startswith("new_"))
+    assert line_groups([{"file_name": new}], group_map=gm) == [gm[new]]

@@ -27,6 +27,22 @@ GROUP_RULES: list[tuple[str, re.Pattern]] = [
     ("G8_zrzuty_0512", re.compile(r"^miesnie_p\d+")),
 ]
 
+# test/real/v1.2: strony `new_<hash>` (dokument "new") nie niosą źródła w nazwie; grupę daje plik źródłowy
+# z manifest.csv (original_name). Mapę linia -> grupa zapisuje evaluation.import_bench do data/v12/groups.csv.
+NEW_SOURCE_RULES: list[tuple[str, re.Pattern]] = [
+    ("G9_karta", re.compile(r"^(Kopia KARTA PACJENTA \d|Recepta okulistyczna)")),
+    ("G10_nerw_twarzowy", re.compile(r"^Nerw Twarzowy")),
+    ("G11_zyly_glebokie", re.compile(r"^Żyły Głębokie")),
+]
+
+
+def source_group(original_name: str) -> str:
+    hits = [g for g, rx in NEW_SOURCE_RULES if rx.match(original_name)]
+    if len(hits) != 1:
+        raise ValueError(f"{original_name!r} matches {hits or 'no group'}")
+    return hits[0]
+
+
 # Test odporności (spec §3): łączymy źródła, które mogą mieć wspólnego autora.
 COARSE = {
     "G6_dataN": "C_zrzuty_dataN",
@@ -48,8 +64,10 @@ def coarse(group: str) -> str:
     return COARSE.get(group, group)
 
 
-def line_groups(rows: Sequence[dict], split: str = "fine") -> list[str]:
-    gs = [assign_group(r["file_name"]) for r in rows]
+def line_groups(rows: Sequence[dict], split: str = "fine", group_map: dict[str, str] | None = None) -> list[str]:
+    """Grupa linii; `group_map` (file_name -> grupa) ma pierwszeństwo przed GROUP_RULES (np. strony `new_*` z v1.2)."""
+    gm = group_map or {}
+    gs = [gm.get(r["file_name"]) or assign_group(r["file_name"]) for r in rows]
     if split == "coarse":
         gs = [coarse(g) for g in gs]
     elif split != "fine":
@@ -85,6 +103,12 @@ def write_groups_csv(path: Path = GROUPS_CSV) -> Counter:
         for r, g in zip(rows, fine):
             w.writerow([r["file_name"], g, coarse(g)])
     return Counter(fine)
+
+
+def read_group_map(path: Path) -> dict[str, str]:
+    """CSV z kolumnami file_name, group (inne kolumny pomijane)."""
+    with open(path, encoding="utf-8") as f:
+        return {r["file_name"]: r["group"] for r in csv.DictReader(f)}
 
 
 def read_groups_csv(path: Path = GROUPS_CSV) -> dict[str, tuple[str, str]]:

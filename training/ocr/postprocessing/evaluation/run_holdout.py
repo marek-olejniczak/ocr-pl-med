@@ -16,6 +16,7 @@ import argparse
 import json
 import math
 import time
+from pathlib import Path
 from typing import Sequence
 
 from evaluation import run_cv as R
@@ -72,6 +73,9 @@ def main() -> None:
                                                  "domyślnie wyłączona; progi stroimy bez niej")
     ap.add_argument("--domain-in-tuning", action="store_true", help="ablacja: lista także przy strojeniu progów")
     ap.add_argument("--test", action="store_true", help="oceń linie testowe; używać raz, po wyborze wariantu na dev")
+    ap.add_argument("--predictions", type=Path, help="inny plik predykcji (format data/baseline/predictions.jsonl)")
+    ap.add_argument("--groups", type=Path, help="CSV file_name,group dla linii spoza GROUP_RULES")
+    ap.add_argument("--out-dir", type=Path, default=R.RESULTS, help="katalog wyników (eksperymenty poza results/)")
     a = ap.parse_args()
     t0 = time.time()
     terms = frozenset(domain_terms(a.domain.split(","))) if a.domain else frozenset()
@@ -79,7 +83,7 @@ def main() -> None:
     lex = Lexicon()
     lm = UnigramLM(lex.targets())
     lp_unseen = math.log(lm.unseen) - lm.logz
-    d = R.prepare(lex, "fine")
+    d = R.prepare(lex, "fine", predictions=a.predictions, groups_csv=a.groups)
     em = Params(multi=True)
     dev, test = split_lines(d.groups)
     print(f"dev {len(dev)} linii, test {len(test)} linii, grupy dev {sorted({d.groups[i] for i in dev})}", flush=True)
@@ -100,7 +104,8 @@ def main() -> None:
         print(f"progi z dev: {p.as_dict()} {info}")
         show("TEST", res["test"])
 
-    with open(R.RESULTS / f"holdout_{a.tag}.json", "w", encoding="utf-8") as f:
+    a.out_dir.mkdir(parents=True, exist_ok=True)
+    with open(a.out_dir / f"holdout_{a.tag}.json", "w", encoding="utf-8") as f:
         json.dump(res, f, indent=1)
     print(f"razem {time.time() - t0:.0f}s")
 

@@ -9,6 +9,10 @@ pełna tabela: [`results/TABLE.md`](results/TABLE.md).
 CER 0.1238 → 0.1062 (−1.76 p.p., 95% CI po liniach [−2.05, −1.44]), harm 0.00%; w LOGO na 2160 liniach
 CER 0.1270 → 0.0987 (−2.83 p.p., 95% CI po grupach [−3.38, −1.89]), harm 0.31%.
 
+**Stan na 2026-11-24** (Surya v4_200k_25k, test/real/v1.2, 2904 linie bez `[BLANK]`): LOGO po 11 grupach
+CER 0.1098 → 0.0975 (−1.23 p.p.), harm 0.27%; zamrożony test 0.1040 → 0.0956 (−0.84 p.p.), harm 0.05%.
+Na v2/v3 ten sam korektor dawał ok. −2.5 p.p. Szczegóły i progi dla v4: [`results/v12/`](results/v12/README.md).
+
 ## Uruchomienie
 
 ```bash
@@ -39,6 +43,9 @@ Ablacje `run_cv`: `--uniform`, `--no-multi`, `--no-group-cap`, `--no-protect`, `
 `--forward`, `--split coarse`. `--dump PLIK` zapisuje predykcje z tekstem linii: tylko poza repo.
 Inne predykcje (np. Surya v3, test v1.1) w formacie `data/baseline/predictions.jsonl`: `--predictions PLIK`,
 wyniki wtedy poza `results/`: `--out-dir KATALOG`.
+Predykcje z przebiegu benchmarku importuje `evaluation.import_bench` (jsonl poza repo + mapa grup `data/v12/groups.csv`).
+Dla test/real/v1.2 podawaj `--groups data/v12/groups.csv` (strony `new_*` nie mają źródła w nazwie). Linie `[BLANK]`
+(zostają w zbiorze dla detekcji) `load_predictions` pomija.
 
 Higiena wejścia korektora (`pp/normalize.hygiene`) zwija zapętlenia modelu (`deloop`): n-gramy do 3 słów
 powtórzone ≥ 3 razy z rzędu oraz powtórzone segmenty `<br>`. Surya v3 na RxHandBD: CER 0.710 → 0.600;
@@ -69,6 +76,7 @@ to nie jest wynik testowy).
 |---|---|
 | `data/baseline/predictions.jsonl` | predykcje Surya v2_200k na dataset-v1 (z etykietami), 2026-11-05 |
 | `data/baseline/metrics.json`, `groups.csv` | wynik `eval_cer.py` (CER 0.12701, WER 0.48307); mapa linia → grupa |
+| `data/v12/groups.csv` | test/real/v1.2: linia → grupa (G1–G11) i split dev/test |
 | `data/domain/` | lista terminów TA z Wikidata (CC0) i kwerenda SPARQL |
 | `pp/normalize.py`, `tokenize.py`, `protect.py` | opcja 0, tokenizacja + wielkość liter, klasy chronione P1–P8 |
 | `pp/lexicon.py`, `lm.py` | słownik `known` / `target`, P(w) z NKJP + Simple Good-Turing |

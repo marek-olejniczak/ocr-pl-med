@@ -74,9 +74,15 @@ def score(labels: Iterable[str], preds: Iterable[str], norm: Callable[[str], str
 BASELINE_DIR = Path(__file__).resolve().parent.parent / "data" / "baseline"
 
 
+# Linie bez tekstu (np. 68 w miesnie, test/real/v1.1 i v1.2) zostają w zbiorze dla testów detekcji;
+# w ocenie OCR i korektora je pomijamy.
+BLANK = "[BLANK]"
+
+
 def load_predictions(path: Path = BASELINE_DIR / "predictions.jsonl") -> list[dict]:
     with open(path, encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+        rows = [json.loads(line) for line in f if line.strip()]
+    return [r for r in rows if normalize_ws(r["ground_truth"]) != BLANK]
 
 
 if __name__ == "__main__":
