@@ -1,6 +1,6 @@
 # Postprocessing OCR: co przetestowano i co działa
 
-Stan 2026-11-16, branch `postprocessing`. Kod: `training/ocr/postprocessing/`, pełny raport z tabelami:
+Stan 2026-11-25 (wcześniej 2026-11-16), branch `postprocessing`. Kod: `training/ocr/postprocessing/`, pełny raport z tabelami:
 `results/RAPORT.md`, `results/TABLE.md`.
 
 Statyczny korektor wyjścia Surya bez ponownej inferencji: słownik (PoliMorf, częstości NKJP), model kanału
@@ -20,8 +20,14 @@ leave-one-group-out (LOGO, grupy = źródła notatek) i na zamrożonym teście.
 | test/real v1.1, LOGO (2210 linii, bez `[BLANK]`) | v3_200k | 0.1280 → **0.1029** | −2.51 p.p. (CI grup [−3.02, −1.60]) | 0.32% |
 | test/real v1.1, LOGO | v2_200k | 0.1351 → 0.1073 | −2.78 p.p. | 0.34% |
 | syntetyczny tekst medyczny (63 tys. linii) | szum v3 | 0.1199 → 0.0908 | −2.9 p.p. | 0.24% |
+| test/real v1.2, LOGO 11 grup (2904 linie, bez `[BLANK]`) | **v4_200k_25k** | 0.1098 → **0.0975** | −1.23 p.p. (CI grup [−1.45, −0.96]) | 0.27% |
+| test/real v1.2, zamrożony test (1069 linii) | v4_200k_25k | 0.1040 → 0.0956 | −0.84 p.p. | 0.05% |
+| test/real v1.2, LOGO | v3_200k | 0.1446 → 0.1200 | −2.47 p.p. | 0.23% |
+| test/real v1.2, LOGO | RysOCR (konkurencja) | 0.3249 → 0.3021 | −2.28 p.p. | 0.06% |
 
-- Korektor daje ok. −2.5 do −2.8 p.p. CER (ok. 20% względnie) na każdym modelu i każdej wersji testu.
+- Korektor daje ok. −2.5 do −2.8 p.p. CER (ok. 20% względnie) na v2 i v3.
+- Na v4 (generator z ~50 fontami) zysk spada o połowę: −1.23 p.p. (−11%). 41% poprawek z v3 v4 robi sam,
+  strojenie wybiera `L_min = 6`. Sam v4 (0.1098) jest lepszy niż v3 z korektorem (0.1200). Szczegóły: `results/v12/README.md`.
 - Lepszy model OCR i korektor częściowo naprawiają te same błędy: na v1 po korekcie v3 wygrywa z v2 tylko o 0.08 p.p.,
   na v1.1 o 0.43 p.p.
 - Zysk jest na każdej z 8 grup, od −0.27 p.p. (grupa z najniższym CER) do −3.8 p.p.

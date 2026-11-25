@@ -80,3 +80,23 @@ RysOCR zapętla się na części linii notatek („1. 1. 1. …”): 10 najgorsz
 Korektor (ten sam protokół) na wyjściu RysOCR: LOGO 0.3249 → 0.3021 (−2.28 p.p., harm 0.06%, changed_wrong 594),
 dev → test 0.2811 → 0.2624 (−1.87 p.p.). RysOCR z korektą jest prawie 3× gorszy niż Surya v4 bez korekty.
 Na RxHandBD (angielskie nazwy leków z recept z Bangladeszu) RysOCR jest lepszy od każdej Suryi, a v4 nie poprawił się względem v2.
+
+## Dalsze pomiary (2026-11-25, lokalnie)
+
+**Limit harm na v4 (tylko dev, LOGO wewnątrz dev, test nieczytany).** harm ≤ 0.3%: 0.1124 → 0.1027 (−0.97 p.p., harm 0.29%,
+changed_wrong 117); ≤ 0.5%: → 0.0999 (−1.25, harm 0.47%, changed_wrong 189); ≤ 1%: → 0.0978 (−1.46, harm 0.54%,
+changed_wrong 309). Każde +0.2 p.p. harm daje ok. −0.3 p.p. CER, ale błędne podmiany rosną szybciej niż naprawy.
+`L_min = 6` zostaje w 13 z 16 foldów niezależnie od limitu: krótkie słowa nie opłacają się w żadnym wariancie.
+Wybór budżetu harm to decyzja, nie wynik; wariant główny zostaje przy 0.3%.
+
+**Zbiory zewnętrzne** (model kanału z całego v1.2, progi `deploy_params.json`, lista TA `en,la,pl`, CER bez wielkości liter):
+htrlex core2k 0.0662 → 0.0590 (−0.72 p.p.; 119 zmian: 96 naprawionych, 15 zepsutych); RxHandBD test 0.5816 → 0.5752,
+całość z higieny (`deloop`), sama korekta 20 zmian i 0 naprawionych: angielskie nazwy leków spoza słownika.
+
+**Karty pacjenta (G9).** Wycinki pasują do etykiet, ale w 6 liniach bbox łapie nadruk formularza, który OCR czyta:
+225 z 598 edycji G9 (CER 0.493 → 0.350 bez tych linii). Kilka etykiet jest niewiernych obrazowi (np. `11.05.2024` przy
+`11.05.24`, `tablet` przy `tabl.`, `Jzo` przy `J20.`); bez nich ok. 0.33. Złe tokeny G9: 148, z czego 46 to liczby/kody/krótkie
+skróty; z 102 słów 82 mają GT w PoliMorf, 8 w RPL (6× `tabl`, Plavix, Forxiga), 1 w listach imion. Słownik nie jest
+wąskim gardłem: GT wypada poza kandydatów (odległość > 3) albo słowo jest krótsze niż `L_min`. Lista RPL nie jest warta wdrożenia;
+`tabl` lepiej jako skrót chroniony. Na nowych notatkach (G10+G11) 225/239 złych słów ma GT w PoliMorf; brakujące to
+terminy anatomiczne (`zażuchwowy`) i literówki w GT.

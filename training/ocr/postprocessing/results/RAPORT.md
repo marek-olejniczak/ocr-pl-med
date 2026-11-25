@@ -5,6 +5,10 @@ Korektor słownikowy z modelem kanału (opcja 1, z opcją 2 wchłoniętą) na wy
 Pełna tabela: [`TABLE.md`](TABLE.md); szczegóły faz: [`ORACLE.md`](ORACLE.md), [`P2_P3.md`](P2_P3.md),
 [`P4.md`](P4.md). Raport nie zawiera tekstu linii.
 
+> **Aktualizacja 2026-11-24/25.** Raport opisuje Suryę v2_200k na dataset-v1. Stan na Surya v4 (generator z ~50 fontami)
+> i test/real/v1.2 (2904 linie, 11 grup): [`v12/README.md`](v12/README.md). Korektor daje tam −1.23 p.p. w LOGO
+> (0.1098 → 0.0975) i −0.84 p.p. na zamrożonym teście, mniej więcej połowę zysku z v2/v3.
+
 ## 1. Wynik główny
 
 Wariant główny (decyzje 2026-11-04 do 2026-11-06): limit szkód harm ≤ 0.3% poprawnych tokenów na
