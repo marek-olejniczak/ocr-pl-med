@@ -1,0 +1,12 @@
+{
+ "_opis": "Odtworzenie wyników z 2026-11-24/25 (test/real/v1.2). Dla finalnego zbioru skopiuj ten plik i zmień ścieżki oraz name. Przebieg benchmarku (z tekstem linii) leży poza repo.",
+ "name": "v12-rebuild",
+ "benchmark_run": "~/.cache/ocr-pl-med/postprocessing/preds-v4/bench_20261123",
+ "dataset_dir": "~/.cache/ocr-pl-med/dataset/test/real/v1.2",
+ "dataset_id": "real_v12",
+ "model": "surya_lora_v4_200k_25k",
+ "compare_models": ["surya_lora_v4_200k", "surya_lora_v3_200k", "surya_lora_v2_200k"],
+ "images_prefix": "benchmark/dane/real_v1.2/images/",
+ "bundle_name": "v4_200k_25k-rebuild",
+ "adapter": "<katalog adaptera v4_200k_25k>"
+}

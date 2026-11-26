@@ -17,6 +17,8 @@ __pycache__/
 *.pyc
 *.pyo
 *$py.class
+*.egg-info/
+build/
 
 # Tool caches
 .pytest_cache/

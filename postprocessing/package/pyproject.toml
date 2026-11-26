@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ocr-postprocess"
+version = "1.0.0"
+description = "Korekta wyjścia OCR (Surya) dla polskich rękopisów medycznych"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["rapidfuzz>=3.9", "numpy>=1.26"]
+
+[project.optional-dependencies]
+# tylko tryb z oceną Suryi; wersje takie jak przy treningu adaptera
+surya = ["surya-ocr==0.17.1", "transformers==4.56.1", "peft>=0.17,<1", "pillow"]
+
+[project.scripts]
+ocr-postprocess = "ocr_postprocess.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+ocr_postprocess = ["data/*.tsv", "models/*/*"]

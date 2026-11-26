@@ -1,0 +1,50 @@
+{
+ "file_name": [
+  [
+   "G1_noga",
+   "^noga_p\\d+"
+  ],
+  [
+   "G2_anatomia_zmysly",
+   "^anatomia_zmysly_foto_p\\d+"
+  ],
+  [
+   "G3_serce",
+   "^serce_p\\d+"
+  ],
+  [
+   "G4_unaczynienie",
+   "^miednica_p\\d+"
+  ],
+  [
+   "G5_elementy_topo",
+   "^elementy_topograficzne_p\\d+"
+  ],
+  [
+   "G6_dataN",
+   "^inne_p\\d+"
+  ],
+  [
+   "G7_zrzuty_0507",
+   "^kosci_p\\d+"
+  ],
+  [
+   "G8_zrzuty_0512",
+   "^miesnie_p\\d+"
+  ]
+ ],
+ "original_name": [
+  [
+   "G9_karta",
+   "^(Kopia KARTA PACJENTA \\d|Recepta okulistyczna)"
+  ],
+  [
+   "G10_nerw_twarzowy",
+   "^Nerw Twarzowy"
+  ],
+  [
+   "G11_zyly_glebokie",
+   "^Żyły Głębokie"
+  ]
+ ]
+}
