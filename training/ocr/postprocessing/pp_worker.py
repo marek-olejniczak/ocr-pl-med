@@ -7,7 +7,8 @@ API (JSON):
     POST /correct         {"lines": ["...", ...], "detailed": false}
                           -> {"lines": [...]}  albo  {"results": [{"text", "changes": [{"token", "from", "to"}]}]}
 
-Korektor ładuje się przy pierwszym żądaniu (ok. 30 s, ok. 2–3 GB RAM: słownik PoliMorf + NKJP) albo od razu z PP_PRELOAD=1.
+Korektor ładuje się przy pierwszym żądaniu (ok. 1.5 s ze skompilowanym indeksem `python -m pp.compiled`,
+ok. 1.6 GB RAM) albo od razu z PP_PRELOAD=1.
 Korygować całą stronę jednym żądaniem: prefiltr jest szybki tylko w partii.
 """
 

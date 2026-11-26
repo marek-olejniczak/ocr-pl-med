@@ -7,6 +7,8 @@ bez trenowania w aplikacji: wszystko, czego się nauczył, jest w paczce `deploy
 
 ## Dwa tryby
 
+Docelowo: tryb z oceną Suryi. Statyczny to wariant zapasowy (gdy nie ma obrazu linii) i punkt porównania.
+
 | tryb | co potrzebuje | CER na v1.2 (LOGO, 11 grup) | zamrożony test | harm |
 |---|---|---|---|---|
 | bez korekty | — | 0.1098 | 0.1040 | — |
@@ -21,8 +23,11 @@ Wartości są dla Suryi `v4_200k_25k`: przy innym adapterze trzeba przebudować 
 - Python ≥ 3.10, `pip install -r requirements.txt` (rapidfuzz, numpy).
 - Zasoby słownikowe (raz, ok. 70 MB pobrania, ok. 170 MB po rozpakowaniu): `python fetch_resources.py`;
   katalog z `$PP_CACHE` (domyślnie `~/.cache/ocr-pl-med/postprocessing`). PoliMorf: BSD 2-clause, NKJP 1-gramy: CC-BY.
-- Po załadowaniu ok. 1.9 GB RAM, ładowanie ok. 23 s (raz na proces). Strona 30 linii: ok. 3.5 s na CPU.
-  Korygować całą stronę jednym wywołaniem (kandydaci liczeni są partią).
+- Skompilowany indeks słownika, raz przy instalacji (ok. 40 s, ok. 250 MB w `$PP_CACHE/compiled/`):
+  `PYTHONPATH=. python -m pp.compiled`. Potem start korektora ok. 1.5 s zamiast ok. 23 s; bez indeksu pierwsze
+  `load()` zbuduje go samo. Wyniki z indeksem i bez są identyczne (2904/2904 linii v1.2, oba tryby).
+- Po załadowaniu ok. 1.6 GB RAM. Strona 30 linii: ok. 1.5 s na CPU. Korygować całą stronę jednym wywołaniem
+  (kandydaci liczeni są partią). Ładowanie można uruchomić w osobnym wątku przy starcie aplikacji.
 - Tryb z oceną Suryi: ten sam proces co Surya (model już w pamięci), dodatkowo ok. 7 wariantów linii na linię
   w jednym przebiegu modelu bez dekodowania; na RTX 3090 ok. 100 wariantów/s. Na CPU/MPS wolniej, nie mierzone.
 
@@ -32,7 +37,7 @@ Wartości są dla Suryi `v4_200k_25k`: przy innym adapterze trzeba przebudować 
 import sys; sys.path.insert(0, "training/ocr/postprocessing")
 from pp.deploy import load
 
-corr = load("training/ocr/postprocessing/deploy/v4_200k_25k")     # raz, przy starcie
+corr = load("training/ocr/postprocessing/deploy/v4_200k_25k")     # raz, przy starcie (ok. 1.5 s)
 corr.correct_lines(["WZGORZE - impulsy z", "receptonów ciała"])   # -> ["WZGÓRZE - impulsy z", "receptorów ciała"]
 corr.correct_lines_detailed([...])  # -> [{"text": ..., "changes": [{"token": 0, "from": "WZGORZE", "to": "WZGÓRZE"}]}]
 ```

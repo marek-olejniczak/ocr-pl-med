@@ -8,7 +8,7 @@ Budowa (raz, po nowym modelu OCR; predykcje z etykietami w formacie data/baselin
 Użycie w aplikacji (słownik i częstości z $PP_CACHE, pobierane przez fetch_resources.py):
 
     from pp.deploy import load
-    corr = load("deploy/v4_200k_25k")               # ok. 30 s, potem korekta partią
+    corr = load("deploy/v4_200k_25k")               # ok. 1.5 s (skompilowany indeks, pp.compiled), potem partią
     corr.correct_lines(["linia z OCR", ...])        # -> poprawione linie
     corr.correct_lines_detailed([...])              # -> [{"text": ..., "changes": [{"token", "from", "to"}]}]
 
@@ -61,13 +61,19 @@ def build(predictions: Path, groups_csv: Path | None, params_json: Path, domain:
     return meta
 
 
-def load(bundle: str | Path, lexicon: Lexicon | None = None, lm: UnigramLM | None = None) -> Corrector:
+def load(bundle: str | Path, lexicon: Lexicon | None = None, lm: UnigramLM | None = None,
+         compiled: bool = True) -> Corrector:
+    """`compiled=True`: słownik i częstości ze skompilowanego indeksu (`pp.compiled`, ok. 1–2 s; pierwszy raz buduje go
+    ok. 30 s); `False`: budowa od zera z plików zasobów (ok. 23 s), wynik identyczny."""
     bundle = Path(bundle)
     meta = json.loads((bundle / "bundle.json").read_text(encoding="utf-8"))
     if meta.get("format") != FORMAT:
         raise ValueError(f"{bundle}: format {meta.get('format')}, oczekiwano {FORMAT}")
     with gzip.open(bundle / "error_model.pkl.gz", "rb") as f:
         model = pickle.load(f)
+    if lexicon is None and compiled:
+        from pp import compiled as C
+        lexicon, lm = C.load(meta["domain_langs"])
     lex = lexicon or Lexicon(extra_known=domain_terms(meta["domain_langs"]))
     lm = lm or UnigramLM(lex.targets())
     corr = Corrector(lex, lm, model, DecisionParams(**meta["params"]), lex.abbrev | set(meta["train_abbrev"]))

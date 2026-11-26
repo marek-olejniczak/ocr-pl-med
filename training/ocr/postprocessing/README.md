@@ -79,7 +79,7 @@ to nie jest wynik testowy).
 | `data/baseline/predictions.jsonl` | predykcje Surya v2_200k na dataset-v1 (z etykietami), 2026-11-05 |
 | `data/baseline/metrics.json`, `groups.csv` | wynik `eval_cer.py` (CER 0.12701, WER 0.48307); mapa linia → grupa |
 | `deploy/v4_200k_25k/` | paczka do wdrożenia: model pomyłek + progi (statyczne i z oceną Suryi) |
-| `pp/deploy.py`, `pp_worker.py`, `pp/surya_score.py` | ładowanie paczki, serwis HTTP, ocena tekstu przez Suryę |
+| `pp/deploy.py`, `pp_worker.py`, `pp/surya_score.py`, `pp/compiled.py` | ładowanie paczki, serwis HTTP, ocena tekstu przez Suryę, skompilowany indeks słownika (start 1.5 s) |
 | `data/v12/groups.csv` | test/real/v1.2: linia → grupa (G1–G11) i split dev/test |
 | `data/domain/` | lista terminów TA z Wikidata (CC0) i kwerenda SPARQL |
 | `pp/normalize.py`, `tokenize.py`, `protect.py` | opcja 0, tokenizacja + wielkość liter, klasy chronione P1–P8 |

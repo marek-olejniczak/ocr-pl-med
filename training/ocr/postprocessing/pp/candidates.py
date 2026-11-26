@@ -22,11 +22,15 @@ class Prefilter:
         self.d_max = d_max
         self.workers = workers
         self.by_len = lexicon.by_length()
-        self.by_fold = lexicon.by_fold()
+        if hasattr(lexicon, "fold_group"):  # pp.compiled.CompiledLexicon: grupy z posortowanej listy, bez słownika
+            self._fold_group = lexicon.fold_group
+        else:
+            by_fold = lexicon.by_fold()
+            self._fold_group = lambda key: by_fold.get(fold(key), ())
 
     def _diacritic_variants(self, key: str, out: dict[str, int]) -> None:
         # warianty diakrytyczne zawsze (opcja 2): przy wielu diakrytykach mogą mieć Lev > d
-        for w in self.by_fold.get(fold(key), ()):
+        for w in self._fold_group(key):
             out.setdefault(w, Levenshtein.distance(key, w))
 
     def __call__(self, key: str, d_max: int | None = None) -> list[tuple[str, int]]:
