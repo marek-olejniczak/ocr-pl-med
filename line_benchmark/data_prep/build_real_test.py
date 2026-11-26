@@ -7,6 +7,8 @@ Sources:
                 (GT for the 114 v1 pages)
     --labeled   labeler dataset dirs (annotations.csv + <stem>/<file> images):
                 patient cards, Zyly Glebokie, Nerw Twarzowy
+    --v1-fixed  labeler dir with v1 pages named <page_id>.png (figures marked
+                #ignore); its labels replace the v1.3 ones of those pages
 
 Tags in labels:
     #ignore      not a line (bar, signature, figure); COCO iscrowd=1, no crop
@@ -17,7 +19,8 @@ Old tags of the v1.x notes are mapped to these.
 Usage (from the repo root):
     python line_benchmark/data_prep/build_real_test.py --v1 real_test_v1 --v13 v13 \
         --labeled medyk_labeling/dataset medyk_labeling/dataset_zyly \
-                  medyk_labeling/dataset_jakub --out real_test_v2
+                  medyk_labeling/dataset_jakub --v1-fixed medyk_labeling/dataset_v1ign \
+        --out real_test_v2
 """
 
 import argparse
@@ -31,14 +34,16 @@ from pathlib import Path
 
 from PIL import Image
 
-# docs_20k train/val templates (KP2) and the KP1_p12 form (KP3 s.94): kept out of test
-CARD_DEV = {("2", 3), ("2", 9), ("2", 11), ("2", 17), ("2", 18), ("2", 23), ("2", 24), ("3", 94)}
+# docs_20k train/val templates (KP2) and the KP1_p12 form (KP3 s.94): seen in training, left out
+CARD_TRAIN_FORM = {("2", 3), ("2", 9), ("2", 11), ("2", 17), ("2", 18), ("2", 23), ("2", 24), ("3", 94)}
 NAME_RES = [
     (re.compile(r"^Kopia KARTA PACJENTA (\d)_page(\d+)\.png$"), "karta_pacjenta_{}", "card", "scan", 0),
     (re.compile(r"^Żyły Głębokie_page(\d+)\.png$"), "zyly_glebokie", "notes", "tablet", 1),
     (re.compile(r"^Nerw Twarzowy_page(\d+)\.png$"), "nerw_twarzowy", "notes", "tablet", 1),
 ]
-FIELDS = ["page_id", "document", "page", "split", "kind", "in_v1", "source_type", "grid_paper",
+# photos of a grid notebook labelled word by word, not line by line
+DROP_DOCS = {"anatomia_zmysly_foto"}
+FIELDS = ["page_id", "document", "page", "kind", "in_v1", "source_type", "grid_paper",
           "width", "height", "n_lines", "original_name", "label_group", "sha256"]
 
 
@@ -53,19 +58,31 @@ def ocr_usable(text):
     return not text.startswith("#") and "[?]" not in text
 
 
-def v1_pages(v1, v13):
-    """114 original note pages: v1.3 GT, tags normalized, Marek's text fixes kept."""
-    v1_manifest = {r["page_id"]: r for r in csv.DictReader(open(v1 / "manifest.csv", encoding="utf-8"))}
+def read_boxes(r, text_key):
+    return [normalize(r[text_key]), *(int(float(r[k])) for k in ("x_min", "y_min", "x_max", "y_max"))]
+
+
+def v1_pages(v1, v13, fixed=None):
+    """Original v1 note pages: v1.3 GT (or the fixed copy), tags normalized, Marek's text fixes kept."""
+    v1_manifest = {r["page_id"]: r for r in csv.DictReader(open(v1 / "manifest.csv", encoding="utf-8"))
+                   if r["document"] not in DROP_DOCS}
     lines = defaultdict(list)
     for r in csv.DictReader(open(v13 / "lines.csv", encoding="utf-8")):
         if r["page_id"] in v1_manifest:
-            lines[r["page_id"]].append([normalize(r["text"]),
-                                        *(int(float(r[k])) for k in ("x_min", "y_min", "x_max", "y_max"))])
+            lines[r["page_id"]].append(read_boxes(r, "text"))
     assert set(lines) == set(v1_manifest), set(v1_manifest) ^ set(lines)
+    if fixed:
+        new = defaultdict(list)
+        for r in csv.DictReader(open(fixed / "annotations.csv", encoding="utf-8")):
+            new[Path(r["filename"]).stem].append(read_boxes(r, "label"))
+        assert set(new) <= set(v1_manifest), set(new) - set(v1_manifest)
+        lines.update(new)
 
     log = []
     for c in csv.DictReader(open(v1 / "annotations/text_corrections_v1.csv", encoding="utf-8")):
         page = c["line_id"].rsplit("_l", 1)[0]
+        if page not in v1_manifest:
+            continue
         if any(c["text_new"] in ln[0] for ln in lines[page]):
             continue
         # Jakub re-transcribed some lines (e.g. added the latin name), so match inside the line
@@ -89,8 +106,7 @@ def labeled_pages(dirs):
     for d in dirs:
         rows = defaultdict(list)
         for r in csv.DictReader(open(d / "annotations.csv", encoding="utf-8")):
-            rows[r["filename"]].append([r["label"].strip(),
-                                        *(int(float(r[k])) for k in ("x_min", "y_min", "x_max", "y_max"))])
+            rows[r["filename"]].append(read_boxes(r, "label"))
         for name, lines in rows.items():
             for rx, doc, kind, source_type, grid in NAME_RES:
                 m = rx.match(name)
@@ -100,11 +116,12 @@ def labeled_pages(dirs):
                 raise SystemExit(f"unknown page name: {name}")
             *card, page = m.groups()
             document = doc.format(*card)
-            split = "dev" if card and (card[0], int(page)) in CARD_DEV else "test"
+            if card and (card[0], int(page)) in CARD_TRAIN_FORM:
+                continue
             src = d / Path(name).stem / name
             assert src.exists(), src
             meta = {"page_id": f"{document}_p{page}", "document": document, "page": int(page),
-                    "split": split, "kind": kind, "in_v1": 0, "source_type": source_type,
+                    "kind": kind, "in_v1": 0, "source_type": source_type,
                     "grid_paper": grid, "original_name": name, "label_group": ""}
             pages.append((meta, src, lines))
     return pages
@@ -170,10 +187,11 @@ def main(argv=None):
     ap.add_argument("--v1", type=Path, required=True)
     ap.add_argument("--v13", type=Path, required=True)
     ap.add_argument("--labeled", type=Path, nargs="+", required=True)
+    ap.add_argument("--v1-fixed", type=Path)
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args(argv)
 
-    notes, log = v1_pages(args.v1, args.v13)
+    notes, log = v1_pages(args.v1, args.v13, args.v1_fixed)
     pages = notes + labeled_pages(args.labeled)
     rows, crops, problems = write(pages, args.out)
     with open(args.out / "annotations/text_fixes_reapplied.csv", "w", newline="", encoding="utf-8") as f:
@@ -183,8 +201,8 @@ def main(argv=None):
 
     by = defaultdict(lambda: [0, 0])
     for m, _, lines in pages:
-        by[(m["kind"], m["split"], m["in_v1"])][0] += 1
-        by[(m["kind"], m["split"], m["in_v1"])][1] += len(lines)
+        by[(m["kind"], m["in_v1"])][0] += 1
+        by[(m["kind"], m["in_v1"])][1] += len(lines)
     for k, (n, nl) in sorted(by.items()):
         print(f"{k}: {n} pages, {nl} boxes")
     print(f"{len(rows)} boxes, {len(crops)} OCR crops; text fixes: "
