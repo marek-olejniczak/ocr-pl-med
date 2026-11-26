@@ -168,15 +168,24 @@ def evaluate_run(gt_json_path, predictions, conf_thresh=0.25, with_map=True):
     return result
 
 
-def _append_summary(out_dir, exp_id, result):
+def _write_summary(out_dir, exp_id, result):
+    """One row per (exp_id, conf_thresh): a rerun replaces its row instead of
+    adding a second one that every reader would have to disambiguate."""
     path = Path(out_dir) / "summary.csv"
-    new = not path.exists()
-    with path.open("a", newline="") as f:
+    conf = float(result["conf_thresh"])
+    rows = []
+    if path.exists():
+        with path.open(newline="") as f:
+            rows = [r for r in csv.DictReader(f)
+                    if not (r["exp_id"] == exp_id
+                            and float(r["conf_thresh"]) == conf)]
+    rows.append({"exp_id": exp_id, "conf_thresh": conf, **result["overall"]})
+    tmp = path.with_name(path.name + ".tmp")
+    with tmp.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=SUMMARY_COLUMNS, extrasaction="ignore")
-        if new:
-            w.writeheader()
-        w.writerow({"exp_id": exp_id, "conf_thresh": result["conf_thresh"],
-                    **result["overall"]})
+        w.writeheader()
+        w.writerows(rows)
+    tmp.replace(path)
 
 
 def main(argv=None):
@@ -210,7 +219,7 @@ def main(argv=None):
     metrics_dir = Path(args.out_dir) / "metrics"
     metrics_dir.mkdir(parents=True, exist_ok=True)
     (metrics_dir / f"{args.exp_id}.json").write_text(json.dumps(result, indent=2))
-    _append_summary(args.out_dir, args.exp_id, result)
+    _write_summary(args.out_dir, args.exp_id, result)
     o = result["overall"]
     ap50 = f"{o['ap50']:.3f}" if "ap50" in o else "skipped"
     print(f"{args.exp_id}: AP50={ap50} P={o['precision']:.3f} "

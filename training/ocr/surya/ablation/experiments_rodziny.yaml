@@ -1,0 +1,153 @@
+# Wygenerowane przez text-gen (runda 2 ablacji, 2026-10). Uruchomienie:
+#   cd benchmark && python autorunner.py --config ../training/ocr/surya/ablation/experiments_rodziny.yaml
+experiment:
+  name: ocr-ablacja-rodziny
+  project_name: ocr-benchmark
+  wandb_entity: ocr-pl-med
+  tags:
+  - autorun
+  - http
+  - sequential
+  - server
+  - ablacja
+  - rodziny
+  hardware_note: Nvidia RTX 3090, 24GB VRAM
+settings:
+  output_dir: wyniki
+  export_overleaf_table: false
+  auto_start_services: true
+  stop_service_after_run: true
+  sequential: true
+  warmup_samples: 1
+  cooldown_seconds: 5
+  restart_docker_per_dataset: false
+  http_timeout_default: 120
+  wandb_log: false
+datasets:
+- id: handlabeled
+  enabled: true
+  labels_csv: dane/handlabeled/labels.csv
+  images_dir: dane/handlabeled/images
+  limit: null
+  single_words: false
+models:
+- id: surya_lora_v2_200k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/v2_200k-lora-r64/adapter
+- id: surya_lora_no_short_words_200k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/no_short_words_200k-lora-r64/adapter
+- id: surya_lora_no_caps_200k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/no_caps_200k-lora-r64/adapter
+- id: surya_lora_no_arrows_bullets_200k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/no_arrows_bullets_200k-lora-r64/adapter
+- id: surya_lora_no_anatomy_vocab_200k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/no_anatomy_vocab_200k-lora-r64/adapter
+- id: surya_lora_no_neighbour_glyphs_200k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/no_neighbour_glyphs_200k-lora-r64/adapter
+- id: surya_lora_no_grid_paper_200k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/no_grid_paper_200k-lora-r64/adapter
+- id: surya_lora_no_morphology_200k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/no_morphology_200k-lora-r64/adapter
+- id: surya_lora_no_elastic_200k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/no_elastic_200k-lora-r64/adapter
+- id: surya_lora_no_phone_photo_200k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/no_phone_photo_200k-lora-r64/adapter

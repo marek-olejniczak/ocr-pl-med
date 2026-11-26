@@ -133,6 +133,14 @@ def wandb_flags(cfg, job, imgsz, batch, nbs):
     return [*out, "--wandb-tags", ",".join(t for t in tags if t)]
 
 
+def train_args(mc):
+    """Any other CLI flag, by name: {"weight-decay": 1e-4} -> --weight-decay
+    0.0001. HPO trials put their values here, so a trial is the exact command
+    line a matrix run would be, plus the tuned flags."""
+    return [x for flag, value in (mc.get("train_args") or {}).items()
+            for x in (f"--{flag}", str(value))]
+
+
 def job_command(job, cfg, local, results_dir="results"):
     d = cfg["defaults"]
     if job["kind"] == "train":
@@ -175,6 +183,7 @@ def job_command(job, cfg, local, results_dir="results"):
                 *(["--nbs", str(nbs)] if nbs is not None else []),
                 *(["--lr0", str(lr0)] if lr0 is not None else []),
                 *(["--mosaic", str(mosaic)] if mosaic is not None else []),
+                *train_args(mc),
                 *flags]
     elif job["kind"] == "predict":
         argv = ["python", f"docker/{job['service']}/cli.py", "predict",

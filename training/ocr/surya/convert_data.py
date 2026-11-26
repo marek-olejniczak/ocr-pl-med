@@ -15,14 +15,14 @@ Ten skrypt obsługuje dwa źródła danych (odkryte na DagsHub, gałąź `dvc`):
    ├── labels_train.txt               TSV: tylko train
    └── labels_val.txt                 TSV: tylko val
 
-2. `handlabeled` — ręcznie olabelowane linie (testset do benchmarku)
-   ├── annotations.csv                filename,label,x_min,y_min,x_max,y_max,crop
-   └── <page>/lines/lineN.jpg         wycinki
+2. `handlabeled` — ręcznie olabelowane linie (testset do benchmarku), dataset/test/real/v1
+   ├── crops.csv                      file_name,label,line_id
+   └── crops/<dokument>/<line_id>.jpg wycinki
 
 Użycie:
-    python convert_data.py ocr800k --input dataset/ocr_800k --output data/processed/surya
-    python convert_data.py handlabeled --input dataset --output data/processed/surya
-    python convert_data.py ocr800k --input dataset/ocr_800k --output ... --max-samples 1000
+    python convert_data.py ocr800k --input dataset/train/ocr/ocr_800k --output data/processed/surya
+    python convert_data.py handlabeled --input dataset/test/real/v1 --output data/processed/surya
+    python convert_data.py ocr800k --input dataset/train/ocr/ocr_800k --output ... --max-samples 1000
 """
 
 import argparse
@@ -176,34 +176,30 @@ def convert_ocr800k(input_dir: Path, output_dir: Path, max_samples: int | None) 
 # handlabeled → format Surya
 # ---------------------------------------------------------------------------
 
-def convert_handlabeled(input_dir: Path, output_dir: Path,
-                        val_split: float) -> None:
-    """Konwertuje ręcznie olabelowane wycinki (annotations.csv + lines/) → Surya.
-
-    Wejściowy annotations.csv: filename,label,x_min,y_min,x_max,y_max,crop
-    gdzie `crop` to nazwa pliku wycinka w <page>/lines/.
-    """
+def _read_handlabeled(input_dir: Path) -> list[dict]:
+    """Wycinki z crops.csv (file_name,label) i ich ścieżki w crops/<dokument>/."""
     import csv
 
-    input_dir = Path(input_dir)
-    output_dir = Path(output_dir)
-    csv_path = input_dir / "annotations.csv"
+    csv_path = input_dir / "crops.csv"
     if not csv_path.exists():
-        raise FileNotFoundError(f"Brak annotations.csv w {input_dir}")
-
+        raise FileNotFoundError(f"Brak crops.csv w {input_dir}")
+    paths = {p.name: p for p in (input_dir / "crops").rglob("*.jpg")}
     samples = []
     with open(csv_path, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
+        for row in csv.DictReader(f):
             text = (row.get("label") or "").strip()
-            page = (row.get("filename") or "").strip()
-            crop = (row.get("crop") or "").strip()
-            if not (text and page and crop):
-                continue
-            # filename w CSV to nazwa oryginalnego obrazu (np. "data11.png"),
-            # a katalog strony to ta nazwa bez rozszerzenia ("data11/").
-            page_dir = Path(page).stem
-            samples.append({"page": page_dir, "crop": crop, "text": text})
+            name = (row.get("file_name") or "").strip()
+            if text and name in paths:
+                samples.append({"src": paths[name], "file_name": name, "text": text})
+    return samples
+
+
+def convert_handlabeled(input_dir: Path, output_dir: Path,
+                        val_split: float) -> None:
+    """Konwertuje ręcznie olabelowane wycinki (crops.csv + crops/) → Surya."""
+    input_dir = Path(input_dir)
+    output_dir = Path(output_dir)
+    samples = _read_handlabeled(input_dir)
 
     # Podział train/val (deterministyczny: kolejność z CSV)
     split_idx = int(len(samples) * (1 - val_split))
@@ -214,15 +210,10 @@ def convert_handlabeled(input_dir: Path, output_dir: Path,
         images_dir.mkdir(parents=True, exist_ok=True)
         meta = []
         for s in ss:
-            src = input_dir / s["page"] / "lines" / s["crop"]
-            if not src.exists():
-                continue
-            # unikalna nazwa: <page>_<crop>
-            flat_name = f"{s['page']}_{s['crop']}"
-            dst = images_dir / flat_name
+            dst = images_dir / s["file_name"]
             if not dst.exists():
-                shutil.copy2(src, dst)
-            meta.append({"file_name": flat_name, "text": s["text"]})
+                shutil.copy2(s["src"], dst)
+            meta.append({"file_name": s["file_name"], "text": s["text"]})
         out_meta = output_dir / split / "metadata.jsonl"
         with open(out_meta, "w", encoding="utf-8") as f:
             for line in meta:
@@ -241,39 +232,22 @@ def convert_handlabeled_benchmark(input_dir: Path, output_dir: Path) -> None:
         labels.csv   # kolumny: file_name,label
         images/      # płaskie pliki obrazów
 
-    Nazwy plików <page>_<crop> (np. data11_line1.jpg) — unikalne, bo strony
-    mają wspólne nazwy wycinków (line1.jpg w każdej). Dokument/linia są
-    wyciągane z nazwy przez benchmark (regex ^(.+)_(\\d+)$).
+    Nazwy wycinków to line_id (<dokument>_p<NN>[_tytuł]_l<NNN>.jpg), unikalne
+    w całym zbiorze.
     """
     import csv
 
     input_dir = Path(input_dir)
     output_dir = Path(output_dir)
-    csv_path = input_dir / "annotations.csv"
-    if not csv_path.exists():
-        raise FileNotFoundError(f"Brak annotations.csv w {input_dir}")
-
     images_dir = output_dir / "images"
     images_dir.mkdir(parents=True, exist_ok=True)
 
     rows = []
-    with open(csv_path, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            text = (row.get("label") or "").strip()
-            page = (row.get("filename") or "").strip()
-            crop = (row.get("crop") or "").strip()
-            if not (text and page and crop):
-                continue
-            page_dir = Path(page).stem
-            src = input_dir / page_dir / "lines" / crop
-            if not src.exists():
-                continue
-            flat_name = f"{page_dir}_{crop}"
-            dst = images_dir / flat_name
-            if not dst.exists():
-                shutil.copy2(src, dst)
-            rows.append({"file_name": flat_name, "label": text})
+    for s in _read_handlabeled(input_dir):
+        dst = images_dir / s["file_name"]
+        if not dst.exists():
+            shutil.copy2(s["src"], dst)
+        rows.append({"file_name": s["file_name"], "label": s["text"]})
 
     labels_csv = output_dir / "labels.csv"
     with open(labels_csv, "w", encoding="utf-8") as f:
@@ -305,7 +279,7 @@ def main(argv=None):
 
     # handlabeled
     h = sub.add_parser("handlabeled", help="Ręcznie olabelowane wycinki → format Surya")
-    h.add_argument("--input", required=True, help="Katalog z annotations.csv")
+    h.add_argument("--input", required=True, help="Katalog z crops.csv (dataset/test/real/v1)")
     h.add_argument("--output", required=True, help="Katalog wyjściowy")
     h.add_argument("--val-split", type=float, default=0.1)
     h.set_defaults(fn=lambda a: convert_handlabeled(
@@ -314,7 +288,7 @@ def main(argv=None):
     # handlabeled → format benchmarku (labels.csv + images/)
     hb = sub.add_parser("handlabeled-benchmark",
                         help="Ręcznie olabelowane wycinki → format benchmarku")
-    hb.add_argument("--input", required=True, help="Katalog z annotations.csv")
+    hb.add_argument("--input", required=True, help="Katalog z crops.csv (dataset/test/real/v1)")
     hb.add_argument("--output", required=True,
                     help="Katalog wyjściowy (np. benchmark/dane/handlabeled)")
     hb.set_defaults(fn=lambda a: convert_handlabeled_benchmark(

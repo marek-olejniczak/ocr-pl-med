@@ -1,0 +1,40 @@
+# yolov8n at the r2 settings with only the learning rate moved, on the full
+# raw train set: r3 did not reproduce the gain the HPO trials (10 epochs on a
+# 30% subsample) promised, and lr0 is what those trials changed most. Two
+# extra seeds at r2's own lr0 measure run-to-run noise.
+dataset: docs_20k
+run: lr-sweep
+notes: >-
+  lr-sweep: yolov8n at r2 settings, lr0 x0.5/x2/x4/x8 of 0.0005, plus seeds 1
+  and 2 at x1, full raw train set
+
+train_variants: [raw]
+
+defaults:
+  epochs: 20
+  imgsz: 1024
+  batch: 16
+  nbs: 64
+  conf_thresh: 0.25
+  lr0: 0.0005
+  train_flags: [--line-val, --diagnostics, --wandb]
+
+data:
+  raw:
+    yolo: dataset/yolo_raw/data.yaml
+    images_root: dataset/docs_20k/images
+  prep:
+    yolo: dataset/yolo_prep/data.yaml
+    images_root: dataset/prep
+
+test_coco: dataset/annotations/instances_test.json
+train_coco: dataset/annotations/instances_train.json
+val_coco: dataset/annotations/instances_val.json
+
+models:
+  yolov8-lrx0.5: {service: ultralytics, weights: yolov8n.pt, finetune: true, lr0: 0.00025}
+  yolov8-lrx2:   {service: ultralytics, weights: yolov8n.pt, finetune: true, lr0: 0.001}
+  yolov8-lrx4:   {service: ultralytics, weights: yolov8n.pt, finetune: true, lr0: 0.002}
+  yolov8-lrx8:   {service: ultralytics, weights: yolov8n.pt, finetune: true, lr0: 0.004}
+  yolov8-seed1:  {service: ultralytics, weights: yolov8n.pt, finetune: true, train_args: {seed: 1}}
+  yolov8-seed2:  {service: ultralytics, weights: yolov8n.pt, finetune: true, train_args: {seed: 2}}

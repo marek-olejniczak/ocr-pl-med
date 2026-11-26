@@ -37,7 +37,7 @@ docker compose -f training/docker-compose.yml build surya-training
 # 2. Konwersja danych (ocr800k → processed/surya)
 docker compose -f training/docker-compose.yml run --rm surya-training \
     python training/ocr/surya/convert_data.py ocr800k \
-    --input dataset/ocr_800k --output training/data/processed/surya
+    --input dataset/train/ocr/ocr_800k --output training/data/processed/surya
 
 # 3. Trening (LoRA)
 docker compose -f training/docker-compose.yml run --rm surya-training \
@@ -55,7 +55,7 @@ Smoke test (mała próbka, waliduje że pipeline nie crashuje):
 ```bash
 docker compose -f training/docker-compose.yml run --rm surya-training \
     python training/ocr/surya/convert_data.py ocr800k \
-    --input dataset/ocr_800k --output training/data/processed/surya --max-samples 500
+    --input dataset/train/ocr/ocr_800k --output training/data/processed/surya --max-samples 500
 # potem train z --max-steps 2 (limit kroków, żeby nie czekać na epokę)
 ```
 

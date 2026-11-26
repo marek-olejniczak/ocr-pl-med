@@ -1,0 +1,70 @@
+# r3: the two best HPO trials of each tuned model, trained on the full raw set
+# like r2 and predicted/evaluated on both variants. Values come from
+# results_hpo/hpo.db (studies docs_20k-yolov8-v2 and docs_20k-rtdetr), rounded
+# to four significant digits. Faster R-CNN is not here: its best trial (t017,
+# 0.491) sits on its own baseline (0.489), which is the r2 cosine run already.
+dataset: docs_20k
+run: r3
+notes: >-
+  r3: top-2 HPO configs per model on the full raw train set (HPO on 100/67
+  pages per template, 10 epochs, objective val mAP50-95)
+
+train_variants: [raw]
+
+defaults:
+  epochs: 20
+  imgsz: 1024
+  batch: 16
+  nbs: 64
+  conf_thresh: 0.25
+  lr0: 0.0005
+  train_flags: [--line-val, --diagnostics, --wandb]
+
+data:
+  raw:
+    yolo: dataset/yolo_raw/data.yaml
+    images_root: dataset/docs_20k/images
+  prep:
+    yolo: dataset/yolo_prep/data.yaml
+    images_root: dataset/prep
+
+test_coco: dataset/annotations/instances_test.json
+train_coco: dataset/annotations/instances_train.json
+val_coco: dataset/annotations/instances_val.json
+
+models:
+  # close-mosaic stays at the ultralytics 10, half of 20 epochs - the same
+  # share as the trials' 5 of 10
+  yolov8-t013:
+    service: ultralytics
+    weights: yolov8n.pt
+    finetune: true
+    lr0: 0.004335
+    mosaic: 1.0
+    train_args: {warmup-epochs: 1.599, weight-decay: 0.006171, scale: 0.3887, fliplr: 0.5}
+  yolov8-t003:
+    service: ultralytics
+    weights: yolov8n.pt
+    finetune: true
+    lr0: 0.003290
+    mosaic: 0.5
+    train_args: {warmup-epochs: 2.445, weight-decay: 0.008627, scale: 0.5795, fliplr: 0.5}
+  # 40 epochs and batch 8 as in r2, so r2 is the untuned reference
+  rtdetr-t014:
+    service: ultralytics
+    weights: rtdetr-l.pt
+    finetune: true
+    batch: 8
+    mosaic: 0.0
+    epochs: 40
+    lr0: 0.0009681
+    train_args: {warmup-epochs: 1.860, weight-decay: 0.0009043, scale: 0.5653, fliplr: 0.0}
+  rtdetr-t017:
+    service: ultralytics
+    weights: rtdetr-l.pt
+    finetune: true
+    batch: 8
+    mosaic: 0.0
+    epochs: 40
+    lr0: 0.0008190
+    train_args: {warmup-epochs: 2.327, weight-decay: 0.0002496, scale: 0.6159, fliplr: 0.0}
