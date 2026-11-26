@@ -65,6 +65,16 @@ Wytrenowany adapter LoRA (katalog `adapter/` w `--output-dir`) jest walidowany p
 benchmark (`benchmark/docker/surya` ładuje go przez `lora_adapter_path`). W `cli.py`
 nie ma subkomendy `predict` — za ewaluację odpowiada benchmark.
 
+## Wybór checkpointu po CER (`--cer-callback`)
+
+Domyślnie najlepszy checkpoint wybiera `eval_loss`, który w tym zadaniu zawodzi (walidacja pochodzi z tego samego
+syntetycznego generatora co trening). Z `--cer-callback` po każdej ewaluacji liczony jest CER na ręcznie
+etykietowanych liniach (`cer_callback.py` woła `hp_search/eval_cer.py`) i wygrywa najniższy `eval_cer`.
+Opcje: `--cer-labels-csv`, `--cer-images-dir`, `--cer-eval-gpu`, `--cer-eval-batch-size`, `--cer-max-samples`.
+Pełny przebieg z tymi ustawieniami: `mega/run_mega.sh` (8 epok, batch 96).
+
+**Uwaga metodyczna:** zbiór użyty do wyboru checkpointu nie jest dla tego modelu niezależnym zbiorem testowym.
+
 ## W&B
 
 `report-to wandb` włącza logowanie metryk (loss, lr, grad_norm) do projektu

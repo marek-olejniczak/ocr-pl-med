@@ -2,7 +2,11 @@
 
 Diagnostyka *jakie znaki i ciągi znaków myli model* na ręcznie olabelowanym zbiorze
 `benchmark/dane/handlabeled` (2160 linii). Wyniki zasiliły wnioski do danych v3:
-`notes/vault/Generator_v3_wskazowki.md`.
+`notes/vault/Generator_v3_wskazowki.md`. Były też punktem wyjścia modelu pomyłek korektora
+(`postprocessing/`, który uczy go własnym kodem i nie czyta stąd żadnych plików).
+
+Stan z października 2026: ścieżki `benchmark/dane/handlabeled` odnoszą się do układu sprzed podziału zbioru na
+`dataset/train` i `dataset/test` (tam te linie to `test/real/v1`).
 
 Analizowany model: Surya LoRA r64 / `v2_200k` (best checkpoint, `checkpoint-7908`),
 CER **0.1277** · WER 0.4817 · EMA 0.2528. Analizy działają na dowolnym `predictions.jsonl`
