@@ -138,6 +138,7 @@ def cmd_train(args):
         weight_decay=args.weight_decay,
         scale=args.scale,
         fliplr=args.fliplr,
+        degrees=args.degrees,
         cos_lr=True,
         seed=args.seed,
         deterministic=True,
@@ -351,6 +352,8 @@ def main(argv=None):
                    help="random rescale gain, +/- fraction of imgsz")
     t.add_argument("--fliplr", type=float, default=0.5,
                    help="probability of a horizontal flip - mirrors the text")
+    t.add_argument("--degrees", type=float, default=0.0,
+                   help="random rotation, +/- degrees")
     t.add_argument("--mosaic", type=float, default=1.0,
                    help="ultralytics default is 1.0; set 0 for rtdetr")
     t.add_argument("--close-mosaic", type=int, default=10,
