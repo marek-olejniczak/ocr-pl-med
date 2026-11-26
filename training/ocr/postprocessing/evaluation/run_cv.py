@@ -41,7 +41,7 @@ GRID = {
     "lam": [0.25, 0.5, 0.75, 1.0, 1.5],
     "d_max": [1, 2, 3],
     "f_min": [0, 1, 5, 20],
-    "delta": [x / 2 for x in range(-8, 21)],
+    "delta": [x / 2 for x in range(-32, 21)],  # od 2026-11-25 (wcześniej od -4: na v4 strojenie stało na brzegu)
     "mu": [0.0, 0.5, 1.0, 2.0, 3.0],
     "L_min": [3, 4, 5, 6],
 }

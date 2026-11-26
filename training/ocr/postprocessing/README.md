@@ -12,6 +12,8 @@ CER 0.1270 → 0.0987 (−2.83 p.p., 95% CI po grupach [−3.38, −1.89]), harm
 **Stan na 2026-11-24** (Surya v4_200k_25k, test/real/v1.2, 2904 linie bez `[BLANK]`): LOGO po 11 grupach
 CER 0.1098 → 0.0975 (−1.23 p.p.), harm 0.27%; zamrożony test 0.1040 → 0.0956 (−0.84 p.p.), harm 0.05%.
 Na v2/v3 ten sam korektor dawał ok. −2.5 p.p. Szczegóły i progi dla v4: [`results/v12/`](results/v12/README.md).
+Wybór tylko spośród 5 najlepszych kandydatów daje −1.59 p.p., a z oceną kandydatów przez Suryę (log P linii przy obrazie)
+−2.40 p.p. w LOGO i −2.56 p.p. na teście. Integracja z aplikacją: [`INTEGRACJA.md`](INTEGRACJA.md), paczka `deploy/v4_200k_25k`.
 
 ## Uruchomienie
 
@@ -76,6 +78,8 @@ to nie jest wynik testowy).
 |---|---|
 | `data/baseline/predictions.jsonl` | predykcje Surya v2_200k na dataset-v1 (z etykietami), 2026-11-05 |
 | `data/baseline/metrics.json`, `groups.csv` | wynik `eval_cer.py` (CER 0.12701, WER 0.48307); mapa linia → grupa |
+| `deploy/v4_200k_25k/` | paczka do wdrożenia: model pomyłek + progi (statyczne i z oceną Suryi) |
+| `pp/deploy.py`, `pp_worker.py`, `pp/surya_score.py` | ładowanie paczki, serwis HTTP, ocena tekstu przez Suryę |
 | `data/v12/groups.csv` | test/real/v1.2: linia → grupa (G1–G11) i split dev/test |
 | `data/domain/` | lista terminów TA z Wikidata (CC0) i kwerenda SPARQL |
 | `pp/normalize.py`, `tokenize.py`, `protect.py` | opcja 0, tokenizacja + wielkość liter, klasy chronione P1–P8 |

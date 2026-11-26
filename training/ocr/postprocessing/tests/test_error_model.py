@@ -56,3 +56,11 @@ def test_group_share_cap():
     assert capped(Counter({"a": 10}), 0.5) == 10
     assert capped(Counter({"a": 90, "b": 10}), 0.5) == 20
     assert capped(Counter({"a": 5, "b": 5}), 0.5) == 10
+
+
+def test_pickle_roundtrip_for_deploy_bundle():
+    import gzip, pickle
+    bm = ErrorModel.fit(toy_pairs())
+    bm2 = pickle.loads(gzip.decompress(gzip.compress(pickle.dumps(bm))))
+    for obs, cand in (("kosc", "kość"), ("zyla", "żyła"), ("abc", "abd")):
+        assert bm2.logp(obs, cand) == bm.logp(obs, cand)

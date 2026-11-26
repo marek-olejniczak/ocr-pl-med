@@ -2,17 +2,19 @@
  "harm_max": 0.003,
  "params": {
   "lam": 0.75,
-  "delta": -4.0,
+  "delta": -4.5,
   "mu": 3.0,
   "d_max": 3,
   "L_min": 6,
-  "f_min": 0
+  "f_min": 0,
+  "w": 0.0,
+  "k": 5,
+  "lam_gen": 0.75
  },
  "logo_all_groups": {
-  "d_edits": -814,
-  "harm": 0.0028197047603250956,
-  "n_changed": 768
+  "d_edits": -820,
+  "harm": 0.0029855697462265714,
+  "n_changed": 779
  },
- "note": "progi strojone na LOGO wszystkich 11 grup; model kana\u0142u do wdro\u017cenia uczony na ca\u0142o\u015bci",
- "predictions": "Surya v4_200k_25k na test/real/v1.2 (benchmark ocr-v4_20261123_140539), grupy data/v12/groups.csv"
+ "note": "progi strojone na LOGO wszystkich 11 grup; model kana\u0142u do wdro\u017cenia uczony na ca\u0142o\u015bci"
 }

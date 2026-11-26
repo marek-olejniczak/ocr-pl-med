@@ -100,3 +100,34 @@ skróty; z 102 słów 82 mają GT w PoliMorf, 8 w RPL (6× `tabl`, Plavix, Forxi
 wąskim gardłem: GT wypada poza kandydatów (odległość > 3) albo słowo jest krótsze niż `L_min`. Lista RPL nie jest warta wdrożenia;
 `tabl` lepiej jako skrót chroniony. Na nowych notatkach (G10+G11) 225/239 złych słów ma GT w PoliMorf; brakujące to
 terminy anatomiczne (`zażuchwowy`) i literówki w GT.
+
+## Ticket 20: logprobs Suryi i ocena kandydatów (2026-11-25, serwer RTX 3090)
+
+**Krok A (inferencja, `eval_cer.py` na real_v1.2, v4_200k_25k).** Powtórka daje identyczne linie (inferencja deterministyczna
+przy tej samej kolejności i batchu). `FOUNDATION_MULTI_TOKEN_MIN_CONFIDENCE=1.01` nie zmienia żadnej linii: w configu modelu
+`multi_output_distance = 0`, więc lookahead jest wyłączony i hipoteza o nieuczonych głowicach odpada. Zadanie `ocr_with_boxes`
+(na nim uczono LoRA) zamiast `ocr_without_boxes` (benchmark): 358 linii inaczej, ΔCER −0.07 p.p., CI95 [−0.31, +0.10], 144 lepsze
+/ 147 gorsze: bez różnicy. `eval_cer.py` liczy 0.10790 przy 0.10981 z benchmarku: 6 linii różnych (zapętlenia).
+
+**Krok B (log P z teacher forcingu).** Surya daje własnemu odczytowi prawie zawsze wyższe log P niż etykiecie (dekodowanie
+zachłanne), więc sama pewność nie mówi, czy poprawiać.
+
+**Krok C (ocena kandydatów).** Dla tokenów kwalifikujących się do korekty 5 kandydatów (wg ch + 0.75·lp, model kanału bez grupy
+linii), dla każdego log P(linia z kandydatem | obraz) − log P(oryginał | obraz) = sd. Decyzja: s(c) = ch + lam·lp + w·sd,
+progi i w strojone w zagnieżdżonym LOGO (`evaluation/run_rescore.py`, kandydaci `rescore_cands.py`, serwer `surya_lp.py`).
+Wśród 1589 złych tokenów z GT w top-5 Surya stawia GT na 1. miejscu 1462 razy (model kanału 1343), ale od oryginału woli GT tylko 93 razy.
+
+| wariant (harm ≤ 0.3% na walidacji wewnętrznej) | LOGO 11 grup | zamrożony test | changed_wrong (LOGO) |
+|---|---|---|---|
+| korektor dotychczasowy (pełna lista kandydatów) | 0.1098 → 0.0976 (−1.22 p.p.) | 0.1040 → 0.0956 (−0.84) | 198 |
+| top-5 kandydatów, bez Suryi (w = 0) | → 0.0939 (−1.59), CI linie [−1.72, −1.45] | → 0.0887 (−1.53) | 341 |
+| top-5 + ocena Suryi | → **0.0858 (−2.40)**, CI linie [−2.55, −2.24] | → **0.0784 (−2.56)** | 387 |
+
+(`rescore_w0.json`, `rescore_surya.json`). Zastrzeżenia: (1) warianty z oceną Suryi strojono na trzech coraz szerszych siatkach
+i każdy przebieg liczył też test, więc test nie jest ściśle jednorazowy; główną liczbą jest LOGO. (2) W najszerszej siatce
+`delta` dalej stoi na brzegu (−16) w 5 z 11 foldów i w = 2 to maksimum siatki: zysk może być nieco większy. (3) Harm w LOGO
+0.40% (cel 0.3% liczony na walidacji wewnętrznej). (4) Kandydaci dla strojenia wewnętrznego pochodzą z modelu kanału foldu
+zewnętrznego (mały przeciek grupy testowej do wyboru kandydatów, nie do progów). Siatkę `delta` w `run_cv` poszerzono do −16:
+wariant główny bez zmian (−1.22 vs −1.23), progi `deploy_params.json` przeliczone (delta −4.5).
+
+Wdrożenie: `deploy/v4_200k_25k` (tryb statyczny top-5 i tryb z oceną Suryi), opis w `INTEGRACJA.md`.

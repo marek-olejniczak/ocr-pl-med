@@ -62,3 +62,17 @@ def test_deloop():
     assert deloop("1. 1. 1. 1. x") == "1. x"
     assert deloop("ab cd ab cd ab cd ef") == "ab cd ef"
     assert hygiene("kość  udowa") == "kość udowa"
+
+
+def test_decide_rescored_surya_breaks_tie_and_respects_k():
+    import math
+    from pp.decide import DecisionParams, Scored, decide_rescored, top_k
+    sc = Scored("kosc", ["kość", "kosa", "kosz"], [1, 1, 1], [-1.0, -1.0, -5.0], [-8.0, -8.0, -8.0], [10, 10, 10], -9.0)
+    p = DecisionParams(lam=1.0, delta=-20.0, mu=0.5, d_max=3, L_min=3, f_min=0, w=1.0, k=2, lam_gen=1.0)
+    idx = top_k(sc, p.k, p.lam_gen)
+    assert idx == [0, 1]                                   # „kosz” poza top-2
+    assert decide_rescored(sc, idx, [-1.0, -3.0], p, -10.0) == "kość"   # Surya rozstrzyga remis kanału
+    assert decide_rescored(sc, idx, [-3.0, -1.0], p, -10.0) == "kosa"
+    assert decide_rescored(sc, idx, [-1.0, -1.2], p, -10.0) is None     # za mały margines mu
+    p0 = DecisionParams(lam=1.0, delta=math.inf, mu=0.0, L_min=3, w=1.0)
+    assert decide_rescored(sc, idx, [0.0, 0.0], p0, -10.0) is None      # próg delta

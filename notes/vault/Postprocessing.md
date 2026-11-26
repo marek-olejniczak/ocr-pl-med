@@ -24,10 +24,15 @@ leave-one-group-out (LOGO, grupy = źródła notatek) i na zamrożonym teście.
 | test/real v1.2, zamrożony test (1069 linii) | v4_200k_25k | 0.1040 → 0.0956 | −0.84 p.p. | 0.05% |
 | test/real v1.2, LOGO | v3_200k | 0.1446 → 0.1200 | −2.47 p.p. | 0.23% |
 | test/real v1.2, LOGO | RysOCR (konkurencja) | 0.3249 → 0.3021 | −2.28 p.p. | 0.06% |
+| test/real v1.2, LOGO, top-5 + ocena Suryi | v4_200k_25k | 0.1098 → **0.0858** | −2.40 p.p. (CI linie [−2.55, −2.24]) | 0.40% |
+| test/real v1.2, zamrożony test, top-5 + ocena Suryi | v4_200k_25k | 0.1040 → 0.0784 | −2.56 p.p. | 0.31% |
 
 - Korektor daje ok. −2.5 do −2.8 p.p. CER (ok. 20% względnie) na v2 i v3.
 - Na v4 (generator z ~50 fontami) zysk spada o połowę: −1.23 p.p. (−11%). 41% poprawek z v3 v4 robi sam,
   strojenie wybiera `L_min = 6`. Sam v4 (0.1098) jest lepszy niż v3 z korektorem (0.1200). Szczegóły: `results/v12/README.md`.
+- Ocena kandydatów przez Suryę (teacher forcing, log P linii z kandydatem przy obrazie) przywraca zysk: −2.40 p.p. w LOGO.
+  Surya dobrze wybiera między kandydatami, ale sama prawie nigdy nie woli poprawki od własnego odczytu. Lookahead w modelu
+  jest wyłączony (`multi_output_distance = 0`), zadanie `ocr_with_boxes` nie zmienia CER.
 - Lepszy model OCR i korektor częściowo naprawiają te same błędy: na v1 po korekcie v3 wygrywa z v2 tylko o 0.08 p.p.,
   na v1.1 o 0.43 p.p.
 - Zysk jest na każdej z 8 grup, od −0.27 p.p. (grupa z najniższym CER) do −3.8 p.p.

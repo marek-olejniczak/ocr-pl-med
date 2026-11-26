@@ -1,0 +1,22 @@
+{
+ "harm_max": 0.003,
+ "params": {
+  "lam": 0.5,
+  "f_min": 0,
+  "w": 0.0,
+  "L_min": 6,
+  "mu": 1.0,
+  "delta": -5.5,
+  "d_max": 3,
+  "k": 5,
+  "lam_gen": 0.75,
+  "topk_only": true
+ },
+ "logo_all_groups": {
+  "d_edits": -1109,
+  "harm": 0.0029855697462265714,
+  "n": 1232
+ },
+ "note": "progi z oceną Suryi (w), LOGO 11 grup; k=5 kandydatów wg ch+0.75*lp",
+ "predictions": "Surya v4_200k_25k na test/real/v1.2 (ocr-v4_20261123_140539), grupy data/v12/groups.csv"
+}

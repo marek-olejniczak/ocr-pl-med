@@ -8,6 +8,7 @@ Pełna tabela: [`TABLE.md`](TABLE.md); szczegóły faz: [`ORACLE.md`](ORACLE.md)
 > **Aktualizacja 2026-11-24/25.** Raport opisuje Suryę v2_200k na dataset-v1. Stan na Surya v4 (generator z ~50 fontami)
 > i test/real/v1.2 (2904 linie, 11 grup): [`v12/README.md`](v12/README.md). Korektor daje tam −1.23 p.p. w LOGO
 > (0.1098 → 0.0975) i −0.84 p.p. na zamrożonym teście, mniej więcej połowę zysku z v2/v3.
+> Z oceną kandydatów przez Suryę (ticket 20): −2.40 p.p. w LOGO, −2.56 p.p. na teście (`v12/README.md`).
 
 ## 1. Wynik główny
 
