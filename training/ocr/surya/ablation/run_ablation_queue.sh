@@ -57,6 +57,10 @@ RUNS=(
   # one full pass over the 200k lines.
   "v4_200k 10000 2500 42"
   "v4_200k_25k 25000 2500 42 v4_200k"
+  # generator v5 (2026-11): v4 with the Google fonts back as 20% of the lines,
+  # after v4 lost to v3 on the printed patient cards of test/real/v2.
+  "v5_200k 10000 2500 42"
+  "v5_200k_25k 25000 2500 42 v5_200k"
 )
 # Restrict with: ONLY="noA_200k noB_200k" bash training/ocr/surya/ablation/run_ablation_queue.sh
 ONLY="${ONLY:-}"

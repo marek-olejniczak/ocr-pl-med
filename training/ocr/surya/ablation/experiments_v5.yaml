@@ -1,0 +1,58 @@
+# Wygenerowane przez text-gen (generator v5, 2026-11). Uruchomienie:
+#   cd benchmark && python autorunner.py --config ../training/ocr/surya/ablation/experiments_v5.yaml
+# Testset: dataset/test/real/v2 (3728 linii z crops.csv), rozpakowany przez prepare_real_v2.sh.
+# Pozostale modele na tym testsecie: przebieg ocr-v4-real-v2.
+experiment:
+  name: ocr-v5-real-v2
+  project_name: ocr-benchmark
+  wandb_entity: ocr-pl-med
+  tags:
+  - autorun
+  - http
+  - sequential
+  - server
+  - v5
+  hardware_note: Nvidia RTX 3090, 24GB VRAM
+settings:
+  output_dir: wyniki
+  export_overleaf_table: false
+  auto_start_services: true
+  stop_service_after_run: true
+  sequential: true
+  warmup_samples: 1
+  cooldown_seconds: 5
+  restart_docker_per_dataset: false
+  http_timeout_default: 120
+  wandb_log: false
+datasets:
+- id: real_v2
+  enabled: true
+  labels_csv: dane/real_v2/labels.csv
+  images_dir: dane/real_v2/images
+  limit: null
+  single_words: false
+models:
+- id: surya_lora_v5_200k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/v5_200k-lora-r64/adapter
+- id: surya_lora_v5_200k_25k
+  service_name: surya
+  base_url: http://localhost:8008
+  enabled: true
+  timeout: 600
+  options:
+    device: cuda
+    batch_size: 8
+    task_name: ocr_without_boxes
+    disable_math: false
+    cache_dir: modele/cache/surya
+    lora_adapter_path: /app/training/results/ocr/surya/v5_200k_25k-lora-r64/adapter
